@@ -1,4 +1,5 @@
 ﻿using QTBot.Core;
+using QTBot.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -101,8 +102,7 @@ namespace QTBot
 
         private void OnOpenConfigClick(object sender, RoutedEventArgs e)
         {
-            var path = Path.Combine(Environment.CurrentDirectory, "config.json");
-            Process.Start(path);
+            Process.Start(ConfigManager.GetConfigDirectory());
         }
 
         private void OnReloadConfigClick(object sender, RoutedEventArgs e)

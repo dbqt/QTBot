@@ -38,7 +38,7 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" HorizontalAlignment="Center" Margin="12">
-                            <Button Content="Open configuration file" Click="OnOpenConfigClick"  HorizontalAlignment="Center" Margin="0,12,0,2" MinWidth="135"/>
+                            <Button Content="Open configuration file folder" Click="OnOpenConfigClick"  HorizontalAlignment="Center" Margin="0,12,0,2" MinWidth="135"/>
                             <Button Content="Reload configuration file" Click="OnReloadConfigClick" Margin="0,2" MinWidth="135"/>
                             <Button x:Name="TestMessage" Click="OnTestMessageClick" Margin="0,2" MinWidth="135">Send test message</Button>
                             <Button x:Name="Connect" Click="OnConnectClick" FontSize="16" Margin="0,12,0,0" MinWidth="135">Connect</Button>

@@ -11,11 +11,13 @@ using System.Threading.Tasks;
 
 namespace QTBot.Helpers
 {
-    class ConfigManager
+    public class ConfigManager
     {
+        private const string ConfigsFolderName = "Configs";
+
         public static ConfigModel ReadConfig()
         {
-            var config = ReadConfig<ConfigModel>("config.json");
+            var config = ReadConfig<ConfigModel>("config.json", new ConfigModel());
             if (config == null)
             {
                 config = new ConfigModel();
@@ -25,7 +27,7 @@ namespace QTBot.Helpers
 
         public static TwitchOptionsModel ReadTwitchOptionsConfigs()
         {
-            var options = ReadConfig<TwitchOptionsModel>("TwitchOptionsConfigs.json");
+            var options = ReadConfig<TwitchOptionsModel>("TwitchOptionsConfigs.json", new TwitchOptionsModel());
             if (options == null)
             {
                 options = new TwitchOptionsModel();
@@ -38,12 +40,19 @@ namespace QTBot.Helpers
             SaveConfig<TwitchOptionsModel>("TwitchOptionsConfigs.json", options.GetModel());
         }
 
-        private static T ReadConfig<T>(string fileName)
+        public static string GetConfigDirectory()
         {
-            var enviroment = Environment.CurrentDirectory;
-            var filePath = Path.Combine(enviroment, fileName);
+            var current = Environment.CurrentDirectory;
+            var configsPath = Path.Combine(current, ConfigsFolderName);
+            Directory.CreateDirectory(configsPath);
+            return configsPath;
+        }
 
-            T config = default(T);
+        private static T ReadConfig<T>(string fileName, T defaultObject)
+        {
+            var filePath = Path.Combine(GetConfigDirectory(), fileName);
+
+            T config = defaultObject;
 
             try
             {
@@ -52,7 +61,6 @@ namespace QTBot.Helpers
                 {
                     var fileStream = File.Create(filePath);
                     fileStream.Close();
-                    config = default(T);
                     string json = JsonConvert.SerializeObject(config, Formatting.Indented);
                     File.WriteAllText(filePath, json);
                 }
@@ -65,7 +73,7 @@ namespace QTBot.Helpers
             catch (Exception e)
             {
                 Debug.WriteLine("Reading failed for: " + fileName + " with " + e.Message);
-                config = default(T);
+                config = defaultObject;
             }
 
             return config;
@@ -73,8 +81,7 @@ namespace QTBot.Helpers
 
         private static void SaveConfig<T>(string fileName, T model)
         {
-            var enviroment = Environment.CurrentDirectory;
-            var filePath = Path.Combine(enviroment, fileName);
+            var filePath = Path.Combine(GetConfigDirectory(), fileName);
 
             try
             {
@@ -90,7 +97,7 @@ namespace QTBot.Helpers
             }
             catch (Exception e)
             {
-                Debug.WriteLine("Writing failed for: " + fileName);
+                Debug.WriteLine("Writing failed for: " + fileName + " with " + e.Message);
             }
         }
     }
