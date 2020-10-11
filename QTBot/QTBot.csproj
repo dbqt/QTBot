@@ -181,6 +181,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Core\BeatSaberManager.cs" />
+    <Compile Include="Core\QTChatManager.cs" />
     <Compile Include="Core\QTCore.cs" />
     <Compile Include="Core\TwitchOptions.cs" />
     <Compile Include="Helpers\ConfigManager.cs" />

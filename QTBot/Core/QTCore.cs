@@ -50,11 +50,13 @@ namespace QTBot.Core
 
         private JoinedChannel currentChannel = null;
 
-        private ConfigModel mainConfig = null;
+        private QTChatManager chatManager = null;
 
+        private ConfigModel mainConfig = null;
         private TwitchOptions twitchOptions = null;
 
         public TwitchClient Client => this.client;
+        public JoinedChannel CurrentChannel => this.currentChannel;
         public string BotUserName => this.mainConfig?.BotChannelName ?? "<Invalid Value>";
         public string CurrentChannelName => this.mainConfig?.StreamerChannelName ?? "<Invalid Value>";
 
@@ -97,6 +99,9 @@ namespace QTBot.Core
             this.client.OnDisconnected += Client_OnDisconnected;
 
             this.client.Connect();
+
+            // Setup QT chat manager
+            this.chatManager = new QTChatManager(this.client);
 
             // Setup API client
             this.apiClient = new TwitchAPI();
@@ -145,11 +150,12 @@ namespace QTBot.Core
         #region Client Events
         private void Client_OnConnected(object sender, OnConnectedArgs e)
         {
-
+            this.chatManager.ToggleChat(true);
         }
 
         private void Client_OnDisconnected(object sender, TwitchLib.Communication.Events.OnDisconnectedEventArgs e)
         {
+            this.chatManager.ToggleChat(false);
             this.OnDisonnected?.Invoke(sender, null);
         }
 
@@ -201,16 +207,7 @@ namespace QTBot.Core
 
         private void PubSubClient_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
         {
-            if (this.twitchOptions.IsRedemptionInChat)
-            {
-                string message = $"@{e.DisplayName} has redeemed {e.RewardTitle} {e.RewardCost}";
-
-                if (this.twitchOptions.IsRedemptionTagUser && !string.IsNullOrEmpty(this.twitchOptions.RedemptionTagUser))
-                {
-                    message += $" @{this.twitchOptions.RedemptionTagUser}";
-                }
-                this.client.SendMessage(this.currentChannel, message);
-            }
+            this.chatManager.QueueRedeemAlert(e.RewardTitle, e.DisplayName);
         }
 
         private void PubSubClient_OnListenResponse(object sender, TwitchLib.PubSub.Events.OnListenResponseArgs e)
@@ -237,9 +234,19 @@ namespace QTBot.Core
         }
         #endregion PubSub Events
 
-        public void Test()
+        public void TestMessage()
         {
             this.client.SendMessage(this.currentChannel, "This is a test message!");
+        }
+
+        public void TestRedemption1()
+        {
+            this.chatManager.QueueRedeemAlert("FakeRedeem1", "SomeFakeUser1");
+        }
+
+        public void TestRedemption2()
+        {
+            this.chatManager.QueueRedeemAlert("FakeRedeem2", "SomeFakeUser2");
         }
     }
 }

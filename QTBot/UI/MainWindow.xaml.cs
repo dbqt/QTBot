@@ -84,6 +84,8 @@ namespace QTBot
             {
                 this.isConnected = true;
                 this.TestMessage.IsEnabled = this.isConnected;
+                this.TestRedeem1.IsEnabled = this.isConnected;
+                this.TestRedeem2.IsEnabled = this.isConnected;
                 this.ConnectionStatus.Text = "Connected";
                 this.Connect.Content = "Disconnect";
             });
@@ -95,6 +97,8 @@ namespace QTBot
             {
                 this.isConnected = false;
                 this.TestMessage.IsEnabled = this.isConnected;
+                this.TestRedeem1.IsEnabled = this.isConnected;
+                this.TestRedeem2.IsEnabled = this.isConnected;
                 this.ConnectionStatus.Text = "Disconnected";
                 this.Connect.Content = "Connect";
             });
@@ -124,7 +128,17 @@ namespace QTBot
 
         private void OnTestMessageClick(object sender, RoutedEventArgs e)
         {
-            QTCore.Instance.Test();
+            QTCore.Instance.TestMessage();
+        }
+
+        private void TestRedeem1_Click(object sender, RoutedEventArgs e)
+        {
+            QTCore.Instance.TestRedemption1();
+        }
+
+        private void TestRedeem2_Click(object sender, RoutedEventArgs e)
+        {
+            QTCore.Instance.TestRedemption2();
         }
 
         private void OnSaveButtonClick(object sender, RoutedEventArgs e)
@@ -144,6 +158,6 @@ namespace QTBot
         private void ExecuteOnUIThread(Action action)
         {
             Application.Current.Dispatcher.Invoke(action);
-        } 
+        }
     }
 }

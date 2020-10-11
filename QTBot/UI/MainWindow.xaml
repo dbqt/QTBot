@@ -41,9 +41,12 @@
                             <Button Content="Open configuration file folder" Click="OnOpenConfigClick"  HorizontalAlignment="Center" Margin="0,12,0,2" MinWidth="135"/>
                             <Button Content="Reload configuration file" Click="OnReloadConfigClick" Margin="0,2" MinWidth="135"/>
                             <Button x:Name="TestMessage" Click="OnTestMessageClick" Margin="0,2" MinWidth="135">Send test message</Button>
-                            <Button x:Name="Connect" Click="OnConnectClick" FontSize="16" Margin="0,12,0,0" MinWidth="135">Connect</Button>
+                            <Button x:Name="TestRedeem1" Click="TestRedeem1_Click" Margin="0,2" MinWidth="135">Send test redeem 1</Button>
+                            <Button x:Name="TestRedeem2" Click="TestRedeem2_Click" Margin="0,2" MinWidth="135">Send test redeem 2</Button>
+                            
                         </StackPanel>
                         <StackPanel Grid.Column="1" Margin="12">
+                            <Button x:Name="Connect" Click="OnConnectClick" FontSize="16" Margin="0,12,0,0" MinWidth="135">Connect</Button>
                             <TextBlock FontSize="16" FontWeight="Bold">Status</TextBlock>
                             <TextBlock x:Name="ConnectionStatus" Margin="0,12" FontWeight="Bold" FontSize="14">Not connected</TextBlock>
                             <TextBlock x:Name="CurrentStreamerText">name</TextBlock>
