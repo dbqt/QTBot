@@ -6,6 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TwitchLib.Api;
+using TwitchLib.Api.Core;
+using TwitchLib.Api.Core.Enums;
+using TwitchLib.Api.Core.Interfaces;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
@@ -41,6 +44,18 @@ namespace QTBot.Core
             }
         }
         #endregion Singleton
+
+        private readonly AuthScopes[] scopes = new AuthScopes[]
+        {
+            AuthScopes.Channel_Read,
+            AuthScopes.Channel_Stream,
+            AuthScopes.Channel_Subscriptions,
+            AuthScopes.Channel_Check_Subscription,
+            AuthScopes.Chat_Login,
+            AuthScopes.Viewing_Activity_Read,
+            AuthScopes.User_Read,
+            AuthScopes.User_Subscriptions
+        };
 
         private TwitchClient client = null;
         private TwitchPubSub pubSubClient = null;
@@ -103,8 +118,14 @@ namespace QTBot.Core
             // Setup QT chat manager
             this.chatManager = new QTChatManager(this.client);
 
+            
+
             // Setup API client
             this.apiClient = new TwitchAPI();
+
+            // Auth user
+            //this.apiClient.ThirdParty.AuthorizationFlow.CreateFlow("QTBot", scopes);
+
             this.apiClient.Settings.ClientId = this.mainConfig.StreamerChannelClientId;
             this.apiClient.Settings.AccessToken = this.mainConfig.StreamerChannelAccessToken;
             var authChannel = await this.apiClient.V5.Channels.GetChannelAsync(this.apiClient.Settings.AccessToken);
@@ -207,7 +228,10 @@ namespace QTBot.Core
 
         private void PubSubClient_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
         {
-            this.chatManager.QueueRedeemAlert(e.RewardTitle, e.DisplayName);
+            if (e.Status.Equals("UNFULFILLED")) // FULFILLED
+            {
+                this.chatManager.QueueRedeemAlert(e.RewardTitle, e.DisplayName);
+            }
         }
 
         private void PubSubClient_OnListenResponse(object sender, TwitchLib.PubSub.Events.OnListenResponseArgs e)
