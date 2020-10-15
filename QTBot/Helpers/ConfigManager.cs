@@ -25,6 +25,11 @@ namespace QTBot.Helpers
             return config;
         }
 
+        public static void SaveConfig(ConfigModel config)
+        {
+            SaveConfig<ConfigModel>("config.json", config);
+        }
+
         public static TwitchOptionsModel ReadTwitchOptionsConfigs()
         {
             var options = ReadConfig<TwitchOptionsModel>("TwitchOptionsConfigs.json", new TwitchOptionsModel());

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using TwitchLib.Api;
 using TwitchLib.Api.Core;
 using TwitchLib.Api.Core.Enums;
@@ -128,6 +129,41 @@ namespace QTBot.Core
 
             this.apiClient.Settings.ClientId = this.mainConfig.StreamerChannelClientId;
             this.apiClient.Settings.AccessToken = this.mainConfig.StreamerChannelAccessToken;
+
+            var credentialResponse = await this.apiClient.ThirdParty.AuthorizationFlow.CheckCredentialsAsync();
+            // Current token not working
+            if (!credentialResponse.Result)
+            {
+                Debug.WriteLine(credentialResponse.ResultMessage);
+                // Try refresh
+                var refreshResponse = this.apiClient.ThirdParty.AuthorizationFlow.RefreshToken(this.mainConfig.StreamerChannelRefreshToken);
+                if (!string.IsNullOrEmpty(refreshResponse.Token) && !string.IsNullOrEmpty(refreshResponse.Refresh))
+                {
+                    // Update to new tokens from the refresh
+                    this.mainConfig.StreamerChannelAccessToken = refreshResponse.Token;
+                    this.mainConfig.StreamerChannelRefreshToken = refreshResponse.Refresh;
+                    ConfigManager.SaveConfig(this.mainConfig);
+                    this.apiClient.Settings.ClientId = this.mainConfig.StreamerChannelClientId;
+                    this.apiClient.Settings.AccessToken = this.mainConfig.StreamerChannelAccessToken;
+
+                    // Check with refreshed tokens
+                    credentialResponse = await this.apiClient.ThirdParty.AuthorizationFlow.CheckCredentialsAsync();
+                    if (!credentialResponse.Result)
+                    {
+                        Debug.WriteLine("failed to auth even after refresh");
+                        MessageBox.Show("QTBot couldn't authenticate.\nYou'll need to https://twitchtokengenerator.com/ \nGet new streamer tokens, add them to the config file and reload the configuration files.", "Error authenticating");
+                        return;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("QTBot couldn't authenticate.\nYou'll need to https://twitchtokengenerator.com/ \nGet new streamer tokens, add them to the config file and reload the configuration files.", "Error authenticating");
+                    Debug.WriteLine("refresh failed");
+                    return;
+                }
+            }
+
+            // Grab channel info
             var authChannel = await this.apiClient.V5.Channels.GetChannelAsync(this.apiClient.Settings.AccessToken);
             this.channelId = authChannel.Id;
             var authUser = await this.apiClient.V5.Users.GetUserAsync(this.apiClient.Settings.AccessToken);
