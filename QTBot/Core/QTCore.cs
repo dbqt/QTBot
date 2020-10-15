@@ -150,15 +150,13 @@ namespace QTBot.Core
                     credentialResponse = await this.apiClient.ThirdParty.AuthorizationFlow.CheckCredentialsAsync();
                     if (!credentialResponse.Result)
                     {
-                        Debug.WriteLine("failed to auth even after refresh");
-                        MessageBox.Show("QTBot couldn't authenticate.\nYou'll need to https://twitchtokengenerator.com/ \nGet new streamer tokens, add them to the config file and reload the configuration files.", "Error authenticating");
+                        Utilities.ShowMessage("QTBot couldn't authenticate.\nYou'll need to https://twitchtokengenerator.com/ \nGet new streamer tokens, add them to the config file and reload the configuration files.", "Error authenticating");
                         return;
                     }
                 }
                 else
                 {
-                    MessageBox.Show("QTBot couldn't authenticate.\nYou'll need to https://twitchtokengenerator.com/ \nGet new streamer tokens, add them to the config file and reload the configuration files.", "Error authenticating");
-                    Debug.WriteLine("refresh failed");
+                    Utilities.ShowMessage("QTBot couldn't authenticate.\nYou'll need to https://twitchtokengenerator.com/ \nGet new streamer tokens, add them to the config file and reload the configuration files.", "Error authenticating");
                     return;
                 }
             }
@@ -181,6 +179,9 @@ namespace QTBot.Core
             this.pubSubClient.OnBitsReceived += PubSubClient_OnBitsReceived;
             this.pubSubClient.OnChannelSubscription += PubSubClient_OnChannelSubscription;
             this.pubSubClient.OnHost += PubSubClient_OnHost;
+            this.pubSubClient.OnRaidGo += PubSubClient_OnRaidGo;
+            this.pubSubClient.OnRaidUpdate += PubSubClient_OnRaidUpdate;
+            this.pubSubClient.OnRaidUpdateV2 += PubSubClient_OnRaidUpdateV2;
 
             this.pubSubClient.ListenToRewards(this.channelId);
             this.pubSubClient.ListenToFollows(this.channelId);
@@ -201,7 +202,10 @@ namespace QTBot.Core
         public void SetupTwitchOptions(TwitchOptions options)
         {
             this.twitchOptions = options;
-            ConfigManager.SaveTwitchOptionsConfigs(this.twitchOptions);
+            if (ConfigManager.SaveTwitchOptionsConfigs(this.twitchOptions))
+            {
+                Utilities.ShowMessage("Twitch options saved!");
+            }
         }
 
         #region Client Events
@@ -240,8 +244,21 @@ namespace QTBot.Core
         #endregion Client Events
 
         #region PubSub Events
-        private void PubSubClient_OnHost(object sender, TwitchLib.PubSub.Events.OnHostArgs e)
+        private async void PubSubClient_OnHost(object sender, TwitchLib.PubSub.Events.OnHostArgs e)
         {
+            if (this.twitchOptions.IsAutoShoutOutHost)
+            {
+                var usersResponse = await this.apiClient.Helix.Users.GetUsersAsync(new List<string> { e.ChannelId }, null, null);
+                if (usersResponse.Users.Length == 1)
+                {
+                    // We got one valid user
+                    var user = usersResponse.Users.FirstOrDefault();
+                    if (!string.IsNullOrEmpty(user.DisplayName))
+                    {
+                        this.chatManager.SendInstantMessage($"!so @{user.DisplayName}");
+                    }
+                }
+            }
         }
 
         private void PubSubClient_OnChannelSubscription(object sender, TwitchLib.PubSub.Events.OnChannelSubscriptionArgs e)
@@ -291,6 +308,18 @@ namespace QTBot.Core
         private void PubSubClient_OnEmoteOnly(object sender, TwitchLib.PubSub.Events.OnEmoteOnlyArgs e)
         {
 
+        }
+
+        private void PubSubClient_OnRaidUpdateV2(object sender, TwitchLib.PubSub.Events.OnRaidUpdateV2Args e)
+        {
+        }
+
+        private void PubSubClient_OnRaidUpdate(object sender, TwitchLib.PubSub.Events.OnRaidUpdateArgs e)
+        {
+        }
+
+        private void PubSubClient_OnRaidGo(object sender, TwitchLib.PubSub.Events.OnRaidGoArgs e)
+        {
         }
         #endregion PubSub Events
 

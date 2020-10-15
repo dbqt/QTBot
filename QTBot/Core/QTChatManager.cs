@@ -40,6 +40,11 @@ namespace QTBot.Core
             }
         }
 
+        public void SendInstantMessage(string message)
+        {
+            this.client.SendMessage(QTCore.Instance.CurrentChannel, message);
+        }
+
         public void QueueRedeemAlert(string title, string user)
         {
             lock (redeemLock)
@@ -130,7 +135,7 @@ namespace QTBot.Core
                 message += $" @{QTCore.Instance.TwitchOptions.RedemptionTagUser}";
             }
 
-            this.client.SendMessage(QTCore.Instance.CurrentChannel, message);
+            SendInstantMessage(message);
         }
     }
 }

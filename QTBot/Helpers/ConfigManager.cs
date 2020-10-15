@@ -25,9 +25,9 @@ namespace QTBot.Helpers
             return config;
         }
 
-        public static void SaveConfig(ConfigModel config)
+        public static bool SaveConfig(ConfigModel config)
         {
-            SaveConfig<ConfigModel>("config.json", config);
+            return SaveConfig<ConfigModel>("config.json", config);
         }
 
         public static TwitchOptionsModel ReadTwitchOptionsConfigs()
@@ -40,9 +40,9 @@ namespace QTBot.Helpers
             return options;
         }
 
-        public static void SaveTwitchOptionsConfigs(TwitchOptions options)
+        public static bool SaveTwitchOptionsConfigs(TwitchOptions options)
         {
-            SaveConfig<TwitchOptionsModel>("TwitchOptionsConfigs.json", options.GetModel());
+            return SaveConfig<TwitchOptionsModel>("TwitchOptionsConfigs.json", options.GetModel());
         }
 
         public static string GetConfigDirectory()
@@ -77,14 +77,14 @@ namespace QTBot.Helpers
             }
             catch (Exception e)
             {
-                Debug.WriteLine("Reading failed for: " + fileName + " with " + e.Message);
+                Utilities.ShowMessage("Reading failed for: " + fileName + " with " + e.Message);
                 config = defaultObject;
             }
 
             return config;
         }
 
-        private static void SaveConfig<T>(string fileName, T model)
+        private static bool SaveConfig<T>(string fileName, T model)
         {
             var filePath = Path.Combine(GetConfigDirectory(), fileName);
 
@@ -99,11 +99,14 @@ namespace QTBot.Helpers
 
                 string json = JsonConvert.SerializeObject(model, Formatting.Indented);
                 File.WriteAllText(filePath, json);
+                return true;
             }
             catch (Exception e)
             {
-                Debug.WriteLine("Writing failed for: " + fileName + " with " + e.Message);
+                Utilities.ShowMessage("Save failed for: " + fileName + " with " + e.Message);
             }
+
+            return false;
         }
     }
 
@@ -135,5 +138,7 @@ namespace QTBot.Helpers
         public bool IsRedemptionInChat { get; set; } = false;
         public bool IsRedemptionTagUser { get; set; } = false;
         public string RedemptionTagUser { get; set; } = "";
+
+        public bool IsAutoShoutOutHost { get; set; } = false;
     }
 }

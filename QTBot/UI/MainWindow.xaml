@@ -79,10 +79,12 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <Button x:Name="SaveButton" Grid.Column="3" Content="Save" Click="OnSaveButtonClick"/>
 
+                        <!-- Channel redeems -->
                         <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center">Channel points redemptions</TextBlock>
 
                         <CheckBox x:Name="IsRedemptionInChatBox" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="{Binding IsRedemptionInChat}"/>
@@ -93,7 +95,11 @@
                             <TextBlock x:Name="IsTagUserLabel" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">Tag user in chat @</TextBlock>
                             <TextBox x:Name="UserNameTextBox" MinWidth="150" ToolTip="@username"/>
                         </StackPanel>
-                        
+
+                        <!-- Auto shout out -->
+                        <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center">Auto shout out on host</TextBlock>
+                        <CheckBox x:Name="IsAutoShoutOutBox" Grid.Row="5" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="5" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">Automatically send !so command when someone hosts the channel</TextBlock>
                     </Grid>
                 </ScrollViewer>
             </TabItem>
@@ -105,6 +111,7 @@
                         <TextBlock Text="Commands" />
                     </StackPanel>
                 </TabItem.Header>
+                <TextBlock>Nothing here yet! 0w0</TextBlock>
             </TabItem>
             <!-- End Commands -->
         </TabControl>

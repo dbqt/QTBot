@@ -185,6 +185,7 @@
     <Compile Include="Core\QTCore.cs" />
     <Compile Include="Core\TwitchOptions.cs" />
     <Compile Include="Helpers\ConfigManager.cs" />
+    <Compile Include="Helpers\Utilities.cs" />
     <Compile Include="UI\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
