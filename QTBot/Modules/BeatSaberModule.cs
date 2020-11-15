@@ -7,16 +7,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using TwitchLib.Communication.Clients;
 
-namespace QTBot.Core
+namespace QTBot.Modules
 {
-    public class BeatSaberManager
+    public class BeatSaberModule
     {
         private string address = "127.0.0.1:2946";
 
         private ClientWebSocket clientWebSocket = new ClientWebSocket();
         private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
-        public BeatSaberManager()
+        public BeatSaberModule()
         {
                       
         }

@@ -1,7 +1,10 @@
 ﻿using QTBot.Helpers;
+using QTBot.Models;
+using QTBot.Modules;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,33 +22,8 @@ using TwitchLib.PubSub;
 
 namespace QTBot.Core
 {
-    public class QTCore
+    public class QTCore : Singleton<QTCore>
     {
-        #region Singleton
-        private static QTCore instance = null;
-
-        public static QTCore Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new QTCore();
-                }
-                return instance;
-            }
-            private set
-            {
-                if (instance != value)
-                {
-                    Debug.WriteLine("Error: Trying to create a second instance of TwitchLibWrapper");
-                    return;
-                }
-                instance = value;
-            }
-        }
-        #endregion Singleton
-
         private readonly AuthScopes[] scopes = new AuthScopes[]
         {
             AuthScopes.Channel_Read,
@@ -66,7 +44,7 @@ namespace QTBot.Core
 
         private JoinedChannel currentChannel = null;
 
-        private QTChatManager chatManager = null;
+        private QTCommandsManager commandsManager = null;
 
         private ConfigModel mainConfig = null;
         private TwitchOptions twitchOptions = null;
@@ -84,6 +62,30 @@ namespace QTBot.Core
 
         public QTCore()
         {
+            try
+            {
+                var logPath = Path.Combine(Environment.CurrentDirectory, "Logs");
+                Directory.CreateDirectory(logPath);
+                var logFilePath = Path.Combine(logPath, "logs-" + DateTime.Now.ToString("yyyy-MM-dd-hh-mm-ss-tt") + ".txt");
+                var fileStream = File.Create(logFilePath);
+                fileStream.Close();
+
+                TextWriterTraceListener[] listeners = new TextWriterTraceListener[]
+                {
+                    new TextWriterTraceListener(logFilePath),
+                    new TextWriterTraceListener(Console.Out)
+                };
+
+                Trace.Listeners.AddRange(listeners);
+                Trace.AutoFlush = true;
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine(e.StackTrace);
+            }
+
+            Trace.WriteLine("QT LOGS STARTING");
+
             LoadConfigs();
         }
 
@@ -117,9 +119,10 @@ namespace QTBot.Core
             this.client.Connect();
 
             // Setup QT chat manager
-            this.chatManager = new QTChatManager(this.client);
+            QTChatManager.Instance.Initialize(this.client);
 
-            
+            // Setup QT commands manager
+            this.commandsManager = new QTCommandsManager();           
 
             // Setup API client
             this.apiClient = new TwitchAPI();
@@ -134,7 +137,7 @@ namespace QTBot.Core
             // Current token not working
             if (!credentialResponse.Result)
             {
-                Debug.WriteLine(credentialResponse.ResultMessage);
+                Trace.WriteLine(credentialResponse.ResultMessage);
                 // Try refresh
                 var refreshResponse = this.apiClient.ThirdParty.AuthorizationFlow.RefreshToken(this.mainConfig.StreamerChannelRefreshToken);
                 if (!string.IsNullOrEmpty(refreshResponse.Token) && !string.IsNullOrEmpty(refreshResponse.Refresh))
@@ -191,6 +194,12 @@ namespace QTBot.Core
             this.pubSubClient.ListenToSubscriptions(this.channelId);
 
             this.pubSubClient.Connect();
+
+            // Setup StreamElements
+            if (this.mainConfig.IsStreamElementsConfigured)
+            {
+                StreamElementsModule.Instance.Initialize(this.mainConfig);
+            }
         }
 
         public void Disconnect()
@@ -208,15 +217,27 @@ namespace QTBot.Core
             }
         }
 
+        #region Core Functionality
+
+        private async void HandleCommand(string command, IEnumerable<string> args, string username)
+        {
+            var result = await this.commandsManager.ProcessCommand(command, args, username);
+            if (!string.IsNullOrEmpty(result))
+            {
+                QTChatManager.Instance.SendInstantMessage(result);
+            }
+        }
+        #endregion Core Functionality
+
         #region Client Events
         private void Client_OnConnected(object sender, OnConnectedArgs e)
         {
-            this.chatManager.ToggleChat(true);
+            QTChatManager.Instance.ToggleChat(true);
         }
 
         private void Client_OnDisconnected(object sender, TwitchLib.Communication.Events.OnDisconnectedEventArgs e)
         {
-            this.chatManager.ToggleChat(false);
+            QTChatManager.Instance.ToggleChat(false);
             this.OnDisonnected?.Invoke(sender, null);
         }
 
@@ -227,7 +248,13 @@ namespace QTBot.Core
 
         private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
-
+            var msg = e.ChatMessage.Message;
+            // Is command?
+            if (msg.StartsWith("!"))
+            {
+                var parts = msg.Split(' ');
+                HandleCommand(parts[0], parts.Skip(1), e.ChatMessage.Username);
+            }
         }
 
         private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
@@ -238,7 +265,7 @@ namespace QTBot.Core
 
         private void Client_OnLog(object sender, OnLogArgs e)
         {
-            Debug.WriteLine("Client log " + e.Data);
+            Trace.WriteLine("Client log " + e.Data);
         }
       
         #endregion Client Events
@@ -246,7 +273,7 @@ namespace QTBot.Core
         #region PubSub Events
         private async void PubSubClient_OnHost(object sender, TwitchLib.PubSub.Events.OnHostArgs e)
         {
-            if (this.twitchOptions.IsAutoShoutOutHost)
+           /* if (this.twitchOptions.IsAutoShoutOutHost)
             {
                 var usersResponse = await this.apiClient.Helix.Users.GetUsersAsync(new List<string> { e.ChannelId }, null, null);
                 if (usersResponse.Users.Length == 1)
@@ -255,10 +282,10 @@ namespace QTBot.Core
                     var user = usersResponse.Users.FirstOrDefault();
                     if (!string.IsNullOrEmpty(user.DisplayName))
                     {
-                        this.chatManager.SendInstantMessage($"!so @{user.DisplayName}");
+                        QTChatManager.Instance.SendInstantMessage($"!so @{user.DisplayName}");
                     }
                 }
-            }
+            }*/
         }
 
         private void PubSubClient_OnChannelSubscription(object sender, TwitchLib.PubSub.Events.OnChannelSubscriptionArgs e)
@@ -281,9 +308,10 @@ namespace QTBot.Core
 
         private void PubSubClient_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
         {
+            QTChatManager.Instance.SendInstantMessage("TEST - " + e.Status);
             if (e.Status.Equals("UNFULFILLED")) // FULFILLED
             {
-                this.chatManager.QueueRedeemAlert(e.RewardTitle, e.DisplayName);
+                QTChatManager.Instance.QueueRedeemAlert(e.RewardTitle, e.DisplayName);
             }
         }
 
@@ -330,12 +358,12 @@ namespace QTBot.Core
 
         public void TestRedemption1()
         {
-            this.chatManager.QueueRedeemAlert("FakeRedeem1", "SomeFakeUser1");
+            QTChatManager.Instance.QueueRedeemAlert("FakeRedeem1", "SomeFakeUser1");
         }
 
         public void TestRedemption2()
         {
-            this.chatManager.QueueRedeemAlert("FakeRedeem2", "SomeFakeUser2");
+            QTChatManager.Instance.QueueRedeemAlert("FakeRedeem2", "SomeFakeUser2");
         }
     }
 }

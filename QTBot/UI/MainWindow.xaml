@@ -108,9 +108,11 @@
                         </StackPanel>
 
                         <!-- Auto shout out -->
+                        <!--
                         <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,12,0,0">Auto shout out on host</TextBlock>
                         <CheckBox x:Name="IsAutoShoutOutBox" Grid.Row="5" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <TextBlock Grid.Row="5" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">Automatically send !so command when someone hosts the channel</TextBlock>
+                        -->
                     </Grid>
                 </ScrollViewer>
             </TabItem>

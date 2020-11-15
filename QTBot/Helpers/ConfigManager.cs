@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using QTBot.Core;
+using QTBot.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -73,6 +74,13 @@ namespace QTBot.Helpers
                 {
                     string json = File.ReadAllText(filePath);
                     config = JsonConvert.DeserializeObject<T>(json);
+
+                    // Update file in case format is different
+                    if (config != null)
+                    {
+                        json = JsonConvert.SerializeObject(config, Formatting.Indented);
+                        File.WriteAllText(filePath, json);
+                    }
                 }
             }
             catch (Exception e)
@@ -108,37 +116,5 @@ namespace QTBot.Helpers
 
             return false;
         }
-    }
-
-    
-
-    public class ConfigModel
-    {
-        public string StreamerChannelName { get; set; } = "";
-        public string StreamerChannelAccessToken { get; set; } = "";
-        public string StreamerChannelRefreshToken { get; set; } = "";
-        public string StreamerChannelClientId { get; set; } = "";
-
-        public string BotChannelName { get; set; } = "";
-        public string BotOAuthToken { get; set; } = "";
-
-        [JsonIgnore]
-        public bool IsConfigured =>
-            !string.IsNullOrEmpty(StreamerChannelName) &&
-            !string.IsNullOrEmpty(StreamerChannelAccessToken) &&
-            !string.IsNullOrEmpty(StreamerChannelRefreshToken) &&
-            !string.IsNullOrEmpty(StreamerChannelClientId) &&
-            !string.IsNullOrEmpty(BotChannelName) &&
-            !string.IsNullOrEmpty(BotOAuthToken);
-
-    }
-
-    public class TwitchOptionsModel
-    {
-        public bool IsRedemptionInChat { get; set; } = false;
-        public bool IsRedemptionTagUser { get; set; } = false;
-        public string RedemptionTagUser { get; set; } = "";
-
-        public bool IsAutoShoutOutHost { get; set; } = false;
     }
 }

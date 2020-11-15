@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QTBot.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ using TwitchLib.Client;
 
 namespace QTBot.Core
 {
-    class QTChatManager
+    class QTChatManager : Singleton<QTChatManager>
     {
         private bool isActive = false;
 
@@ -18,9 +19,9 @@ namespace QTBot.Core
 
         private readonly object redeemLock = new object();
 
-        private readonly TwitchClient client;
+        private TwitchClient client;
 
-        public QTChatManager(TwitchClient client)
+        public void Initialize(TwitchClient client)
         {
             this.client = client;
         }

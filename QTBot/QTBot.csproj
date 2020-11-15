@@ -188,12 +188,17 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Core\BeatSaberManager.cs" />
+    <Compile Include="Core\QTCommandsManager.cs" />
+    <Compile Include="Helpers\Singleton.cs" />
+    <Compile Include="Modules\BeatSaberModule.cs" />
     <Compile Include="Core\QTChatManager.cs" />
     <Compile Include="Core\QTCore.cs" />
     <Compile Include="Core\TwitchOptions.cs" />
     <Compile Include="Helpers\ConfigManager.cs" />
     <Compile Include="Helpers\Utilities.cs" />
+    <Compile Include="Models\ConfigModel.cs" />
+    <Compile Include="Models\TwitchOptionsModel.cs" />
+    <Compile Include="Modules\StreamElementsModule.cs" />
     <Compile Include="UI\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -242,6 +247,7 @@
   <ItemGroup>
     <Resource Include="dblogowhite.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\MaterialDesignThemes.3.2.0\build\MaterialDesignThemes.targets" Condition="Exists('..\packages\MaterialDesignThemes.3.2.0\build\MaterialDesignThemes.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
