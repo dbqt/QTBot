@@ -63,7 +63,7 @@ namespace QTBot.Core
                 if (args.FirstOrDefault().Equals("all", StringComparison.OrdinalIgnoreCase))
                 {
                     var amount = points;
-                    points = await StreamElementsModule.Instance.UpdatePoints(username, -amount);
+                    await StreamElementsModule.Instance.UpdatePoints(username, -amount);
                     message = string.Format(currentCommand.Response, args.ToArray());
                 }
                 // Is contributing an amount
@@ -80,7 +80,10 @@ namespace QTBot.Core
                     }
                     else
                     {
-                        points = await StreamElementsModule.Instance.UpdatePoints(username, -amount);
+                        if (amount != 0)
+                        {
+                            await StreamElementsModule.Instance.UpdatePoints(username, -amount);
+                        }
                         var messageFormat = ReplaceKeywords(currentCommand.Response, username);
                         message = string.Format(messageFormat, args.ToArray());
                     }
@@ -102,7 +105,10 @@ namespace QTBot.Core
                 }
                 else if (validity == PointStatus.Valid)
                 {
-                    points = await StreamElementsModule.Instance.UpdatePoints(username, -amount);
+                    if (amount != 0)
+                    {
+                        await StreamElementsModule.Instance.UpdatePoints(username, -amount);
+                    }
                     var messageFormat = ReplaceKeywords(currentCommand.Response, username);
                     message = string.Format(messageFormat, args.ToArray());
                 }
