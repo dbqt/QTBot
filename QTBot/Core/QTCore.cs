@@ -115,13 +115,7 @@ namespace QTBot.Core
             WebSocketClient customClient = new WebSocketClient(clientOptions);
             this.client = new TwitchClient(customClient);
             this.client.Initialize(credentials, this.mainConfig.StreamerChannelName);
-
-            this.client.OnLog += Client_OnLog;
-            this.client.OnJoinedChannel += Client_OnJoinedChannel;
-            this.client.OnMessageReceived += Client_OnMessageReceived;
-            this.client.OnNewSubscriber += Client_OnNewSubscriber;
-            this.client.OnConnected += Client_OnConnected;
-            this.client.OnDisconnected += Client_OnDisconnected;
+            SetupClientListeners();
 
             this.client.Connect();
 
@@ -135,8 +129,6 @@ namespace QTBot.Core
             this.apiClient = new TwitchAPI();
 
             // Auth user
-            //this.apiClient.ThirdParty.AuthorizationFlow.CreateFlow("QTBot", scopes);
-
             this.apiClient.Settings.ClientId = this.mainConfig.StreamerChannelClientId;
             this.apiClient.Settings.AccessToken = this.mainConfig.StreamerChannelAccessToken;
 
@@ -179,26 +171,7 @@ namespace QTBot.Core
 
             // Setup PubSub client
             this.pubSubClient = new TwitchPubSub();
-            this.pubSubClient.OnPubSubServiceConnected += PubSubClient_OnPubSubServiceConnected;
-            this.pubSubClient.OnListenResponse += PubSubClient_OnListenResponse;
-            this.pubSubClient.OnEmoteOnly += PubSubClient_OnEmoteOnly;
-            this.pubSubClient.OnEmoteOnlyOff += PubSubClient_OnEmoteOnlyOff;
-            this.pubSubClient.OnRewardRedeemed += PubSubClient_OnRewardRedeemed;
-            this.pubSubClient.OnStreamUp += PubSubClient_OnStreamUp;
-            this.pubSubClient.OnStreamDown += PubSubClient_OnStreamDown;
-            this.pubSubClient.OnBitsReceived += PubSubClient_OnBitsReceived;
-            this.pubSubClient.OnChannelSubscription += PubSubClient_OnChannelSubscription;
-            this.pubSubClient.OnHost += PubSubClient_OnHost;
-            this.pubSubClient.OnRaidGo += PubSubClient_OnRaidGo;
-            this.pubSubClient.OnRaidUpdate += PubSubClient_OnRaidUpdate;
-            this.pubSubClient.OnRaidUpdateV2 += PubSubClient_OnRaidUpdateV2;
-
-            this.pubSubClient.ListenToRewards(this.channelId);
-            this.pubSubClient.ListenToFollows(this.channelId);
-            this.pubSubClient.ListenToBitsEvents(this.channelId);
-            this.pubSubClient.ListenToChatModeratorActions(this.userId, this.channelId);
-            this.pubSubClient.ListenToRaid(this.channelId);
-            this.pubSubClient.ListenToSubscriptions(this.channelId);
+            SetupPubSubListeners();
 
             this.pubSubClient.Connect();
 
@@ -209,9 +182,36 @@ namespace QTBot.Core
             }
         }
 
+        private void Client_OnRaidNotification(object sender, OnRaidNotificationArgs e)
+        {
+            Trace.WriteLine("Raid notification with display name: " + e.RaidNotification.DisplayName);
+            Trace.WriteLine("Raid notification with channel name: " + e.Channel);
+            Trace.WriteLine("Raid notification with MsgParamDisplayName: " + e.RaidNotification.MsgParamDisplayName);
+            Trace.WriteLine("Raid notification with MsgParamViewerCount: " + e.RaidNotification.MsgParamViewerCount);
+            Trace.WriteLine("Raid notification with MsgParamLogin: " + e.RaidNotification.MsgParamLogin);
+        }
+
+        private void Client_OnBeingHosted(object sender, OnBeingHostedArgs e)
+        {
+            Trace.WriteLine("BeingHosted notification with channel" + e.BeingHostedNotification.Channel);
+            Trace.WriteLine("BeingHosted notification with HostedByChannel" + e.BeingHostedNotification.HostedByChannel);
+            Trace.WriteLine("BeingHosted notification with Viewers" + e.BeingHostedNotification.Viewers);
+            Trace.WriteLine("BeingHosted notification with BotUsername" + e.BeingHostedNotification.BotUsername);
+        }
+
+        private void Client_OnHostingStarted(object sender, OnHostingStartedArgs e)
+        {
+            Trace.WriteLine("HostingStarted notification with HostingChannel " + e.HostingStarted.HostingChannel);
+            Trace.WriteLine("HostingStarted notification with TargetChannel " + e.HostingStarted.TargetChannel);
+            Trace.WriteLine("HostingStarted notification with Viewers " + e.HostingStarted.Viewers);
+        }
+
         public void Disconnect()
         {
+            RemovePubSubListeners();
             this.pubSubClient.Disconnect();
+
+            RemoveClientListeners();
             this.client.Disconnect();
         }
 
@@ -237,6 +237,32 @@ namespace QTBot.Core
         #endregion Core Functionality
 
         #region Client Events
+        private void SetupClientListeners()
+        {
+            this.client.OnLog += Client_OnLog;
+            this.client.OnJoinedChannel += Client_OnJoinedChannel;
+            this.client.OnMessageReceived += Client_OnMessageReceived;
+            this.client.OnNewSubscriber += Client_OnNewSubscriber;
+            this.client.OnConnected += Client_OnConnected;
+            this.client.OnDisconnected += Client_OnDisconnected;
+            this.client.OnHostingStarted += Client_OnHostingStarted;
+            this.client.OnBeingHosted += Client_OnBeingHosted;
+            this.client.OnRaidNotification += Client_OnRaidNotification;
+        }
+
+        private void RemoveClientListeners()
+        {
+            this.client.OnLog -= Client_OnLog;
+            this.client.OnJoinedChannel -= Client_OnJoinedChannel;
+            this.client.OnMessageReceived -= Client_OnMessageReceived;
+            this.client.OnNewSubscriber -= Client_OnNewSubscriber;
+            this.client.OnConnected -= Client_OnConnected;
+            this.client.OnDisconnected -= Client_OnDisconnected;
+            this.client.OnHostingStarted -= Client_OnHostingStarted;
+            this.client.OnBeingHosted -= Client_OnBeingHosted;
+            this.client.OnRaidNotification -= Client_OnRaidNotification;
+        }
+
         private void Client_OnConnected(object sender, OnConnectedArgs e)
         {
             QTChatManager.Instance.ToggleChat(true);
@@ -250,7 +276,7 @@ namespace QTBot.Core
 
         private void Client_OnNewSubscriber(object sender, OnNewSubscriberArgs e)
         {
-
+            Trace.WriteLine("Client_OnNewSubscriber " + e.Subscriber.DisplayName);
         }
 
         private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
@@ -272,50 +298,86 @@ namespace QTBot.Core
 
         private void Client_OnLog(object sender, OnLogArgs e)
         {
-            Trace.WriteLine("Client log " + e.Data);
+            Trace.WriteLine("Client_OnLog: " + e.Data);
         }
       
         #endregion Client Events
 
         #region PubSub Events
-        private async void PubSubClient_OnHost(object sender, TwitchLib.PubSub.Events.OnHostArgs e)
+        private void SetupPubSubListeners()
         {
-           /* if (this.twitchOptions.IsAutoShoutOutHost)
-            {
-                var usersResponse = await this.apiClient.Helix.Users.GetUsersAsync(new List<string> { e.ChannelId }, null, null);
-                if (usersResponse.Users.Length == 1)
-                {
-                    // We got one valid user
-                    var user = usersResponse.Users.FirstOrDefault();
-                    if (!string.IsNullOrEmpty(user.DisplayName))
-                    {
-                        QTChatManager.Instance.SendInstantMessage($"!so @{user.DisplayName}");
-                    }
-                }
-            }*/
+            this.pubSubClient.OnPubSubServiceConnected += PubSubClient_OnPubSubServiceConnected;
+            this.pubSubClient.OnListenResponse += PubSubClient_OnListenResponse;
+            this.pubSubClient.OnEmoteOnly += PubSubClient_OnEmoteOnly;
+            this.pubSubClient.OnEmoteOnlyOff += PubSubClient_OnEmoteOnlyOff;
+            this.pubSubClient.OnRewardRedeemed += PubSubClient_OnRewardRedeemed;
+            this.pubSubClient.OnStreamUp += PubSubClient_OnStreamUp;
+            this.pubSubClient.OnStreamDown += PubSubClient_OnStreamDown;
+            this.pubSubClient.OnBitsReceived += PubSubClient_OnBitsReceived;
+            this.pubSubClient.OnChannelSubscription += PubSubClient_OnChannelSubscription;
+            this.pubSubClient.OnHost += PubSubClient_OnHost;
+            this.pubSubClient.OnRaidGo += PubSubClient_OnRaidGo;
+            this.pubSubClient.OnRaidUpdate += PubSubClient_OnRaidUpdate;
+            this.pubSubClient.OnRaidUpdateV2 += PubSubClient_OnRaidUpdateV2;
+
+            this.pubSubClient.ListenToRewards(this.channelId);
+            this.pubSubClient.ListenToFollows(this.channelId);
+            this.pubSubClient.ListenToBitsEvents(this.channelId);
+            this.pubSubClient.ListenToChatModeratorActions(this.userId, this.channelId);
+            this.pubSubClient.ListenToRaid(this.channelId);
+            this.pubSubClient.ListenToSubscriptions(this.channelId);
+        }
+
+        private void RemovePubSubListeners()
+        {
+            this.pubSubClient.OnPubSubServiceConnected -= PubSubClient_OnPubSubServiceConnected;
+            this.pubSubClient.OnListenResponse -= PubSubClient_OnListenResponse;
+            this.pubSubClient.OnEmoteOnly -= PubSubClient_OnEmoteOnly;
+            this.pubSubClient.OnEmoteOnlyOff -= PubSubClient_OnEmoteOnlyOff;
+            this.pubSubClient.OnRewardRedeemed -= PubSubClient_OnRewardRedeemed;
+            this.pubSubClient.OnStreamUp -= PubSubClient_OnStreamUp;
+            this.pubSubClient.OnStreamDown -= PubSubClient_OnStreamDown;
+            this.pubSubClient.OnBitsReceived -= PubSubClient_OnBitsReceived;
+            this.pubSubClient.OnChannelSubscription -= PubSubClient_OnChannelSubscription;
+            this.pubSubClient.OnHost -= PubSubClient_OnHost;
+            this.pubSubClient.OnRaidGo -= PubSubClient_OnRaidGo;
+            this.pubSubClient.OnRaidUpdate -= PubSubClient_OnRaidUpdate;
+            this.pubSubClient.OnRaidUpdateV2 -= PubSubClient_OnRaidUpdateV2;
+        }
+
+        private void PubSubClient_OnHost(object sender, TwitchLib.PubSub.Events.OnHostArgs e)
+        {
+            Trace.WriteLine("PubSubClient_OnHost");
         }
 
         private void PubSubClient_OnChannelSubscription(object sender, TwitchLib.PubSub.Events.OnChannelSubscriptionArgs e)
         {
+            Trace.WriteLine("PubSubClient_OnChannelSubscription " + e.Subscription.DisplayName);
         }
 
         private void PubSubClient_OnBitsReceived(object sender, TwitchLib.PubSub.Events.OnBitsReceivedArgs e)
         {
+            Trace.WriteLine($"PubSubClient_OnBitsReceived BitsUsed: {e.BitsUsed}, TotalBitsUsed: {e.TotalBitsUsed}, message: {e.ChatMessage}");
         }
 
         private void PubSubClient_OnStreamDown(object sender, TwitchLib.PubSub.Events.OnStreamDownArgs e)
         {
-
+            Trace.WriteLine("PubSubClient_OnStreamDown");
         }
 
         private void PubSubClient_OnStreamUp(object sender, TwitchLib.PubSub.Events.OnStreamUpArgs e)
         {
-
+            Trace.WriteLine("PubSubClient_OnStreamUp");
         }
 
         private void PubSubClient_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
         {
-            QTChatManager.Instance.SendInstantMessage("TEST - " + e.Status);
+            Trace.WriteLine($"PubSubClient_OnRewardRedeemed with RewardTitle: {e.RewardTitle}");
+            Trace.WriteLine($"PubSubClient_OnRewardRedeemed with RewardCost: {e.RewardCost}");
+            Trace.WriteLine($"PubSubClient_OnRewardRedeemed with RewardPrompt: {e.RewardPrompt}");
+            Trace.WriteLine($"PubSubClient_OnRewardRedeemed with Message: {e.Message}");
+            Trace.WriteLine($"PubSubClient_OnRewardRedeemed with Status: {e.Status}");
+
             if (e.Status.Equals("UNFULFILLED")) // FULFILLED
             {
                 QTChatManager.Instance.QueueRedeemAlert(e.RewardTitle, e.DisplayName);
@@ -324,40 +386,42 @@ namespace QTBot.Core
 
         private void PubSubClient_OnListenResponse(object sender, TwitchLib.PubSub.Events.OnListenResponseArgs e)
         {
-            if (!e.Successful)
-            {
-
-            }
+            Trace.WriteLine("PubSubClient_OnListenResponse was successful: " + e.Successful);
         }
 
         private void PubSubClient_OnPubSubServiceConnected(object sender, EventArgs e)
         {
+            Trace.WriteLine("PubSubClient_OnPubSubServiceConnected");
             this.pubSubClient.SendTopics(this.apiClient.Settings.AccessToken);
         }
 
         private void PubSubClient_OnEmoteOnlyOff(object sender, TwitchLib.PubSub.Events.OnEmoteOnlyOffArgs e)
         {
-
+            Trace.WriteLine("PubSubClient_OnEmoteOnlyOff");
         }
 
         private void PubSubClient_OnEmoteOnly(object sender, TwitchLib.PubSub.Events.OnEmoteOnlyArgs e)
         {
-
+            Trace.WriteLine("PubSubClient_OnEmoteOnly");
         }
 
         private void PubSubClient_OnRaidUpdateV2(object sender, TwitchLib.PubSub.Events.OnRaidUpdateV2Args e)
         {
+            Trace.WriteLine("PubSubClient_OnRaidUpdateV2");
         }
 
         private void PubSubClient_OnRaidUpdate(object sender, TwitchLib.PubSub.Events.OnRaidUpdateArgs e)
         {
+            Trace.WriteLine("PubSubClient_OnRaidUpdate");
         }
 
         private void PubSubClient_OnRaidGo(object sender, TwitchLib.PubSub.Events.OnRaidGoArgs e)
         {
+            Trace.WriteLine("PubSubClient_OnRaidGo");
         }
         #endregion PubSub Events
 
+        #region Test
         public void TestMessage()
         {
             this.client.SendMessage(this.currentChannel, "This is a test message!");
@@ -372,5 +436,6 @@ namespace QTBot.Core
         {
             QTChatManager.Instance.QueueRedeemAlert("FakeRedeem2", "SomeFakeUser2");
         }
+        #endregion Test
     }
 }
