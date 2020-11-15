@@ -78,6 +78,13 @@ namespace QTBot.Core
 
                 Trace.Listeners.AddRange(listeners);
                 Trace.AutoFlush = true;
+
+                while (Directory.GetFiles(logPath).Length > 10)
+                {
+                    FileSystemInfo fileInfo = new DirectoryInfo(logPath).GetFileSystemInfos().OrderBy(fi => fi.CreationTime).First();
+                    Trace.WriteLine("Deleting old log: " + fileInfo.FullName);
+                    File.Delete(fileInfo.FullName);
+                }
             }
             catch (Exception e)
             {
