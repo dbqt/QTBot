@@ -378,7 +378,7 @@ namespace QTBot.Core
             Trace.WriteLine($"PubSubClient_OnRewardRedeemed with Message: {e.Message}");
             Trace.WriteLine($"PubSubClient_OnRewardRedeemed with Status: {e.Status}");
 
-            if (e.Status.Equals("UNFULFILLED")) // FULFILLED
+            //if (e.Status.Equals("UNFULFILLED")) // FULFILLED
             {
                 QTChatManager.Instance.QueueRedeemAlert(e.RewardTitle, e.DisplayName);
             }
