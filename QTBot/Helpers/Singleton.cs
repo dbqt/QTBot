@@ -26,7 +26,7 @@ namespace QTBot.Helpers
             {
                 if (instance.Equals(value))
                 {
-                    Debug.WriteLine("Error: Trying to create a second instance of TwitchLibWrapper");
+                    Trace.WriteLine("Error: Trying to create a second instance of TwitchLibWrapper");
                     return;
                 }
                 instance = value;

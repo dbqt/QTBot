@@ -46,6 +46,21 @@ namespace QTBot.Helpers
             return SaveConfig<TwitchOptionsModel>("TwitchOptionsConfigs.json", options.GetModel());
         }
 
+        public static CommandsModel ReadCommands()
+        {
+            var commands = ReadConfig<CommandsModel>("commands.json", new CommandsModel());
+            if (commands == null)
+            {
+                commands = new CommandsModel();
+            }
+            return commands;
+        }
+
+        public static bool SaveCommands(CommandsModel commands)
+        {
+            return SaveConfig<CommandsModel>("commands.json", commands);
+        }
+
         public static string GetConfigDirectory()
         {
             var current = Environment.CurrentDirectory;
