@@ -19,7 +19,7 @@ namespace QTBot.Core
 
         public QTTimersManager()
         {
-            
+            // nothing
         }
 
         public void StartTimers()
