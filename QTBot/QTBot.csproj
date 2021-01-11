@@ -189,8 +189,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Core\QTCommandsManager.cs" />
+    <Compile Include="Core\QTTimersManager.cs" />
     <Compile Include="Helpers\Singleton.cs" />
     <Compile Include="Models\CommandModel.cs" />
+    <Compile Include="Models\TimerModel.cs" />
     <Compile Include="Modules\BeatSaberModule.cs" />
     <Compile Include="Core\QTChatManager.cs" />
     <Compile Include="Core\QTCore.cs" />

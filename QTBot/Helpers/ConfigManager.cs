@@ -61,6 +61,21 @@ namespace QTBot.Helpers
             return SaveConfig<CommandsModel>("commands.json", commands);
         }
 
+        public static TimersModel ReadTimers()
+        {
+            var timers = ReadConfig<TimersModel>("timers.json", new TimersModel());
+            if (timers == null)
+            {
+                timers = new TimersModel();
+            }
+            return timers;
+        }
+
+        public static bool SaveTimers(TimersModel timers)
+        {
+            return SaveConfig<TimersModel>("timers.json", timers);
+        }
+
         public static string GetConfigDirectory()
         {
             var current = Environment.CurrentDirectory;

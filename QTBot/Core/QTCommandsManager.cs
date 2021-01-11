@@ -64,7 +64,12 @@ namespace QTBot.Core
                 {
                     var amount = points;
                     await StreamElementsModule.Instance.UpdatePoints(username, -amount);
-                    message = string.Format(currentCommand.Response, args.ToArray());
+
+                    // Replace the first argument with actual amount of points
+                    var argumentArray = args.ToArray();
+                    argumentArray[0] = amount.ToString();
+
+                    message = string.Format(currentCommand.Response, argumentArray);
                 }
                 // Is contributing an amount
                 else if (int.TryParse(args.FirstOrDefault(), out int amount))

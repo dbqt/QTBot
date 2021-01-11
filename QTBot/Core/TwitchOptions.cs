@@ -17,7 +17,7 @@ namespace QTBot.Core
         public bool IsAutoShoutOutHost;
 
         public TwitchOptions() { }
-
+ 
         public TwitchOptions(TwitchOptionsModel model)
         {
             IsRedemptionInChat = model.IsRedemptionInChat;
@@ -33,7 +33,7 @@ namespace QTBot.Core
                 IsRedemptionInChat = this.IsRedemptionInChat,
                 IsRedemptionTagUser = this.IsRedemptionTagUser,
                 RedemptionTagUser = this.RedemptionTagUser,
-                IsAutoShoutOutHost = this.IsAutoShoutOutHost            
+                IsAutoShoutOutHost = this.IsAutoShoutOutHost
             };
         }
     }

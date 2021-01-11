@@ -75,7 +75,7 @@ namespace QTBot
             this.IsRedemptionInChat = options.IsRedemptionInChat;
             this.IsTagUserBox.IsChecked = options.IsRedemptionTagUser;
             this.UserNameTextBox.Text = options.RedemptionTagUser;
-            //this.IsAutoShoutOutBox.IsChecked = options.IsAutoShoutOutHost;
+            this.IsAutoShoutOutBox.IsChecked = options.IsAutoShoutOutHost;
         }
 
         #region Events
@@ -149,7 +149,7 @@ namespace QTBot
                 IsRedemptionInChat = this.IsRedemptionInChat,
                 IsRedemptionTagUser = this.IsTagUserBox.IsChecked ?? false,
                 RedemptionTagUser = this.UserNameTextBox.Text,
-                //IsAutoShoutOutHost = this.IsAutoShoutOutBox.IsChecked ?? false
+                IsAutoShoutOutHost = this.IsAutoShoutOutBox.IsChecked ?? false
             };
 
             QTCore.Instance.SetupTwitchOptions(twitchOptions);

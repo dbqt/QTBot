@@ -103,16 +103,14 @@
 
                         <CheckBox x:Name="IsTagUserBox" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <StackPanel Grid.Row="3" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Stretch">
-                            <TextBlock x:Name="IsTagUserLabel" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">Tag user in chat @</TextBlock>
+                            <TextBlock x:Name="IsTagUserLabel" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">Tag user in chat when there's a redeem: @</TextBlock>
                             <TextBox x:Name="UserNameTextBox" MinWidth="150" ToolTip="@username"/>
                         </StackPanel>
 
                         <!-- Auto shout out -->
-                        <!--
-                        <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,12,0,0">Auto shout out on host</TextBlock>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,12,0,0">Auto shout out on raid</TextBlock>
                         <CheckBox x:Name="IsAutoShoutOutBox" Grid.Row="5" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Row="5" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">Automatically send !so command when someone hosts the channel</TextBlock>
-                        -->
+                        <TextBlock Grid.Row="5" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">Automatically send shouthout (!so) command when someone raids the channel</TextBlock>
                     </Grid>
                 </ScrollViewer>
             </TabItem>

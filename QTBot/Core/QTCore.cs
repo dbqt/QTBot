@@ -45,6 +45,7 @@ namespace QTBot.Core
         private JoinedChannel currentChannel = null;
 
         private QTCommandsManager commandsManager = null;
+        private QTTimersManager timersManager = null;
 
         private ConfigModel mainConfig = null;
         private TwitchOptions twitchOptions = null;
@@ -123,7 +124,10 @@ namespace QTBot.Core
             QTChatManager.Instance.Initialize(this.client);
 
             // Setup QT commands manager
-            this.commandsManager = new QTCommandsManager();           
+            this.commandsManager = new QTCommandsManager();
+
+            // Setup QT timers manager
+            this.timersManager = new QTTimersManager();
 
             // Setup API client
             this.apiClient = new TwitchAPI();
@@ -189,6 +193,11 @@ namespace QTBot.Core
             Trace.WriteLine("Raid notification with MsgParamDisplayName: " + e.RaidNotification.MsgParamDisplayName);
             Trace.WriteLine("Raid notification with MsgParamViewerCount: " + e.RaidNotification.MsgParamViewerCount);
             Trace.WriteLine("Raid notification with MsgParamLogin: " + e.RaidNotification.MsgParamLogin);
+
+            if (this.TwitchOptions.IsAutoShoutOutHost)
+            {
+                QTChatManager.Instance.SendInstantMessage($"!so {e.RaidNotification.DisplayName}");
+            }
         }
 
         private void Client_OnBeingHosted(object sender, OnBeingHostedArgs e)
@@ -209,10 +218,16 @@ namespace QTBot.Core
         public void Disconnect()
         {
             RemovePubSubListeners();
-            this.pubSubClient.Disconnect();
-
             RemoveClientListeners();
-            this.client.Disconnect();
+            try
+            {
+                this.pubSubClient.Disconnect();
+                this.client.Disconnect();
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine("QTCore.Disconnect exception: " + e.StackTrace);
+            }
         }
 
         public void SetupTwitchOptions(TwitchOptions options)
@@ -266,11 +281,16 @@ namespace QTBot.Core
         private void Client_OnConnected(object sender, OnConnectedArgs e)
         {
             QTChatManager.Instance.ToggleChat(true);
+
+            this.timersManager.StartTimers();
         }
 
         private void Client_OnDisconnected(object sender, TwitchLib.Communication.Events.OnDisconnectedEventArgs e)
         {
             QTChatManager.Instance.ToggleChat(false);
+
+            this.timersManager.StopTimers();
+
             this.OnDisonnected?.Invoke(sender, null);
         }
 
@@ -294,6 +314,7 @@ namespace QTBot.Core
         {
             this.currentChannel = new JoinedChannel(e.Channel);
             this.OnConnected?.Invoke(sender, null);
+            QTChatManager.Instance.SendInstantMessage("hai hai, I am ready to go!");
         }
 
         private void Client_OnLog(object sender, OnLogArgs e)
@@ -424,7 +445,7 @@ namespace QTBot.Core
         #region Test
         public void TestMessage()
         {
-            this.client.SendMessage(this.currentChannel, "This is a test message!");
+            this.client.SendMessage(this.currentChannel, "Hai, I'm connected!");
         }
 
         public void TestRedemption1()
