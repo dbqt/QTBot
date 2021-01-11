@@ -1,0 +1,291 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
+  <asmv1:assemblyIdentity name="QTBot.exe" version="0.0.0.7" publicKeyToken="fed939f706a40f7f" language="neutral" processorArchitecture="msil" type="win32" />
+  <description asmv2:iconFile="dblogowhite.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
+  <application />
+  <entryPoint>
+    <assemblyIdentity name="QTBot" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+    <commandLine file="QTBot.exe" parameters="" />
+  </entryPoint>
+  <trustInfo>
+    <security>
+      <applicationRequestMinimum>
+        <PermissionSet Unrestricted="true" ID="Custom" SameSite="site" />
+        <defaultAssemblyRequest permissionSetReference="Custom" />
+      </applicationRequestMinimum>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <!--
+          UAC Manifest Options
+          If you want to change the Windows User Account Control level replace the
+          requestedExecutionLevel node with one of the following.
+
+        <requestedExecutionLevel  level="asInvoker" uiAccess="false" />
+        <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
+        <requestedExecutionLevel  level="highestAvailable" uiAccess="false" />
+
+         If you want to utilize File and Registry Virtualization for backward
+         compatibility then delete the requestedExecutionLevel node.
+    -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <dependency>
+    <dependentOS>
+      <osVersionInfo>
+        <os majorVersion="5" minorVersion="1" buildNumber="2600" servicePackMajor="0" />
+      </osVersionInfo>
+    </dependentOS>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
+      <assemblyIdentity name="Microsoft.Windows.CommonLanguageRuntime" version="4.0.30319.0" />
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="MaterialDesignColors.dll" size="300032">
+      <assemblyIdentity name="MaterialDesignColors" version="1.2.7.1979" publicKeyToken="DF2A72020BD7962A" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>d/pQnWa7tgPAOoEJwstdUnpwQC/lepx9LuP77yK5xIY=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="MaterialDesignThemes.Wpf.dll" size="7727616">
+      <assemblyIdentity name="MaterialDesignThemes.Wpf" version="3.2.0.1979" publicKeyToken="DF2A72020BD7962A" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>feGKj5Rze49jAmfq40yatU2lTC2zNU2SA6lR4Lys7wg=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Microsoft.Extensions.Logging.Abstractions.dll" size="48192">
+      <assemblyIdentity name="Microsoft.Extensions.Logging.Abstractions" version="2.2.0.0" publicKeyToken="ADB9793829DDAE60" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>zkch63WRx37CNlDAecJXMLyeTyr0QO0M6RMlgVFDTNo=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Newtonsoft.Json.dll" size="675240">
+      <assemblyIdentity name="Newtonsoft.Json" version="12.0.0.0" publicKeyToken="30AD4FE6B2A6AEED" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>tmdJuB4UifzY11SyrTnr4NtoE0TjkqP0nckjVkO9vQY=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="QTBot.exe" size="123328">
+      <assemblyIdentity name="QTBot" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>E7RC8UkBnIsuh/ymK5qnCUPsSS8P5rzhN1q4AwQX7Yo=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TwitchLib.Api.dll" size="45056">
+      <assemblyIdentity name="TwitchLib.Api" version="3.1.2.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>E2ZQ8vafvBXh1/cYG96ogD0N5tPwxOnvkqnDeezeUhs=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TwitchLib.Api.Core.dll" size="70656">
+      <assemblyIdentity name="TwitchLib.Api.Core" version="3.1.3.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>WqXcBesyqQtWCzZAuu7To3Um/WyFqdnhP+4jaR1LhjY=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TwitchLib.Api.Core.Enums.dll" size="9216">
+      <assemblyIdentity name="TwitchLib.Api.Core.Enums" version="3.1.2.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>NUMhHbcsGcf8AYZ4KTXZiO12aOMJKH/DtrbJGITtDJk=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TwitchLib.Api.Core.Interfaces.dll" size="7680">
+      <assemblyIdentity name="TwitchLib.Api.Core.Interfaces" version="3.1.2.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>c2GNyyNBcP4T7vuDv0SBOBXuHLzwMouOFNFynLYkfus=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TwitchLib.Api.Core.Models.dll" size="57344">
+      <assemblyIdentity name="TwitchLib.Api.Core.Models" version="3.1.3.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>UvB75rRQuCv71LD/es34M2bMYRlbTyQjPlX+oQLzD8w=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TwitchLib.Api.Helix.dll" size="30208">
+      <assemblyIdentity name="TwitchLib.Api.Helix" version="3.1.2.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>LY6371cZZeRkYb5+TYn6r8QYw068IJtHhZelUKOxOeQ=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TwitchLib.Api.Helix.Models.dll" size="44544">
+      <assemblyIdentity name="TwitchLib.Api.Helix.Models" version="3.1.3.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>zDfgLQNtpmB2X0NoHAlQW8HWBWOTH49n2oXfw0t1GLg=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TwitchLib.Api.V5.dll" size="53248">
+      <assemblyIdentity name="TwitchLib.Api.V5" version="3.1.2.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>VXkCHQ0hpgtpBlqocreYNyTU41HT/RvCAeV1CKIsEHk=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TwitchLib.Api.V5.Models.dll" size="74752">
+      <assemblyIdentity name="TwitchLib.Api.V5.Models" version="3.1.2.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>jJ096nr/JocoCg/YjZjDfqm9Q9DgJjsZvxFUatjWY5k=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TwitchLib.Client.dll" size="79872">
+      <assemblyIdentity name="TwitchLib.Client" version="3.1.5.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>PaoTyHlNgAi5eFxxIGtH8JYgjPp/ehvFm8irN7Mt89o=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TwitchLib.Client.Enums.dll" size="7168">
+      <assemblyIdentity name="TwitchLib.Client.Enums" version="3.1.4.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>nj9A/ASSKFoOKgMGTVy5ntf9Uh+I4/aEnluDK1tOM0c=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TwitchLib.Client.Models.dll" size="89600">
+      <assemblyIdentity name="TwitchLib.Client.Models" version="3.1.5.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>+c7vI+GMz5y6Xlu3LT9sOrh3Sw5ltNExVMa/yHSWRt0=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TwitchLib.Communication.dll" size="38400">
+      <assemblyIdentity name="TwitchLib.Communication" version="1.0.3.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>KzuJ/xLkDv9CV+8Ef+v1ukeg965GXB4fYZssJtKm7Ec=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TwitchLib.PubSub.dll" size="61952">
+      <assemblyIdentity name="TwitchLib.PubSub" version="3.1.4.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>xYvU9fhmpH7+7nxIGaKw5axkPHRhLFaHR8YV4G+z0LQ=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <file name="dblogowhite.ico" size="32107">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>Mpoz5qeOoKJfzLsWPExDMxPwCn6MObMqP3BcsIGoPwA=</dsig:DigestValue>
+    </hash>
+  </file>
+  <file name="QTBot.exe.config" size="809">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>kj93nacbir9dVLEtXebXV/sojqvwgGOBrpvohrnarlE=</dsig:DigestValue>
+    </hash>
+  </file>
+<publisherIdentity name="CN=DBQT-NZXT\dt_db" issuerKeyHash="c119de551c1bb8540ce1ca5d9605e96d77c8c438" /><Signature Id="StrongNameSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>wucs83RUPtwpZQladhSPCJQNSoTJmK0m2jqoUHZ3QCY=</DigestValue></Reference></SignedInfo><SignatureValue>SyrfF2OcW1hUHtI1PYv0zOR5R+DtQ3HD8eSMKNiGHIaF3MgP2Gkqdf6A4bF0jpBMJwysT/Fio2LIEp1DBy92/lM0Axq2NmPGJ6fMdsWHjViDvePZVxs7eJN+/nUewRjBMm8FQoxpq3sHNNI2cD7nRtB/GCu5fqVIlje/WFu/PxQ=</SignatureValue><KeyInfo Id="StrongNameKeyInfo"><KeyValue><RSAKeyValue><Modulus>1+eQt5+gkqcc5FMAgFatcQe3ffTJYYzTet5hfHU9FDILXG798hU8GAibzyGn1NnPq1LZxZ6t5VIAJIufSfSWCcfjrdiOas5TZmcSgmUmAiXQCU1u4QtxZx/8VwHZGh4c1EfyTEF9VbiIFcWMUxumdsHklR2aRWHNKPhzsT/TTh0=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><msrel:RelData xmlns:msrel="http://schemas.microsoft.com/windows/rel/2005/reldata"><r:license xmlns:r="urn:mpeg:mpeg21:2003:01-REL-R-NS" xmlns:as="http://schemas.microsoft.com/windows/pki/2005/Authenticode"><r:grant><as:ManifestInformation Hash="2640777650a83ada26ad98c9844a0d94088f14765a096529dc3e5474f32ce7c2" Description="" Url=""><as:assemblyIdentity name="QTBot.exe" version="0.0.0.7" publicKeyToken="fed939f706a40f7f" language="neutral" processorArchitecture="msil" type="win32" /></as:ManifestInformation><as:SignedBy /><as:AuthenticodePublisher><as:X509SubjectName>CN=DBQT-NZXT\dt_db</as:X509SubjectName></as:AuthenticodePublisher></r:grant><r:issuer><Signature Id="AuthenticodeSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>lKjWVS4En9bdR0tgj8mQ4k/8p5slTpRMMi9CVnUsOIQ=</DigestValue></Reference></SignedInfo><SignatureValue>mob7dPF0r8asdF0UkMpSVdRIelykVjFUg7P3sEBl3v+Rza7rFZsEbOJNbLmpqOnB6ZCrpQrX7aqDZKjNb8qa+wtu+4hiq8R7TrnQusCqijJZ8cnXUakApskfLeDa7McxqB7kHzSYrf5YDpVfgLXWucMhpCXkrMing6spUPP6QwM=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>1+eQt5+gkqcc5FMAgFatcQe3ffTJYYzTet5hfHU9FDILXG798hU8GAibzyGn1NnPq1LZxZ6t5VIAJIufSfSWCcfjrdiOas5TZmcSgmUmAiXQCU1u4QtxZx/8VwHZGh4c1EfyTEF9VbiIFcWMUxumdsHklR2aRWHNKPhzsT/TTh0=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIB1TCCAT6gAwIBAgIQJO1Dsdik8rxPVSst4t7QczANBgkqhkiG9w0BAQsFADApMScwJQYDVQQDHh4ARABCAFEAVAAtAE4AWgBYAFQAXABkAHQAXwBkAGIwHhcNMjAxMDA3MTU0MjE4WhcNMjExMDA3MjE0MjE4WjApMScwJQYDVQQDHh4ARABCAFEAVAAtAE4AWgBYAFQAXABkAHQAXwBkAGIwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBANfnkLefoJKnHORTAIBWrXEHt330yWGM03reYXx1PRQyC1xu/fIVPBgIm88hp9TZz6tS2cWereVSACSLn0n0lgnH463YjmrOU2ZnEoJlJgIl0AlNbuELcWcf/FcB2RoeHNRH8kxBfVW4iBXFjFMbpnbB5JUdmkVhzSj4c7E/004dAgMBAAEwDQYJKoZIhvcNAQELBQADgYEANJqe6DCyhDlGqFuvcKZOTq2jeuCt5M4gbGXeJYr1el2C2YkZKmjQmux7VawS5+KVH+7VJWSW8FePL3huzEzMNU3LBIh4QJJlsJ59xQv9A/CGc8aoFcMLdGnblyYE0odDTwOuPC+TTu13TnoY9bVh5bYqQsEoe+oSn7kmYdWyrGM=</X509Certificate></X509Data></KeyInfo></Signature></r:issuer></r:license></msrel:RelData></KeyInfo></Signature></asmv1:assembly>
