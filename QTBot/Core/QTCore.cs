@@ -65,7 +65,7 @@ namespace QTBot.Core
         {
             try
             {
-                var logPath = Path.Combine(Environment.CurrentDirectory, "Logs");
+                var logPath = Path.Combine(Utilities.GetDataDirectory(), "Logs");
                 Directory.CreateDirectory(logPath);
                 var logFilePath = Path.Combine(logPath, "logs-" + DateTime.Now.ToString("yyyy-MM-dd-hh-mm-ss-tt") + ".txt");
                 var fileStream = File.Create(logFilePath);
@@ -92,7 +92,7 @@ namespace QTBot.Core
                 Trace.WriteLine(e.StackTrace);
             }
 
-            Trace.WriteLine("QT LOGS STARTING");
+            Trace.WriteLine("QT LOGS STARTING!");
 
             LoadConfigs();
         }
@@ -140,7 +140,7 @@ namespace QTBot.Core
             // Current token not working
             if (!credentialResponse.Result)
             {
-                Trace.WriteLine(credentialResponse.ResultMessage);
+                Utilities.Log(credentialResponse.ResultMessage);
                 // Try refresh
                 var refreshResponse = this.apiClient.ThirdParty.AuthorizationFlow.RefreshToken(this.mainConfig.StreamerChannelRefreshToken);
                 if (!string.IsNullOrEmpty(refreshResponse.Token) && !string.IsNullOrEmpty(refreshResponse.Refresh))
@@ -188,11 +188,11 @@ namespace QTBot.Core
 
         private void Client_OnRaidNotification(object sender, OnRaidNotificationArgs e)
         {
-            Trace.WriteLine("Raid notification with display name: " + e.RaidNotification.DisplayName);
-            Trace.WriteLine("Raid notification with channel name: " + e.Channel);
-            Trace.WriteLine("Raid notification with MsgParamDisplayName: " + e.RaidNotification.MsgParamDisplayName);
-            Trace.WriteLine("Raid notification with MsgParamViewerCount: " + e.RaidNotification.MsgParamViewerCount);
-            Trace.WriteLine("Raid notification with MsgParamLogin: " + e.RaidNotification.MsgParamLogin);
+            Utilities.Log("Raid notification with display name: " + e.RaidNotification.DisplayName);
+            Utilities.Log("Raid notification with channel name: " + e.Channel);
+            Utilities.Log("Raid notification with MsgParamDisplayName: " + e.RaidNotification.MsgParamDisplayName);
+            Utilities.Log("Raid notification with MsgParamViewerCount: " + e.RaidNotification.MsgParamViewerCount);
+            Utilities.Log("Raid notification with MsgParamLogin: " + e.RaidNotification.MsgParamLogin);
 
             if (this.TwitchOptions.IsAutoShoutOutHost)
             {
@@ -202,17 +202,17 @@ namespace QTBot.Core
 
         private void Client_OnBeingHosted(object sender, OnBeingHostedArgs e)
         {
-            Trace.WriteLine("BeingHosted notification with channel" + e.BeingHostedNotification.Channel);
-            Trace.WriteLine("BeingHosted notification with HostedByChannel" + e.BeingHostedNotification.HostedByChannel);
-            Trace.WriteLine("BeingHosted notification with Viewers" + e.BeingHostedNotification.Viewers);
-            Trace.WriteLine("BeingHosted notification with BotUsername" + e.BeingHostedNotification.BotUsername);
+            Utilities.Log("BeingHosted notification with channel" + e.BeingHostedNotification.Channel);
+            Utilities.Log("BeingHosted notification with HostedByChannel" + e.BeingHostedNotification.HostedByChannel);
+            Utilities.Log("BeingHosted notification with Viewers" + e.BeingHostedNotification.Viewers);
+            Utilities.Log("BeingHosted notification with BotUsername" + e.BeingHostedNotification.BotUsername);
         }
 
         private void Client_OnHostingStarted(object sender, OnHostingStartedArgs e)
         {
-            Trace.WriteLine("HostingStarted notification with HostingChannel " + e.HostingStarted.HostingChannel);
-            Trace.WriteLine("HostingStarted notification with TargetChannel " + e.HostingStarted.TargetChannel);
-            Trace.WriteLine("HostingStarted notification with Viewers " + e.HostingStarted.Viewers);
+            Utilities.Log("HostingStarted notification with HostingChannel " + e.HostingStarted.HostingChannel);
+            Utilities.Log("HostingStarted notification with TargetChannel " + e.HostingStarted.TargetChannel);
+            Utilities.Log("HostingStarted notification with Viewers " + e.HostingStarted.Viewers);
         }
 
         public void Disconnect()
@@ -226,7 +226,7 @@ namespace QTBot.Core
             }
             catch (Exception e)
             {
-                Trace.WriteLine("QTCore.Disconnect exception: " + e.StackTrace);
+                Utilities.Log("QTCore.Disconnect exception: " + e.StackTrace);
             }
         }
 
@@ -296,7 +296,7 @@ namespace QTBot.Core
 
         private void Client_OnNewSubscriber(object sender, OnNewSubscriberArgs e)
         {
-            Trace.WriteLine("Client_OnNewSubscriber " + e.Subscriber.DisplayName);
+            Utilities.Log("Client_OnNewSubscriber " + e.Subscriber.DisplayName);
         }
 
         private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
@@ -319,7 +319,7 @@ namespace QTBot.Core
 
         private void Client_OnLog(object sender, OnLogArgs e)
         {
-            Trace.WriteLine("Client_OnLog: " + e.Data);
+            Utilities.Log("Client_OnLog: " + e.Data);
         }
       
         #endregion Client Events
@@ -368,36 +368,36 @@ namespace QTBot.Core
 
         private void PubSubClient_OnHost(object sender, TwitchLib.PubSub.Events.OnHostArgs e)
         {
-            Trace.WriteLine("PubSubClient_OnHost");
+            Utilities.Log("PubSubClient_OnHost");
         }
 
         private void PubSubClient_OnChannelSubscription(object sender, TwitchLib.PubSub.Events.OnChannelSubscriptionArgs e)
         {
-            Trace.WriteLine("PubSubClient_OnChannelSubscription " + e.Subscription.DisplayName);
+            Utilities.Log("PubSubClient_OnChannelSubscription " + e.Subscription.DisplayName);
         }
 
         private void PubSubClient_OnBitsReceived(object sender, TwitchLib.PubSub.Events.OnBitsReceivedArgs e)
         {
-            Trace.WriteLine($"PubSubClient_OnBitsReceived BitsUsed: {e.BitsUsed}, TotalBitsUsed: {e.TotalBitsUsed}, message: {e.ChatMessage}");
+            Utilities.Log($"PubSubClient_OnBitsReceived BitsUsed: {e.BitsUsed}, TotalBitsUsed: {e.TotalBitsUsed}, message: {e.ChatMessage}");
         }
 
         private void PubSubClient_OnStreamDown(object sender, TwitchLib.PubSub.Events.OnStreamDownArgs e)
         {
-            Trace.WriteLine("PubSubClient_OnStreamDown");
+            Utilities.Log("PubSubClient_OnStreamDown");
         }
 
         private void PubSubClient_OnStreamUp(object sender, TwitchLib.PubSub.Events.OnStreamUpArgs e)
         {
-            Trace.WriteLine("PubSubClient_OnStreamUp");
+            Utilities.Log("PubSubClient_OnStreamUp");
         }
 
         private void PubSubClient_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
         {
-            Trace.WriteLine($"PubSubClient_OnRewardRedeemed with RewardTitle: {e.RewardTitle}");
-            Trace.WriteLine($"PubSubClient_OnRewardRedeemed with RewardCost: {e.RewardCost}");
-            Trace.WriteLine($"PubSubClient_OnRewardRedeemed with RewardPrompt: {e.RewardPrompt}");
-            Trace.WriteLine($"PubSubClient_OnRewardRedeemed with Message: {e.Message}");
-            Trace.WriteLine($"PubSubClient_OnRewardRedeemed with Status: {e.Status}");
+            Utilities.Log($"PubSubClient_OnRewardRedeemed with RewardTitle: {e.RewardTitle}");
+            Utilities.Log($"PubSubClient_OnRewardRedeemed with RewardCost: {e.RewardCost}");
+            Utilities.Log($"PubSubClient_OnRewardRedeemed with RewardPrompt: {e.RewardPrompt}");
+            Utilities.Log($"PubSubClient_OnRewardRedeemed with Message: {e.Message}");
+            Utilities.Log($"PubSubClient_OnRewardRedeemed with Status: {e.Status}");
 
             if (e.Status.Equals("UNFULFILLED")) // FULFILLED
             {
@@ -407,38 +407,38 @@ namespace QTBot.Core
 
         private void PubSubClient_OnListenResponse(object sender, TwitchLib.PubSub.Events.OnListenResponseArgs e)
         {
-            Trace.WriteLine("PubSubClient_OnListenResponse was successful: " + e.Successful);
+            Utilities.Log("PubSubClient_OnListenResponse was successful: " + e.Successful);
         }
 
         private void PubSubClient_OnPubSubServiceConnected(object sender, EventArgs e)
         {
-            Trace.WriteLine("PubSubClient_OnPubSubServiceConnected");
+            Utilities.Log("PubSubClient_OnPubSubServiceConnected");
             this.pubSubClient.SendTopics(this.apiClient.Settings.AccessToken);
         }
 
         private void PubSubClient_OnEmoteOnlyOff(object sender, TwitchLib.PubSub.Events.OnEmoteOnlyOffArgs e)
         {
-            Trace.WriteLine("PubSubClient_OnEmoteOnlyOff");
+            Utilities.Log("PubSubClient_OnEmoteOnlyOff");
         }
 
         private void PubSubClient_OnEmoteOnly(object sender, TwitchLib.PubSub.Events.OnEmoteOnlyArgs e)
         {
-            Trace.WriteLine("PubSubClient_OnEmoteOnly");
+            Utilities.Log("PubSubClient_OnEmoteOnly");
         }
 
         private void PubSubClient_OnRaidUpdateV2(object sender, TwitchLib.PubSub.Events.OnRaidUpdateV2Args e)
         {
-            Trace.WriteLine("PubSubClient_OnRaidUpdateV2");
+            Utilities.Log("PubSubClient_OnRaidUpdateV2");
         }
 
         private void PubSubClient_OnRaidUpdate(object sender, TwitchLib.PubSub.Events.OnRaidUpdateArgs e)
         {
-            Trace.WriteLine("PubSubClient_OnRaidUpdate");
+            Utilities.Log("PubSubClient_OnRaidUpdate");
         }
 
         private void PubSubClient_OnRaidGo(object sender, TwitchLib.PubSub.Events.OnRaidGoArgs e)
         {
-            Trace.WriteLine("PubSubClient_OnRaidGo");
+            Utilities.Log("PubSubClient_OnRaidGo");
         }
         #endregion PubSub Events
 

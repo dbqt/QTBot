@@ -78,7 +78,7 @@ namespace QTBot.Helpers
 
         public static string GetConfigDirectory()
         {
-            var current = Environment.CurrentDirectory;
+            var current = Utilities.GetDataDirectory();
             var configsPath = Path.Combine(current, ConfigsFolderName);
             Directory.CreateDirectory(configsPath);
             return configsPath;

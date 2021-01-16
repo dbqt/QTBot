@@ -39,11 +39,17 @@ namespace QTBot.Core
 
         public async Task<string> ProcessCommand(string command, IEnumerable<string> args, string username)
         {
+            // Early exit if empty command
+            if (string.IsNullOrWhiteSpace(command))
+            {
+                return null;
+            }
+
             string message = "";
-            Trace.WriteLine($"From {username}, command is {command}, args are :");
+            Utilities.Log($"From {username}, command is {command}, args are :");
             foreach (var arg in args)
             {
-                Trace.WriteLine($"{arg}");
+                Utilities.Log($"{arg}");
             }
 
             // Early exit if the command is not found
@@ -122,6 +128,9 @@ namespace QTBot.Core
             return message;
         }
 
+        /// <summary>
+        /// Checks if the the cost is positive and lower than user's points.
+        /// </summary>
         private PointStatus HasValidPointsForCommand(int userTotalPoints, int cost)
         {
             // Amount is positive
@@ -143,6 +152,9 @@ namespace QTBot.Core
             }
         }
 
+        /// <summary>
+        /// Replaces {{user}} with <paramref name="username"/> in <paramref name="stringToModify"/> and returns the resulting string.
+        /// </summary>
         private string ReplaceKeywords(string stringToModify, string username)
         {
             return stringToModify.Replace("{{user}}", username);

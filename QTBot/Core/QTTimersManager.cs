@@ -46,7 +46,7 @@ namespace QTBot.Core
                 foreach (var rawTimer in this.rawTimers.Timers)
                 {
                     var cancellationToken = new CancellationTokenSource();
-                    Trace.WriteLine($"QTTimersManager [{rawTimer.Name}] - Registered!");
+                    Utilities.Log($"QTTimersManager [{rawTimer.Name}] - Registered!");
                     this.timerTasks.Add(TimerMessage(rawTimer.Name, rawTimer.OffsetMin, rawTimer.DelayMin, rawTimer.Message, cancellationToken), cancellationToken);
                 }
             }
@@ -54,21 +54,21 @@ namespace QTBot.Core
 
         private async Task TimerMessage(string name, int startDelay, int cycleDelay, string message, CancellationTokenSource token)
         {
-            Trace.WriteLine($"QTTimersManager [{name}] - Start delayed by {startDelay} min");
+            Utilities.Log($"QTTimersManager [{name}] - Start delayed by {startDelay} min");
             await Task.Delay(startDelay * MinToMilliseconds);
 
             while (true)
             {
                 if (token.IsCancellationRequested)
                 {
-                    Trace.WriteLine($"QTTimersManager [{name}] - Cancelled");
+                    Utilities.Log($"QTTimersManager [{name}] - Cancelled");
                     return;
                 }
 
-                Trace.WriteLine($"QTTimersManager [{name}] - Sending message: {message}");
+                Utilities.Log($"QTTimersManager [{name}] - Sending message: {message}");
                 QTChatManager.Instance.SendInstantMessage(message);
 
-                Trace.WriteLine($"QTTimersManager [{name}] - Waiting for next cycle in {cycleDelay} min");
+                Utilities.Log($"QTTimersManager [{name}] - Waiting for next cycle in {cycleDelay} min");
                 await Task.Delay(cycleDelay * MinToMilliseconds);
             }
         }
