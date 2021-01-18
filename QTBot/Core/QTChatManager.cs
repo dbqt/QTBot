@@ -12,7 +12,7 @@ namespace QTBot.Core
     {
         private bool isActive = false;
 
-        private const int CycleDelay = 5000;
+        private const int CycleDelay = 10000;
 
         private Dictionary<string, List<string>> redemptionsCollection = new Dictionary<string, List<string>>();
         private bool redemptionsCollectionDirty = false;
@@ -37,8 +37,14 @@ namespace QTBot.Core
             this.isActive = active;
             if (this.isActive)
             {
-                _ = InitiateChatLoop();
+                _ = InitiateRedeemsLoop();
             }
+        }
+
+        public async Task SendMessage(string message, int delayMs = 0)
+        {
+            await Task.Delay(delayMs);
+            SendInstantMessage(message);
         }
 
         public void SendInstantMessage(string message)
@@ -60,13 +66,18 @@ namespace QTBot.Core
             }
         }
 
-        private async Task InitiateChatLoop()
+        /// <summary>
+        /// Groups redeems into a cleaner message
+        /// </summary>
+        /// <returns></returns>
+        private async Task InitiateRedeemsLoop()
         {
             while(this.isActive)
             {
                 this.redemptionsCollectionDirty = false;
                 await Task.Delay(CycleDelay);
 
+                // If the redemption collection got dirty, that means a new redeem came in during the delay
                 if (this.redemptionsCollectionDirty)
                 {
                     continue;
@@ -74,12 +85,12 @@ namespace QTBot.Core
 
                 lock (redeemLock)
                 {
-                    HandleRedeemAlerts();
+                    GenerateRedeemsAlertMessage();
                 }
-            }      
+            }
         }
 
-        private void HandleRedeemAlerts()
+        private void GenerateRedeemsAlertMessage()
         {
             if (this.redemptionsCollection.Count == 0)
             {

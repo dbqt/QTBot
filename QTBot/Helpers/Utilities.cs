@@ -12,6 +12,9 @@ namespace QTBot.Helpers
 {
     public class Utilities
     {
+        /// <summary>
+        /// Show a message box to the user.
+        /// </summary>
         public static void ShowMessage(string message, string title = "")
         {
             MessageBox.Show(message, title);
@@ -20,7 +23,8 @@ namespace QTBot.Helpers
         public static string GetDataDirectory()
         {
             string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            string userFilePath = Path.Combine(localAppData, "QTBot");
+            string installAppData = Path.Combine(localAppData, "QTBot");
+            string userFilePath = Path.Combine(installAppData, "UserData");
 
             if (!Directory.Exists(userFilePath))
             {

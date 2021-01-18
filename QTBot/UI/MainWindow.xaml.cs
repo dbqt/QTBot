@@ -1,10 +1,12 @@
 ﻿using QTBot.Core;
 using QTBot.Helpers;
+using Squirrel;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -43,6 +45,8 @@ namespace QTBot
             InitializeComponent();
 
             this.DataContext = this;
+            var v = GetRunningVersion();
+            this.Title = $"QTBot - {v.Major}.{v.Minor}.{v.Build}";
 
             this.IsRedemptionInChat = false;
 
@@ -52,6 +56,26 @@ namespace QTBot
             Instance_OnDisonnected(null, null);
 
             CheckConfig();
+
+            Update();
+        }
+
+        private async Task Update()
+        {
+            using (var mgr = await UpdateManager.GitHubUpdateManager("https://github.com/dbqt/QTBot-releases"))
+            {
+                var updateInfo = await mgr.CheckForUpdate();
+                var hasUpdate = updateInfo.CurrentlyInstalledVersion.Version != updateInfo.FutureReleaseEntry.Version;
+
+                await mgr.UpdateApp();
+
+                if (hasUpdate)
+                {
+                    ExecuteOnUIThread(() =>
+                        Utilities.ShowMessage("I got an update, please reboot me :)", "QTBot has updated")
+                    ) ;
+                }
+            }
         }
 
         private void CheckConfig()
@@ -60,11 +84,13 @@ namespace QTBot
             if (QTCore.Instance.IsConfigured)
             {
                 this.ConfigCheck.Visibility = Visibility.Collapsed;
+                this.ConfigCheck1.Visibility = Visibility.Collapsed;
                 this.Connect.IsEnabled = true;
             }
             else
             {
                 this.ConfigCheck.Visibility = Visibility.Visible;
+                this.ConfigCheck1.Visibility = Visibility.Visible;
                 this.Connect.IsEnabled = false;
             }
 
@@ -76,6 +102,18 @@ namespace QTBot
             this.IsTagUserBox.IsChecked = options.IsRedemptionTagUser;
             this.UserNameTextBox.Text = options.RedemptionTagUser;
             this.IsAutoShoutOutBox.IsChecked = options.IsAutoShoutOutHost;
+        }
+
+        private Version GetRunningVersion()
+        {
+            try
+            {
+                return Assembly.GetEntryAssembly().GetName().Version;
+            }
+            catch (Exception)
+            {
+                return Assembly.GetExecutingAssembly().GetName().Version;
+            }
         }
 
         #region Events

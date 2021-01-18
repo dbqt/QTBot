@@ -36,67 +36,43 @@ namespace QTBot.Core
             AuthScopes.User_Subscriptions
         };
 
-        private TwitchClient client = null;
-        private TwitchPubSub pubSubClient = null;
-        private TwitchAPI apiClient = null;
-        private string channelId = null;
-        private string userId = null;
-
-        private JoinedChannel currentChannel = null;
-
+        // Modules
         private QTCommandsManager commandsManager = null;
         private QTTimersManager timersManager = null;
 
+        // Configurations
         private ConfigModel mainConfig = null;
-        private TwitchOptions twitchOptions = null;
+        private string channelId = null;
+        private string userId = null;
+        private JoinedChannel currentChannel = null;
 
+        // Twitch client
+        private TwitchClient client = null;
         public TwitchClient Client => this.client;
         public JoinedChannel CurrentChannel => this.currentChannel;
         public string BotUserName => this.mainConfig?.BotChannelName ?? "<Invalid Value>";
         public string CurrentChannelName => this.mainConfig?.StreamerChannelName ?? "<Invalid Value>";
-
         public bool IsConfigured => mainConfig?.IsConfigured ?? false;
+
+        // Twitch options
+        private TwitchOptions twitchOptions = null;
         public TwitchOptions TwitchOptions => this.twitchOptions;
+        public bool IsRedemptionAlertOn => this.TwitchOptions.IsRedemptionTagUser && !string.IsNullOrEmpty(this.TwitchOptions.RedemptionTagUser);
+
+        // TwitchLibs stuff
+        private TwitchPubSub pubSubClient = null;
+        private TwitchAPI apiClient = null;
 
         public event EventHandler OnConnected;
         public event EventHandler OnDisonnected;
 
         public QTCore()
         {
-            try
-            {
-                var logPath = Path.Combine(Utilities.GetDataDirectory(), "Logs");
-                Directory.CreateDirectory(logPath);
-                var logFilePath = Path.Combine(logPath, "logs-" + DateTime.Now.ToString("yyyy-MM-dd-hh-mm-ss-tt") + ".txt");
-                var fileStream = File.Create(logFilePath);
-                fileStream.Close();
-
-                TextWriterTraceListener[] listeners = new TextWriterTraceListener[]
-                {
-                    new TextWriterTraceListener(logFilePath),
-                    new TextWriterTraceListener(Console.Out)
-                };
-
-                Trace.Listeners.AddRange(listeners);
-                Trace.AutoFlush = true;
-
-                while (Directory.GetFiles(logPath).Length > 10)
-                {
-                    FileSystemInfo fileInfo = new DirectoryInfo(logPath).GetFileSystemInfos().OrderBy(fi => fi.CreationTime).First();
-                    Trace.WriteLine("Deleting old log: " + fileInfo.FullName);
-                    File.Delete(fileInfo.FullName);
-                }
-            }
-            catch (Exception e)
-            {
-                Trace.WriteLine(e.StackTrace);
-            }
-
-            Trace.WriteLine("QT LOGS STARTING!");
-
+            SetupLogging();
             LoadConfigs();
         }
 
+        #region Core Functionality
         public void LoadConfigs()
         {
             this.mainConfig = ConfigManager.ReadConfig();
@@ -115,13 +91,13 @@ namespace QTBot.Core
             // Setup Twitch client
             WebSocketClient customClient = new WebSocketClient(clientOptions);
             this.client = new TwitchClient(customClient);
-            this.client.Initialize(credentials, this.mainConfig.StreamerChannelName);
+            this.Client.Initialize(credentials, this.mainConfig.StreamerChannelName);
             SetupClientListeners();
 
-            this.client.Connect();
+            this.Client.Connect();
 
             // Setup QT chat manager
-            QTChatManager.Instance.Initialize(this.client);
+            QTChatManager.Instance.Initialize(this.Client);
 
             // Setup QT commands manager
             this.commandsManager = new QTCommandsManager();
@@ -186,35 +162,6 @@ namespace QTBot.Core
             }
         }
 
-        private void Client_OnRaidNotification(object sender, OnRaidNotificationArgs e)
-        {
-            Utilities.Log("Raid notification with display name: " + e.RaidNotification.DisplayName);
-            Utilities.Log("Raid notification with channel name: " + e.Channel);
-            Utilities.Log("Raid notification with MsgParamDisplayName: " + e.RaidNotification.MsgParamDisplayName);
-            Utilities.Log("Raid notification with MsgParamViewerCount: " + e.RaidNotification.MsgParamViewerCount);
-            Utilities.Log("Raid notification with MsgParamLogin: " + e.RaidNotification.MsgParamLogin);
-
-            if (this.TwitchOptions.IsAutoShoutOutHost)
-            {
-                QTChatManager.Instance.SendInstantMessage($"!so {e.RaidNotification.DisplayName}");
-            }
-        }
-
-        private void Client_OnBeingHosted(object sender, OnBeingHostedArgs e)
-        {
-            Utilities.Log("BeingHosted notification with channel" + e.BeingHostedNotification.Channel);
-            Utilities.Log("BeingHosted notification with HostedByChannel" + e.BeingHostedNotification.HostedByChannel);
-            Utilities.Log("BeingHosted notification with Viewers" + e.BeingHostedNotification.Viewers);
-            Utilities.Log("BeingHosted notification with BotUsername" + e.BeingHostedNotification.BotUsername);
-        }
-
-        private void Client_OnHostingStarted(object sender, OnHostingStartedArgs e)
-        {
-            Utilities.Log("HostingStarted notification with HostingChannel " + e.HostingStarted.HostingChannel);
-            Utilities.Log("HostingStarted notification with TargetChannel " + e.HostingStarted.TargetChannel);
-            Utilities.Log("HostingStarted notification with Viewers " + e.HostingStarted.Viewers);
-        }
-
         public void Disconnect()
         {
             RemovePubSubListeners();
@@ -222,7 +169,7 @@ namespace QTBot.Core
             try
             {
                 this.pubSubClient.Disconnect();
-                this.client.Disconnect();
+                this.Client.Disconnect();
             }
             catch (Exception e)
             {
@@ -239,8 +186,6 @@ namespace QTBot.Core
             }
         }
 
-        #region Core Functionality
-
         private async void HandleCommand(string command, IEnumerable<string> args, string username)
         {
             var result = await this.commandsManager.ProcessCommand(command, args, username);
@@ -249,33 +194,96 @@ namespace QTBot.Core
                 QTChatManager.Instance.SendInstantMessage(result);
             }
         }
+
+        private void SetupLogging()
+        {
+            try
+            {
+                var logPath = Path.Combine(Utilities.GetDataDirectory(), "Logs");
+                Directory.CreateDirectory(logPath);
+                var logFilePath = Path.Combine(logPath, "logs-" + DateTime.Now.ToString("yyyy-MM-dd-hh-mm-ss-tt") + ".txt");
+                var fileStream = File.Create(logFilePath);
+                fileStream.Close();
+
+                TextWriterTraceListener[] listeners = new TextWriterTraceListener[]
+                {
+                    new TextWriterTraceListener(logFilePath),
+                    new TextWriterTraceListener(Console.Out)
+                };
+
+                Trace.Listeners.AddRange(listeners);
+                Trace.AutoFlush = true;
+
+                while (Directory.GetFiles(logPath).Length > 10)
+                {
+                    FileSystemInfo fileInfo = new DirectoryInfo(logPath).GetFileSystemInfos().OrderBy(fi => fi.CreationTime).First();
+                    Trace.WriteLine("Deleting old log: " + fileInfo.FullName);
+                    File.Delete(fileInfo.FullName);
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine(e.StackTrace);
+            }
+
+            Trace.WriteLine("QT LOGS STARTING!");
+        }
         #endregion Core Functionality
 
         #region Client Events
         private void SetupClientListeners()
         {
-            this.client.OnLog += Client_OnLog;
-            this.client.OnJoinedChannel += Client_OnJoinedChannel;
-            this.client.OnMessageReceived += Client_OnMessageReceived;
-            this.client.OnNewSubscriber += Client_OnNewSubscriber;
-            this.client.OnConnected += Client_OnConnected;
-            this.client.OnDisconnected += Client_OnDisconnected;
-            this.client.OnHostingStarted += Client_OnHostingStarted;
-            this.client.OnBeingHosted += Client_OnBeingHosted;
-            this.client.OnRaidNotification += Client_OnRaidNotification;
+            this.Client.OnLog += Client_OnLog;
+            this.Client.OnJoinedChannel += Client_OnJoinedChannel;
+            this.Client.OnMessageReceived += Client_OnMessageReceived;
+            this.Client.OnNewSubscriber += Client_OnNewSubscriber;
+            this.Client.OnConnected += Client_OnConnected;
+            this.Client.OnDisconnected += Client_OnDisconnected;
+            this.Client.OnHostingStarted += Client_OnHostingStarted;
+            this.Client.OnBeingHosted += Client_OnBeingHosted;
+            this.Client.OnRaidNotification += Client_OnRaidNotification;
         }
 
         private void RemoveClientListeners()
         {
-            this.client.OnLog -= Client_OnLog;
-            this.client.OnJoinedChannel -= Client_OnJoinedChannel;
-            this.client.OnMessageReceived -= Client_OnMessageReceived;
-            this.client.OnNewSubscriber -= Client_OnNewSubscriber;
-            this.client.OnConnected -= Client_OnConnected;
-            this.client.OnDisconnected -= Client_OnDisconnected;
-            this.client.OnHostingStarted -= Client_OnHostingStarted;
-            this.client.OnBeingHosted -= Client_OnBeingHosted;
-            this.client.OnRaidNotification -= Client_OnRaidNotification;
+            this.Client.OnLog -= Client_OnLog;
+            this.Client.OnJoinedChannel -= Client_OnJoinedChannel;
+            this.Client.OnMessageReceived -= Client_OnMessageReceived;
+            this.Client.OnNewSubscriber -= Client_OnNewSubscriber;
+            this.Client.OnConnected -= Client_OnConnected;
+            this.Client.OnDisconnected -= Client_OnDisconnected;
+            this.Client.OnHostingStarted -= Client_OnHostingStarted;
+            this.Client.OnBeingHosted -= Client_OnBeingHosted;
+            this.Client.OnRaidNotification -= Client_OnRaidNotification;
+        }
+
+        private void Client_OnRaidNotification(object sender, OnRaidNotificationArgs e)
+        {
+            Utilities.Log("Raid notification with display name: " + e.RaidNotification.DisplayName);
+            Utilities.Log("Raid notification with channel name: " + e.Channel);
+            Utilities.Log("Raid notification with MsgParamDisplayName: " + e.RaidNotification.MsgParamDisplayName);
+            Utilities.Log("Raid notification with MsgParamViewerCount: " + e.RaidNotification.MsgParamViewerCount);
+            Utilities.Log("Raid notification with MsgParamLogin: " + e.RaidNotification.MsgParamLogin);
+
+            if (this.TwitchOptions.IsAutoShoutOutHost)
+            {
+                _ = QTChatManager.Instance.SendMessage($"!so {e.RaidNotification.DisplayName}", 5000);
+            }
+        }
+
+        private void Client_OnBeingHosted(object sender, OnBeingHostedArgs e)
+        {
+            Utilities.Log("BeingHosted notification with channel" + e.BeingHostedNotification.Channel);
+            Utilities.Log("BeingHosted notification with HostedByChannel" + e.BeingHostedNotification.HostedByChannel);
+            Utilities.Log("BeingHosted notification with Viewers" + e.BeingHostedNotification.Viewers);
+            Utilities.Log("BeingHosted notification with BotUsername" + e.BeingHostedNotification.BotUsername);
+        }
+
+        private void Client_OnHostingStarted(object sender, OnHostingStartedArgs e)
+        {
+            Utilities.Log("HostingStarted notification with HostingChannel " + e.HostingStarted.HostingChannel);
+            Utilities.Log("HostingStarted notification with TargetChannel " + e.HostingStarted.TargetChannel);
+            Utilities.Log("HostingStarted notification with Viewers " + e.HostingStarted.Viewers);
         }
 
         private void Client_OnConnected(object sender, OnConnectedArgs e)
@@ -399,7 +407,8 @@ namespace QTBot.Core
             Utilities.Log($"PubSubClient_OnRewardRedeemed with Message: {e.Message}");
             Utilities.Log($"PubSubClient_OnRewardRedeemed with Status: {e.Status}");
 
-            if (e.Status.Equals("UNFULFILLED")) // FULFILLED
+            // Only consider new redeems
+            if (e.Status.Equals("UNFULFILLED"))
             {
                 QTChatManager.Instance.QueueRedeemAlert(e.RewardTitle, e.DisplayName);
             }
@@ -445,7 +454,7 @@ namespace QTBot.Core
         #region Test
         public void TestMessage()
         {
-            this.client.SendMessage(this.currentChannel, "Hai, I'm connected!");
+            this.Client.SendMessage(this.currentChannel, "Hai, I'm connected!");
         }
 
         public void TestRedemption1()
