@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Squirrel;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -20,6 +21,9 @@ namespace QTBot.Helpers
             MessageBox.Show(message, title);
         }
 
+        /// <summary>
+        /// Gets the path to the data directory of the app.
+        /// </summary>
         public static string GetDataDirectory()
         {
             string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -34,9 +38,63 @@ namespace QTBot.Helpers
             return userFilePath;
         }
 
+        /// <summary>
+        /// Logs the message into the log file.
+        /// </summary>
         public static void Log(string message)
         {
             Trace.WriteLine($"[{DateTime.Now.ToString()}] {message}");
+        }
+
+        /// <summary>
+        /// Invoke the speficied action on the UI thread.
+        /// </summary>
+        public static void ExecuteOnUIThread(Action action)
+        {
+            Application.Current.Dispatcher.Invoke(action);
+        }
+
+        /// <summary>
+        /// Starts the auto-update process in the background.
+        /// </summary>
+        public static async Task UpdateApplication()
+        {
+            using (var mgr = await UpdateManager.GitHubUpdateManager("https://github.com/dbqt/QTBot-releases"))
+            {
+                var updateInfo = await mgr.CheckForUpdate();
+                var hasUpdate = updateInfo.CurrentlyInstalledVersion.Version != updateInfo.FutureReleaseEntry.Version;
+
+                await mgr.UpdateApp();
+
+                if (hasUpdate)
+                {
+                    Utilities.ExecuteOnUIThread(() =>
+                        Utilities.ShowMessage("I got an update, please reboot me :)", "QTBot has updated")
+                    );
+                }
+            }
+        }
+
+        /// <summary>
+        /// Check the server to see if there is an update.
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<bool> CheckForUpdate()
+        {
+            using (var mgr = await UpdateManager.GitHubUpdateManager("https://github.com/dbqt/QTBot-releases"))
+            {
+                var updateInfo = await mgr.CheckForUpdate();
+
+                // We hit this when debugging
+                if (updateInfo.CurrentlyInstalledVersion?.Version == null)
+                {
+                    return false;
+                }
+                
+                var hasUpdate = updateInfo.CurrentlyInstalledVersion.Version != updateInfo.FutureReleaseEntry.Version;
+
+                return hasUpdate;
+            }
         }
     }
 }

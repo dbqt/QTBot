@@ -1,4 +1,5 @@
-﻿using QTBot.Helpers;
+﻿using QTBot.Core;
+using QTBot.Helpers;
 using QTBot.Models;
 using QTBot.Modules;
 using System;
@@ -20,7 +21,7 @@ using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
 using TwitchLib.PubSub;
 
-namespace QTBot.Core
+namespace QTBot
 {
     public class QTCore : Singleton<QTCore>
     {
@@ -79,6 +80,9 @@ namespace QTBot.Core
             this.twitchOptions = new TwitchOptions(ConfigManager.ReadTwitchOptionsConfigs());
         }
 
+        /// <summary>
+        /// Initial setup of the services
+        /// </summary>
         public async Task Setup()
         {
             ConnectionCredentials credentials = new ConnectionCredentials(this.mainConfig.BotChannelName, this.mainConfig.BotOAuthToken);
@@ -162,6 +166,10 @@ namespace QTBot.Core
             }
         }
 
+        /// <summary>
+        /// Disconnect Twitch services.
+        /// TODO: Not working
+        /// </summary>
         public void Disconnect()
         {
             RemovePubSubListeners();

@@ -25,83 +25,12 @@ namespace QTBot
     /// </summary>
     public partial class MainWindow : Window
     {
-        private bool isConnected = false;
-
-        private bool isRedemptionInChat = false;
-        public bool IsRedemptionInChat 
-        {
-            get { return this.isRedemptionInChat; } 
-            set
-            {
-                this.isRedemptionInChat = value;
-                this.IsTagUserBox.IsEnabled = value;
-                this.IsTagUserLabel.IsEnabled = value;
-                this.UserNameTextBox.IsEnabled = value;
-            }
-        }
-
         public MainWindow()
         {
             InitializeComponent();
-
             this.DataContext = this;
             var v = GetRunningVersion();
             this.Title = $"QTBot - {v.Major}.{v.Minor}.{v.Build}";
-
-            this.IsRedemptionInChat = false;
-
-            QTCore.Instance.OnConnected += Instance_OnConnected;
-            QTCore.Instance.OnDisonnected += Instance_OnDisonnected;
-            // Start as disconnected
-            Instance_OnDisonnected(null, null);
-
-            CheckConfig();
-
-            Update();
-        }
-
-        private async Task Update()
-        {
-            using (var mgr = await UpdateManager.GitHubUpdateManager("https://github.com/dbqt/QTBot-releases"))
-            {
-                var updateInfo = await mgr.CheckForUpdate();
-                var hasUpdate = updateInfo.CurrentlyInstalledVersion.Version != updateInfo.FutureReleaseEntry.Version;
-
-                await mgr.UpdateApp();
-
-                if (hasUpdate)
-                {
-                    ExecuteOnUIThread(() =>
-                        Utilities.ShowMessage("I got an update, please reboot me :)", "QTBot has updated")
-                    ) ;
-                }
-            }
-        }
-
-        private void CheckConfig()
-        {
-            QTCore.Instance.LoadConfigs();
-            if (QTCore.Instance.IsConfigured)
-            {
-                this.ConfigCheck.Visibility = Visibility.Collapsed;
-                this.ConfigCheck1.Visibility = Visibility.Collapsed;
-                this.Connect.IsEnabled = true;
-            }
-            else
-            {
-                this.ConfigCheck.Visibility = Visibility.Visible;
-                this.ConfigCheck1.Visibility = Visibility.Visible;
-                this.Connect.IsEnabled = false;
-            }
-
-            this.CurrentStreamerText.Text = "Bot will post to this channel: " + QTCore.Instance.CurrentChannelName;
-            this.CurrentBotText.Text = "Bot will be posting as: " + QTCore.Instance.BotUserName;
-
-            var options = QTCore.Instance.TwitchOptions;
-            this.IsRedemptionInChat = options.IsRedemptionInChat;
-            this.IsTagUserBox.IsChecked = options.IsRedemptionTagUser;
-            this.UserNameTextBox.Text = options.RedemptionTagUser;
-            this.IsAutoShoutOutBox.IsChecked = options.IsAutoShoutOutHost;
         }
 
         private Version GetRunningVersion()
@@ -114,90 +43,6 @@ namespace QTBot
             {
                 return Assembly.GetExecutingAssembly().GetName().Version;
             }
-        }
-
-        #region Events
-        private void Instance_OnConnected(object sender, EventArgs e)
-        {
-            ExecuteOnUIThread(() =>
-            {
-                this.isConnected = true;
-                this.TestMessage.IsEnabled = this.isConnected;
-                this.TestRedeem1.IsEnabled = this.isConnected;
-                this.TestRedeem2.IsEnabled = this.isConnected;
-                this.ConnectionStatus.Text = "Connected";
-                this.Connect.Content = "Disconnect";
-            });
-        }
-
-        private void Instance_OnDisonnected(object sender, EventArgs e)
-        {
-            ExecuteOnUIThread(() =>
-            {
-                this.isConnected = false;
-                this.TestMessage.IsEnabled = this.isConnected;
-                this.TestRedeem1.IsEnabled = this.isConnected;
-                this.TestRedeem2.IsEnabled = this.isConnected;
-                this.ConnectionStatus.Text = "Disconnected";
-                this.Connect.Content = "Connect";
-            });
-        }
-
-        private void OnOpenConfigClick(object sender, RoutedEventArgs e)
-        {
-            Process.Start(ConfigManager.GetConfigDirectory());
-        }
-
-        private void OnReloadConfigClick(object sender, RoutedEventArgs e)
-        {
-            CheckConfig();
-        }
-
-        private void OnConnectClick(object sender, RoutedEventArgs e)
-        {
-            if (this.isConnected)
-            {
-                QTCore.Instance.Disconnect();
-            }
-            else
-            {
-                _ = QTCore.Instance.Setup();
-            }
-        }
-
-        private void OnTestMessageClick(object sender, RoutedEventArgs e)
-        {
-            QTCore.Instance.TestMessage();
-        }
-
-        private void TestRedeem1_Click(object sender, RoutedEventArgs e)
-        {
-            QTCore.Instance.TestRedemption1();
-        }
-
-        private void TestRedeem2_Click(object sender, RoutedEventArgs e)
-        {
-            QTCore.Instance.TestRedemption2();
-        }
-
-        private void OnSaveButtonClick(object sender, RoutedEventArgs e)
-        {
-            var twitchOptions = new TwitchOptions()
-            {
-                IsRedemptionInChat = this.IsRedemptionInChat,
-                IsRedemptionTagUser = this.IsTagUserBox.IsChecked ?? false,
-                RedemptionTagUser = this.UserNameTextBox.Text,
-                IsAutoShoutOutHost = this.IsAutoShoutOutBox.IsChecked ?? false
-            };
-
-            QTCore.Instance.SetupTwitchOptions(twitchOptions);
-        }
-
-        #endregion Events
-
-        private void ExecuteOnUIThread(Action action)
-        {
-            Application.Current.Dispatcher.Invoke(action);
         }
     }
 }

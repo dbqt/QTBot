@@ -29,6 +29,7 @@ namespace QTBot.Core
 
         public void StopTimers()
         {
+            Utilities.Log($"QTTimersManager Stopping all timers");
             foreach (var timer in this.timerTasks)
             {
                 timer.Value.Cancel();
@@ -37,17 +38,26 @@ namespace QTBot.Core
 
         private void ResetTimers()
         {
-            this.rawTimers = ConfigManager.ReadTimers();
+            Utilities.Log($"QTTimersManager Reset all timers");
 
+            StopTimers();
             this.timerTasks.Clear();
 
+            this.rawTimers = ConfigManager.ReadTimers();
             if (this.rawTimers != null)
             {
                 foreach (var rawTimer in this.rawTimers.Timers)
                 {
                     var cancellationToken = new CancellationTokenSource();
-                    Utilities.Log($"QTTimersManager [{rawTimer.Name}] - Registered!");
-                    this.timerTasks.Add(TimerMessage(rawTimer.Name, rawTimer.OffsetMin, rawTimer.DelayMin, rawTimer.Message, cancellationToken), cancellationToken);
+                    if (!string.IsNullOrEmpty(rawTimer.Name) && rawTimer.OffsetMin > -1 && rawTimer.OffsetMin > -1)
+                    {
+                        this.timerTasks.Add(TimerMessage(rawTimer.Name, rawTimer.OffsetMin, rawTimer.DelayMin, rawTimer.Message, cancellationToken), cancellationToken);
+                        Utilities.Log($"QTTimersManager [{rawTimer.Name}] - Registered!");
+                    }
+                    else
+                    {
+                        Utilities.Log($"QTTimersManager [{rawTimer.Name}] - Could not be registered with offsetMin: {rawTimer.OffsetMin}, delayMin: {rawTimer.DelayMin}, message: {rawTimer.Message}");
+                    }
                 }
             }
         }
@@ -55,6 +65,7 @@ namespace QTBot.Core
         private async Task TimerMessage(string name, int startDelay, int cycleDelay, string message, CancellationTokenSource token)
         {
             Utilities.Log($"QTTimersManager [{name}] - Start delayed by {startDelay} min");
+
             await Task.Delay(startDelay * MinToMilliseconds);
 
             while (true)

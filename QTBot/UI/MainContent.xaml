@@ -1,0 +1,93 @@
+﻿<UserControl x:Class="QTBot.MainContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:QTBot"
+             xmlns:Views="clr-namespace:QTBot.UI.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             TextElement.FontWeight="Regular"
+             TextElement.FontSize="13"
+             TextOptions.TextFormattingMode="Ideal" 
+             TextOptions.TextRenderingMode="Auto"        
+             Background="{DynamicResource MaterialDesignPaper}"
+             FontFamily="{DynamicResource MaterialDesignFont}">
+
+    
+    <materialDesign:DrawerHost IsLeftDrawerOpen="{Binding ElementName=MenuToggleButton, Path=IsChecked}">
+
+        <!-- Side Menu -->
+        <materialDesign:DrawerHost.LeftDrawerContent>
+            <DockPanel MinWidth="212">
+                <ToggleButton x:Name="MenuButton"
+                              Style="{StaticResource MaterialDesignHamburgerToggleButton}" 
+                              DockPanel.Dock="Top"
+                              HorizontalAlignment="Right" Margin="16"
+                              IsChecked="{Binding ElementName=MenuToggleButton, Path=IsChecked, Mode=TwoWay}" />
+                <Menu>
+                    <Menu.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel />
+                        </ItemsPanelTemplate>
+                    </Menu.ItemsPanel>
+                    <MenuItem Header="Home" Click="MenuItemClick">
+                    </MenuItem>
+                    <MenuItem Header="Setup" Click="MenuItemClick">
+                    </MenuItem>
+                    <MenuItem Header="Events" Click="MenuItemClick">
+                    </MenuItem>
+                    <MenuItem Header="Timers" Click="MenuItemClick">
+                    </MenuItem>
+                    <MenuItem Header="Commands" Click="MenuItemClick">
+                    </MenuItem>
+                    <MenuItem Header="Settings" Click="MenuItemClick">
+                    </MenuItem>
+                </Menu>
+            </DockPanel>
+        </materialDesign:DrawerHost.LeftDrawerContent>
+
+        <!-- Main container for content -->
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <!-- Top Bar -->
+            <materialDesign:ColorZone Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth2"
+                                      Mode="PrimaryMid" DockPanel.Dock="Top">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ToggleButton Style="{StaticResource MaterialDesignHamburgerToggleButton}" IsChecked="False"
+                                  x:Name="MenuToggleButton" Grid.Column="0"/>
+                    <TextBlock x:Name="Header" Grid.Column="1" Text="Home" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="24" FontWeight="Bold" Margin="16,0,0,0"/>
+                    <Button x:Name="UpdateAlertButton" 
+                            Content="An update is available!" 
+                            Grid.Column="2" 
+                            Background="{DynamicResource MaterialDesignLightBackground}" 
+                            Foreground="{DynamicResource MaterialDesignLightForeground}"
+                            Click="UpdateAlertButtonClick"
+                            />
+                </Grid>
+            </materialDesign:ColorZone>
+            
+            <!-- Actual View -->
+            <Grid Grid.Row="1">
+                <Views:Home x:Name="Home"/>
+                <Views:Setup x:Name="Setup"/>
+                <Views:Events x:Name="Events"/>
+                <Views:Timers x:Name="Timers"/>
+                <Views:Commands x:Name="Commands"/>
+                <Views:Settings x:Name="Settings"/>
+            </Grid>
+        </Grid>
+    </materialDesign:DrawerHost>
+</UserControl>

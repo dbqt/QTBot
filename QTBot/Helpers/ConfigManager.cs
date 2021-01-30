@@ -84,11 +84,16 @@ namespace QTBot.Helpers
             return configsPath;
         }
 
-        private static T ReadConfig<T>(string fileName, T defaultObject)
+        /// <summary>
+        /// Reads and deserializes the specified file to build the object. If it fails, the fallback object will return instead.
+        /// </summary>
+        /// <param name="fileName">File name to read, do not include path.</param>
+        /// <param name="fallback">Fallback object to use in case reading fails.</param>
+        private static T ReadConfig<T>(string fileName, T fallback)
         {
             var filePath = Path.Combine(GetConfigDirectory(), fileName);
 
-            T config = defaultObject;
+            T config = fallback;
 
             try
             {
@@ -116,12 +121,17 @@ namespace QTBot.Helpers
             catch (Exception e)
             {
                 Utilities.ShowMessage("Reading failed for: " + fileName + " with " + e.Message);
-                config = defaultObject;
+                config = fallback;
             }
 
             return config;
         }
 
+        /// <summary>
+        /// Serializes the json object to the specified file in the data directory. This will create the file if it doesn't already exist.
+        /// </summary>
+        /// <param name="fileName">File name only, do not include path.</param>
+        /// <param name="model">OBject to save, must be JSON serializable.</param>
         private static bool SaveConfig<T>(string fileName, T model)
         {
             var filePath = Path.Combine(GetConfigDirectory(), fileName);

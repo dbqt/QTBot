@@ -12,6 +12,7 @@ namespace QTBot.Models
         public string Message { get; set; } = "";
         public int DelayMin { get; set; } = -1;
         public int OffsetMin { get; set; } = -1;
+        public bool Active { get; set; } = true;
     }
 
     public class TimersModel
