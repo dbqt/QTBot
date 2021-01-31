@@ -53,7 +53,7 @@ namespace QTBot
         public JoinedChannel CurrentChannel => this.currentChannel;
         public string BotUserName => this.mainConfig?.BotChannelName ?? "<Invalid Value>";
         public string CurrentChannelName => this.mainConfig?.StreamerChannelName ?? "<Invalid Value>";
-        public bool IsConfigured => mainConfig?.IsConfigured ?? false;
+        public bool IsMainConfigLoaded => mainConfig?.IsConfigured ?? false;
 
         // Twitch options
         private TwitchOptions twitchOptions = null;

@@ -56,10 +56,9 @@ namespace QTBot
             CheckConfig();
 
             Update();
-
         }
 
-        private async Task Update()
+        private async void Update()
         {
             using (var mgr = await UpdateManager.GitHubUpdateManager("https://github.com/dbqt/QTBot-releases"))
             {
@@ -80,7 +79,7 @@ namespace QTBot
         private void CheckConfig()
         {
             QTCore.Instance.LoadConfigs();
-            if (QTCore.Instance.IsConfigured)
+            if (QTCore.Instance.IsMainConfigLoaded)
             {
                 this.ConfigCheck.Visibility = Visibility.Collapsed;
                 this.ConfigCheck1.Visibility = Visibility.Collapsed;

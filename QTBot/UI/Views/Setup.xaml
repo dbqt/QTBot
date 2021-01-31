@@ -5,8 +5,59 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:QTBot.UI.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <TextBlock>Setup</TextBlock>
-    </Grid>
+             d:DesignHeight="450" d:DesignWidth="800"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="800">
+            <StackPanel x:Name="ConfigCheck" Grid.Column="0" HorizontalAlignment="Center" Margin="2,0,0,0" Background="#FFFFA0A0" >
+                <TextBlock TextAlignment="Center" FontWeight="Bold" TextWrapping="Wrap">***The configuration file was not setup properly***</TextBlock>
+                <TextBlock TextAlignment="Center" TextWrapping="Wrap">Please make sure to fill the config.json file with all needed information.</TextBlock>
+            </StackPanel>
+
+            <Button Width="Auto" HorizontalAlignment="Center" Click="ToggleInstructionPanel" Margin="16">Toggle Instructions</Button>
+
+            <StackPanel x:Name="InstructionPanel" HorizontalAlignment="Center" Visibility="Collapsed">
+                <TextBlock TextAlignment="Center" FontSize="16" FontWeight="Bold" TextWrapping="Wrap">Streamer account info</TextBlock>
+                <TextBox Background="Transparent"
+                                 BorderThickness="0"
+                                 IsReadOnly="True"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 Padding="0"
+                                 Text=" 1- The streamer user name is the Twitch account from which you are streaming. &#x0a; 2- To generate the access token, refresh token, and client id, go to https://twitchtokengenerator.com/ &#x0a; 3- Select 'Custom Scope Token', scroll down and click the 'Select All' option. Then click 'Generate Token'! &#x0a; 4- Scroll back up and copy the values into the config.json file.">
+
+                </TextBox>
+
+                <TextBlock TextAlignment="Center" FontSize="16" FontWeight="Bold" TextWrapping="Wrap">Bot account info</TextBlock>
+                <TextBox Background="Transparent"
+                                 BorderThickness="0"
+                                 IsReadOnly="True"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 Padding="0"
+                                 Text=" 1- This is the account from which the bot will post to your chat, you can use your own account or create a separate account. &#x0a; 2- To generate the oauth token, go to https://twitchapps.com/tmi/ &#x0a; 3- Connect with your account and copy the oauth password to the config.json file. &#x0a;">
+
+                </TextBox>
+            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" HorizontalAlignment="Center" Margin="12">
+                    <Button Content="Open configuration file folder" Click="OnOpenConfigClick"  HorizontalAlignment="Center" Margin="0,12,0,2" MinWidth="135"/>
+                    <Button Content="Reload configuration file" Click="OnReloadConfigClick" Margin="0,2" MinWidth="135"/>
+                    <Button x:Name="TestMessage" Click="TestMessageClick" Margin="0,2" MinWidth="135">Send test message</Button>
+                    <Button x:Name="TestRedeem" Click="TestRedeemClick" Margin="0,2" MinWidth="135">Send test redeem</Button>
+                </StackPanel>
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center" Margin="12">
+                    <TextBlock x:Name="CurrentStreamerText">name</TextBlock>
+                    <TextBlock x:Name="CurrentBotText">name</TextBlock>
+                </StackPanel>
+            </Grid>
+
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

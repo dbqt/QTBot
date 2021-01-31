@@ -18,7 +18,9 @@ namespace QTBot.Helpers
         /// </summary>
         public static void ShowMessage(string message, string title = "")
         {
-            MessageBox.Show(message, title);
+            //MessageBox.Show(message, title);
+
+            MainContent.Instance.ShowSimpleDialog(message, title);
         }
 
         /// <summary>
@@ -94,6 +96,31 @@ namespace QTBot.Helpers
                 var hasUpdate = updateInfo.CurrentlyInstalledVersion.Version != updateInfo.FutureReleaseEntry.Version;
 
                 return hasUpdate;
+            }
+        }
+
+        /// <summary>
+        /// Show a dialog box with the configured <see cref="DialogBoxOptions"/>.
+        /// </summary>
+        public static void ShowDialog(DialogBoxOptions options)
+        {
+            MainContent.Instance.ShowDialog(options);
+        }
+
+        /// <summary>
+        /// Options for dialog box
+        /// </summary>
+        public class DialogBoxOptions
+        {
+            public string Title = null;
+            public string Message = null;
+            public DialogBoxButtonOptions MainButton = null;
+            public DialogBoxButtonOptions SecondaryButton = null;
+
+            public class DialogBoxButtonOptions
+            {
+                public string Label = null;
+                public Action Callback = null;
             }
         }
     }

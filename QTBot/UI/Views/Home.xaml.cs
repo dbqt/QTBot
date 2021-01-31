@@ -36,7 +36,7 @@ namespace QTBot.UI.Views
         private void CheckConfig()
         {
             QTCore.Instance.LoadConfigs();
-            if (QTCore.Instance.IsConfigured)
+            if (QTCore.Instance.IsMainConfigLoaded)
             {
                 this.ConfigCheck.Visibility = Visibility.Collapsed;
                 this.Connect.IsEnabled = true;

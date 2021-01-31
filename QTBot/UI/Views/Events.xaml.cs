@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QTBot.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,25 @@ namespace QTBot.UI.Views
         public Events()
         {
             InitializeComponent();
+
+            var options = QTCore.Instance.TwitchOptions;
+            this.IsRedemptionInChatBox.IsChecked = options.IsRedemptionInChat;
+            this.IsTagUserBox.IsChecked = options.IsRedemptionTagUser;
+            this.UserNameTextBox.Text = options.RedemptionTagUser;
+            this.IsAutoShoutOutBox.IsChecked = options.IsAutoShoutOutHost;
+        }
+
+        private void OnSaveButtonClick(object sender, RoutedEventArgs e)
+        {
+            var twitchOptions = new TwitchOptions()
+            {
+                IsRedemptionInChat = this.IsRedemptionInChatBox.IsChecked ?? false,
+                IsRedemptionTagUser = this.IsTagUserBox.IsChecked ?? false,
+                RedemptionTagUser = this.UserNameTextBox.Text,
+                IsAutoShoutOutHost = this.IsAutoShoutOutBox.IsChecked ?? false
+            };
+
+            QTCore.Instance.SetupTwitchOptions(twitchOptions);
         }
     }
 }
