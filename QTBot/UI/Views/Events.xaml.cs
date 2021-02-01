@@ -30,6 +30,7 @@ namespace QTBot.UI.Views
             this.IsTagUserBox.IsChecked = options.IsRedemptionTagUser;
             this.UserNameTextBox.Text = options.RedemptionTagUser;
             this.IsAutoShoutOutBox.IsChecked = options.IsAutoShoutOutHost;
+            this.GreetingMessage.Text = options.GreetingMessage;
         }
 
         private void OnSaveButtonClick(object sender, RoutedEventArgs e)
@@ -39,7 +40,8 @@ namespace QTBot.UI.Views
                 IsRedemptionInChat = this.IsRedemptionInChatBox.IsChecked ?? false,
                 IsRedemptionTagUser = this.IsTagUserBox.IsChecked ?? false,
                 RedemptionTagUser = this.UserNameTextBox.Text,
-                IsAutoShoutOutHost = this.IsAutoShoutOutBox.IsChecked ?? false
+                IsAutoShoutOutHost = this.IsAutoShoutOutBox.IsChecked ?? false,
+                GreetingMessage = this.GreetingMessage.Text ?? "Hai hai, I'm connected and ready to go!"
             };
 
             QTCore.Instance.SetupTwitchOptions(twitchOptions);

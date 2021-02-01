@@ -46,10 +46,10 @@ namespace QTBot.Core
             this.rawTimers = ConfigManager.ReadTimers();
             if (this.rawTimers != null)
             {
-                foreach (var rawTimer in this.rawTimers.Timers)
+                foreach (var rawTimer in this.rawTimers.Timers.Where(timer => timer.Active))
                 {
                     var cancellationToken = new CancellationTokenSource();
-                    if (!string.IsNullOrEmpty(rawTimer.Name) && rawTimer.OffsetMin > -1 && rawTimer.OffsetMin > -1)
+                    if (!string.IsNullOrEmpty(rawTimer.Name) && !string.IsNullOrEmpty(rawTimer.Message) && rawTimer.OffsetMin > -1 && rawTimer.OffsetMin > -1)
                     {
                         this.timerTasks.Add(TimerMessage(rawTimer.Name, rawTimer.OffsetMin, rawTimer.DelayMin, rawTimer.Message, cancellationToken), cancellationToken);
                         Utilities.Log($"QTTimersManager [{rawTimer.Name}] - Registered!");

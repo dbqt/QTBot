@@ -22,6 +22,8 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Button x:Name="SaveButton" Grid.Column="3" Content="Save" Click="OnSaveButtonClick" Margin="16"/>
@@ -42,6 +44,10 @@
             <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,12,0,0">Auto shout out on raid</TextBlock>
             <CheckBox x:Name="IsAutoShoutOutBox" Grid.Row="5" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
             <TextBlock Grid.Row="5" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">Automatically send shouthout (!so) command when someone raids the channel</TextBlock>
+
+            <!-- Greeting message -->
+            <TextBlock Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,12,0,0">Custom greeting message</TextBlock>
+            <TextBox x:Name="GreetingMessage" Grid.Row="7" Grid.Column="2">Hai hai, I'm connected and ready to go!</TextBox>
         </Grid>
     </ScrollViewer>
 </UserControl>

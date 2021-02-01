@@ -330,7 +330,10 @@ namespace QTBot
         {
             this.currentChannel = new JoinedChannel(e.Channel);
             this.OnConnected?.Invoke(sender, null);
-            QTChatManager.Instance.SendInstantMessage("hai hai, I am ready to go!");
+            if (!string.IsNullOrWhiteSpace(this.TwitchOptions.GreetingMessage))
+            {
+                QTChatManager.Instance.SendInstantMessage(this.TwitchOptions.GreetingMessage);
+            }
         }
 
         private void Client_OnLog(object sender, OnLogArgs e)

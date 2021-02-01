@@ -20,6 +20,20 @@ namespace QTBot
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private bool isDisconnected = true;
+        public bool IsDisconnected
+        {
+            get
+            {
+                return this.isDisconnected;
+            }
+            set
+            {
+                this.isDisconnected = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsDisconnected)));
+            }
+        }
+
         public bool IsDialogVisible
         {
             get
@@ -46,6 +60,8 @@ namespace QTBot
             InitializeComponent();
             DataContext = this;
 
+            QTCore.Instance.OnConnected += InstanceOnConnected;
+
             // Setup views
             HideAllViews();
             this.Home.Visibility = Visibility.Visible;
@@ -57,10 +73,16 @@ namespace QTBot
             CheckUpdate();
         }
 
+        private void InstanceOnConnected(object sender, EventArgs e)
+        {
+            this.IsDisconnected = false;
+        }
+
         ~MainContent()
         {
             this.DialogBoxMainButton.Click -= DialogBoxMainButtonClick;
             this.DialogBoxSecondaryButton.Click -= DialogBoxSecondaryButtonClick;
+            QTCore.Instance.OnConnected -= InstanceOnConnected;
         }
 
         private async void CheckUpdate()
@@ -68,7 +90,7 @@ namespace QTBot
             this.UpdateAlertButton.Visibility = Visibility.Collapsed;
 
             var needToUpdate = await Utilities.CheckForUpdate();
-            if (needToUpdate || true)
+            if (needToUpdate)
             {
                 Utilities.ExecuteOnUIThread(() =>
                 {

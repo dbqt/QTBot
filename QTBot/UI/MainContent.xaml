@@ -42,15 +42,15 @@
                         </Menu.ItemsPanel>
                         <MenuItem Header="Home" Click="MenuItemClick">
                         </MenuItem>
-                        <MenuItem Header="Setup" Click="MenuItemClick">
+                        <MenuItem x:Name="SetupMenuItem" Header="Setup" Click="MenuItemClick" IsEnabled="{Binding Path=IsDisconnected}">
                         </MenuItem>
-                        <MenuItem Header="Events" Click="MenuItemClick">
+                        <MenuItem x:Name="EventsMenuItem" Header="Events" Click="MenuItemClick" IsEnabled="{Binding Path=IsDisconnected}">
                         </MenuItem>
-                        <MenuItem Header="Timers" Click="MenuItemClick">
+                        <MenuItem x:Name="TimersMenuItem" Header="Timers" Click="MenuItemClick" IsEnabled="{Binding Path=IsDisconnected}">
                         </MenuItem>
-                        <MenuItem Header="Commands" Click="MenuItemClick">
+                        <MenuItem x:Name="CommandsMenuItem" Header="Commands" Click="MenuItemClick" IsEnabled="False">
                         </MenuItem>
-                        <MenuItem Header="Settings" Click="MenuItemClick">
+                        <MenuItem x:Name="SettingsMenuItem" Header="Settings" Click="MenuItemClick" IsEnabled="False">
                         </MenuItem>
                     </Menu>
                 </DockPanel>
