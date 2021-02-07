@@ -61,6 +61,7 @@ namespace QTBot
             DataContext = this;
 
             QTCore.Instance.OnConnected += InstanceOnConnected;
+            QTCore.Instance.OnDisconnected += InstanceOnDisconnected;
 
             // Setup views
             HideAllViews();
@@ -78,11 +79,17 @@ namespace QTBot
             this.IsDisconnected = false;
         }
 
+        private void InstanceOnDisconnected(object sender, EventArgs e)
+        {
+            this.IsDisconnected = true;
+        }
+
         ~MainContent()
         {
             this.DialogBoxMainButton.Click -= DialogBoxMainButtonClick;
             this.DialogBoxSecondaryButton.Click -= DialogBoxSecondaryButtonClick;
             QTCore.Instance.OnConnected -= InstanceOnConnected;
+            QTCore.Instance.OnDisconnected -= InstanceOnDisconnected;
         }
 
         private async void CheckUpdate()

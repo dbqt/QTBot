@@ -108,6 +108,19 @@ namespace QTBot.Helpers
         }
 
         /// <summary>
+        /// Replaces the each token with the value from the <paramref name="tokenValuePairs"/> in the <paramref name="stringToModify"/> and returns the resulting string.
+        /// </summary>
+        public static string ReplaceKeywords(string stringToModify, List<KeyValuePair<string, string>> tokenValuePairs)
+        {
+            string finalString = stringToModify;
+            foreach (var tokenValuePair in tokenValuePairs)
+            {
+                finalString.Replace(tokenValuePair.Key, tokenValuePair.Value);
+            }
+            return finalString;
+        }
+
+        /// <summary>
         /// Options for dialog box
         /// </summary>
         public class DialogBoxOptions

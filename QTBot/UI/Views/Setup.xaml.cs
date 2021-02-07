@@ -18,7 +18,7 @@ namespace QTBot.UI.Views
             InitializeComponent();
 
             QTCore.Instance.OnConnected += InstanceOnConnected;
-            QTCore.Instance.OnDisonnected += InstanceOnDisonnected;
+            QTCore.Instance.OnDisconnected += InstanceOnDisonnected;
 
             CheckConfig();
         }
@@ -26,7 +26,7 @@ namespace QTBot.UI.Views
         ~Setup()
         {
             QTCore.Instance.OnConnected -= InstanceOnConnected;
-            QTCore.Instance.OnDisonnected -= InstanceOnDisonnected;
+            QTCore.Instance.OnDisconnected -= InstanceOnDisonnected;
         }
 
         private void CheckConfig()

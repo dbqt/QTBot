@@ -40,6 +40,55 @@ namespace QTBot.UI.Views
             LoadTimers();
         }
 
+
+        /// <summary>
+        /// Adds timer to the list and update the indexes correctly, then refreshes the view.
+        /// </summary>
+        private void AddTimer(TimerModel model)
+        {
+            this.TimersList.Add(new TimerInternal(model));
+            UpdateTimersIndex();
+            this.TimersListView.Items.Refresh();
+        }
+
+        /// <summary>
+        /// Reads timers from config file, adds them to the list and refreshes the view.
+        /// </summary>
+        private void LoadTimers()
+        {
+            this.TimersList.Clear();
+
+            var rawTimers = ConfigManager.ReadTimers();
+            foreach (var timer in rawTimers.Timers)
+            {
+                AddTimer(timer);
+            }
+        }
+
+        /// <summary>
+        /// Iterates the entire list of timers in memory and updates the indexes.
+        /// </summary>
+        private void UpdateTimersIndex()
+        {
+            foreach (var timer in this.TimersList)
+            {
+                timer.Index = this.TimersList.IndexOf(timer);
+            }
+        }
+
+        /// <summary>
+        /// Iterates the entire list of timers in memory and updates the validity.
+        /// </summary>
+        private void UpdateTimersValidity()
+        {
+            foreach (var timer in this.TimersList)
+            {
+                timer.UpdateValidity();
+            }
+        }
+
+        #region Callbacks
+
         /// <summary>
         /// Save the timers from memory into the timer config files.
         /// </summary>
@@ -113,48 +162,7 @@ namespace QTBot.UI.Views
             UpdateTimersValidity();
         }
 
-        /// <summary>
-        /// Adds timer to the list and update the indexes correctly, then refreshes the view.
-        /// </summary>
-        private void AddTimer(TimerModel model)
-        {
-            this.TimersList.Add(new TimerInternal(model));
-            UpdateTimersIndex();
-            this.TimersListView.Items.Refresh();
-        }
-
-        /// <summary>
-        /// Reads timers from config file, adds them to the list and refreshes the view.
-        /// </summary>
-        private void LoadTimers()
-        {
-            this.TimersList.Clear();
-
-            var rawTimers = ConfigManager.ReadTimers();
-            foreach (var timer in rawTimers.Timers)
-            {
-                AddTimer(timer);
-            }
-        }
-
-        /// <summary>
-        /// Iterates the entire list of timers in memory and updates the indexes.
-        /// </summary>
-        private void UpdateTimersIndex()
-        {
-            foreach (var timer in this.TimersList)
-            {
-                timer.Index = this.TimersList.IndexOf(timer);
-            }
-        }
-
-        private void UpdateTimersValidity()
-        {
-            foreach (var timer in this.TimersList)
-            {
-                timer.UpdateValidity();
-            }
-        }
+        #endregion Callbacks
 
         public class TimerInternal : INotifyPropertyChanged
         {
@@ -177,6 +185,9 @@ namespace QTBot.UI.Views
 
             public event PropertyChangedEventHandler PropertyChanged;
 
+            /// <summary>
+            /// Converts the <see cref="TimerInternal"/> to a <see cref="TimerModel"/>
+            /// </summary>
             public TimerModel ToModel()
             {
                 return new TimerModel()
@@ -189,8 +200,12 @@ namespace QTBot.UI.Views
                 };
             }
 
+            /// <summary>
+            /// Updates the <see cref="IsInvalid"/> property of the timer
+            /// </summary>
             public void UpdateValidity()
             {
+                // Is invalid if name is empty OR message is empty OR delayMin is 0 or less OR offsetMin is less than 0
                 this.IsInvalid = string.IsNullOrWhiteSpace(this.Name) || string.IsNullOrWhiteSpace(this.Message) || this.DelayMin <= 0 || this.OffsetMin < 0;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsInvalid)));
             }

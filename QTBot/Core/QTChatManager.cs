@@ -26,6 +26,9 @@ namespace QTBot.Core
             this.client = client;
         }
 
+        /// <summary>
+        /// Toggle the chat module and starts the redeem loop if going active
+        /// </summary>
         public void ToggleChat(bool active)
         {
             if (this.isActive == active)
@@ -41,17 +44,26 @@ namespace QTBot.Core
             }
         }
 
+        /// <summary>
+        /// Sends the <paramref name="message"/> in chat after <paramref name="delayMs"/>
+        /// </summary>
         public async Task SendMessage(string message, int delayMs = 0)
         {
             await Task.Delay(delayMs);
             SendInstantMessage(message);
         }
 
+        /// <summary>
+        /// Sends the <paramref name="message"/> in chat
+        /// </summary>
         public void SendInstantMessage(string message)
         {
             this.client.SendMessage(QTCore.Instance.CurrentChannel, message);
         }
 
+        /// <summary>
+        /// Queues a redeem with <paramref name="title"/> from <paramref name="user"/> for a delayed alert in chat.
+        /// </summary>
         public void QueueRedeemAlert(string title, string user)
         {
             lock (redeemLock)
@@ -67,9 +79,8 @@ namespace QTBot.Core
         }
 
         /// <summary>
-        /// Groups redeems into a cleaner message
+        /// Groups redeems into a cleaner message after long enough has been waited
         /// </summary>
-        /// <returns></returns>
         private async Task InitiateRedeemsLoop()
         {
             while(this.isActive)

@@ -242,6 +242,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Core\QTEventsManager.cs" />
+    <Compile Include="Models\EventModel.cs" />
     <Compile Include="UI\Views\Commands.xaml.cs">
       <DependentUpon>Commands.xaml</DependentUpon>
     </Compile>

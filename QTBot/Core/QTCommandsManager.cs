@@ -95,7 +95,7 @@ namespace QTBot.Core
                         {
                             await StreamElementsModule.Instance.UpdatePoints(username, -amount);
                         }
-                        var messageFormat = ReplaceKeywords(currentCommand.Response, username);
+                        var messageFormat = ReplaceUsername(currentCommand.Response, username);
                         message = string.Format(messageFormat, args.ToArray());
                     }
                 }
@@ -105,7 +105,7 @@ namespace QTBot.Core
                 }
             }
             // Fixed cost
-            else
+            else if (currentCommand.StreamElementsFixedCost > 0)
             {
                 int points = await StreamElementsModule.Instance.GetPoints(username);
                 int amount = currentCommand.StreamElementsFixedCost;
@@ -120,9 +120,15 @@ namespace QTBot.Core
                     {
                         await StreamElementsModule.Instance.UpdatePoints(username, -amount);
                     }
-                    var messageFormat = ReplaceKeywords(currentCommand.Response, username);
+                    var messageFormat = ReplaceUsername(currentCommand.Response, username);
                     message = string.Format(messageFormat, args.ToArray());
                 }
+            }
+            // No cost
+            else
+            {
+                var messageFormat = ReplaceUsername(currentCommand.Response, username);
+                message = string.Format(messageFormat, args.ToArray());
             }
 
             return message;
@@ -152,12 +158,10 @@ namespace QTBot.Core
             }
         }
 
-        /// <summary>
-        /// Replaces {{user}} with <paramref name="username"/> in <paramref name="stringToModify"/> and returns the resulting string.
-        /// </summary>
-        private string ReplaceKeywords(string stringToModify, string username)
+        
+        private string ReplaceUsername(string stringToModify, string username)
         {
-            return stringToModify.Replace("{{user}}", username);
+            return Utilities.ReplaceKeywords(stringToModify, new List<KeyValuePair<string, string>>{ new KeyValuePair<string, string>("{{user}}", username)});
         }
     }
 }

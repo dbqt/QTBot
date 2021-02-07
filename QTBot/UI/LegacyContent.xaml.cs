@@ -49,7 +49,7 @@ namespace QTBot
             this.IsRedemptionInChat = false;
 
             QTCore.Instance.OnConnected += Instance_OnConnected;
-            QTCore.Instance.OnDisonnected += Instance_OnDisonnected;
+            QTCore.Instance.OnDisconnected += Instance_OnDisonnected;
             // Start as disconnected
             Instance_OnDisonnected(null, null);
 

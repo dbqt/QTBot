@@ -76,6 +76,21 @@ namespace QTBot.Helpers
             return SaveConfig<TimersModel>("timers.json", timers);
         }
 
+        public static EventsModel ReadEvents()
+        {
+            var events = ReadConfig<EventsModel>("events.json", new EventsModel());
+            if (events == null)
+            {
+                events = new EventsModel();
+            }
+            return events;
+        }
+
+        public static bool SaveEvents(EventsModel events)
+        {
+            return SaveConfig<EventsModel>("events.json", events);
+        }
+
         public static string GetConfigDirectory()
         {
             var current = Utilities.GetDataDirectory();
@@ -100,6 +115,7 @@ namespace QTBot.Helpers
                 // Create default if doesn't exist
                 if (!File.Exists(filePath))
                 {
+                    Utilities.Log($"ConfigManager - {filePath} doesn't exist, creating the file...");
                     var fileStream = File.Create(filePath);
                     fileStream.Close();
                     string json = JsonConvert.SerializeObject(config, Formatting.Indented);
@@ -107,12 +123,14 @@ namespace QTBot.Helpers
                 }
                 else
                 {
+                    Utilities.Log($"ConfigManager - {filePath} found, reading the file...");
                     string json = File.ReadAllText(filePath);
                     config = JsonConvert.DeserializeObject<T>(json);
 
                     // Update file in case format is different
                     if (config != null)
                     {
+                        Utilities.Log($"ConfigManager - updating {filePath}...");
                         json = JsonConvert.SerializeObject(config, Formatting.Indented);
                         File.WriteAllText(filePath, json);
                     }
@@ -120,6 +138,7 @@ namespace QTBot.Helpers
             }
             catch (Exception e)
             {
+                Utilities.Log($"ConfigManager - reading {filePath} failed: {e.Message}");
                 Utilities.ShowMessage("Reading failed for: " + fileName + " with " + e.Message);
                 config = fallback;
             }
@@ -141,16 +160,20 @@ namespace QTBot.Helpers
                 // Create default if doesn't exist
                 if (!File.Exists(filePath))
                 {
+                    Utilities.Log($"ConfigManager - {filePath} not found, creating a new file...");
                     var fileStream = File.Create(filePath);
                     fileStream.Close();                
                 }
 
+                Utilities.Log($"ConfigManager - saving to {filePath}...");
                 string json = JsonConvert.SerializeObject(model, Formatting.Indented);
                 File.WriteAllText(filePath, json);
+
                 return true;
             }
             catch (Exception e)
             {
+                Utilities.Log($"ConfigManager - Saving {filePath} failed: {e.Message}");
                 Utilities.ShowMessage("Save failed for: " + fileName + " with " + e.Message);
             }
 

@@ -6,18 +6,14 @@
              xmlns:local="clr-namespace:QTBot.UI.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="4*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -26,28 +22,146 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Button x:Name="SaveButton" Grid.Column="3" Content="Save" Click="OnSaveButtonClick" Margin="16"/>
+            <!-- Reload & Save -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="ReloadButton" Width="100" Content="Reload" Click="ReloadButtonClick" Margin="4" HorizontalAlignment="Right"/>
+                <Button x:Name="SaveButton" Width="100" Content="Save" Click="OnSaveButtonClick" Margin="16" HorizontalAlignment="Right"/>
+            </StackPanel>
+            
+            <!-- Legacy Events -->
+            <Button Grid.Row="1" FontWeight="Bold" HorizontalAlignment="Left" Margin="12"  Width="200" Click="LegacyEventToggleClick">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" FontSize="16" Margin="12,0">Special Events</TextBlock>
+                    <materialDesign:PackIcon x:Name="LegacyEventToggleIcon" Kind="ExpandMore" VerticalAlignment="Center" Height="24" Width="24"/>
+                </StackPanel>
+            </Button>
 
-            <!-- Channel redeems -->
-            <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center">Channel points redemptions</TextBlock>
+            <Line Grid.Row="2" X1="0" X2="2000" Margin="0" Stroke="{DynamicResource MaterialDesignDarkForeground}"/>
 
-            <CheckBox x:Name="IsRedemptionInChatBox" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="{Binding IsRedemptionInChat}"/>
-            <TextBlock Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">Show redemption in chat</TextBlock>
+            <StackPanel x:Name="LegacyEventContainer" Grid.Row="3" Visibility="Collapsed" Margin="48,12,48,24">
+                <!-- Channel redeems -->
+                <TextBlock FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center">Smart channel points redemptions alerts (grouped redeems with delay)</TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <ToggleButton x:Name="IsRedemptionInChatBox" VerticalAlignment="Center" Margin="12"/>
+                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center">Show redemption in chat</TextBlock>
+                </StackPanel>
 
-            <CheckBox x:Name="IsTagUserBox" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-            <StackPanel Grid.Row="3" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Stretch">
-                <TextBlock x:Name="IsTagUserLabel" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">Tag user in chat when there's a redeem: @</TextBlock>
-                <TextBox x:Name="UserNameTextBox" MinWidth="150" ToolTip="@username"/>
+                <StackPanel Orientation="Horizontal" IsEnabled="{Binding ElementName=IsRedemptionInChatBox, Path=IsChecked}">
+                    <ToggleButton x:Name="IsTagUserBox" VerticalAlignment="Center" Margin="12"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock x:Name="IsTagUserLabel" HorizontalAlignment="Left" VerticalAlignment="Center">Tag user in chat when there's a redeem: @</TextBlock>
+                        <TextBox x:Name="UserNameTextBox" MinWidth="150" Height="24" ToolTip="@username"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Auto shout out -->
+                <TextBlock FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,12,0,0">Delayed shout out on raid</TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <ToggleButton x:Name="IsAutoShoutOutBox" VerticalAlignment="Center" Margin="12"/>
+                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center">Automatically send shouthout (!so) command when someone raids the channel after 5s</TextBlock>
+                </StackPanel>
+                
+                <!-- Greeting message -->
+                <TextBlock FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,12,0,0">Custom bot connecting message</TextBlock>
+                <TextBox x:Name="GreetingMessage" >Hai hai, I'm connected and ready to go!</TextBox>
+
             </StackPanel>
 
-            <!-- Auto shout out -->
-            <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,12,0,0">Auto shout out on raid</TextBlock>
-            <CheckBox x:Name="IsAutoShoutOutBox" Grid.Row="5" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-            <TextBlock Grid.Row="5" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center">Automatically send shouthout (!so) command when someone raids the channel</TextBlock>
+            <Line Grid.Row="4" X1="0" X2="2000" Margin="0" Stroke="{DynamicResource MaterialDesignDarkForeground}"/>
 
-            <!-- Greeting message -->
-            <TextBlock Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,12,0,0">Custom greeting message</TextBlock>
-            <TextBox x:Name="GreetingMessage" Grid.Row="7" Grid.Column="2">Hai hai, I'm connected and ready to go!</TextBox>
+            <!-- Custom Events -->
+            <Button Grid.Row="4" FontWeight="Bold" HorizontalAlignment="Left" Margin="12" Width="200" Click="CustomEventToggleClick">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" FontSize="16" Margin="12,0">Custom Events</TextBlock>
+                    <materialDesign:PackIcon x:Name="CustomEventToggleIcon" Kind="ExpandMore" VerticalAlignment="Center" Height="24" Width="24"/>
+                </StackPanel>
+            </Button>
+
+            <Grid x:Name="CustomEventsContainer" Visibility="Collapsed" Grid.Row="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Button Margin="16" HorizontalAlignment="Right" Click="HelpButtonClick">Help</Button>
+                <ListView x:Name="EventsListView" 
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    Margin="48,0,48,0"
+                    Grid.Row="1"
+                          PreviewMouseWheel="OnListViewScroll"
+                    ItemsSource="{Binding EventsList}">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Padding" Value="16" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                        <Border
+                                             BorderBrush="Transparent"
+                                             BorderThickness="0"
+                                             Background="{TemplateBinding Background}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="2*"/>
+                                                    <ColumnDefinition Width="5*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <Line X1="0" X2="2000" Grid.ColumnSpan="4" Stroke="{DynamicResource MaterialDesignDarkForeground}"/>
+
+                                                <StackPanel Grid.Column="0" Margin="12" HorizontalAlignment="Center">
+                                                    <TextBlock Visibility="{Binding IsInvalid, Converter={StaticResource BoolToVisibility}}"
+                                                        FontSize="30"
+                                                        Foreground="Firebrick"
+                                                        TextAlignment="Center">
+                                                         <materialDesign:PackIcon Kind="AlertCircleOutline"/>
+                                                    </TextBlock>
+                                                    <ToggleButton IsChecked="{Binding Active}" Height="40"/>
+                                                </StackPanel>
+                                                <ComboBox Grid.Column="1"
+                                                    ItemsSource="{Binding EventTypeEnumToString}" 
+                                                    DisplayMemberPath="Value"
+                                                    SelectedValuePath="Key"
+                                                    SelectedValue="{Binding Type, Mode=TwoWay}"
+                                                    SelectionChanged="EventTypeComboBoxChanged"
+                                                    Margin="12"
+                                                    >
+                                                </ComboBox>
+                                                <Grid Grid.Column="2" VerticalAlignment="Center">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="4*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition/>
+                                                        <RowDefinition/>
+                                                    </Grid.RowDefinitions>
+                                                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Right" Margin="8">Message: </TextBlock>
+                                                    <TextBlock Grid.Row="1" VerticalAlignment="Center" 
+                                                               HorizontalAlignment="Right" Margin="8"
+                                                               Visibility="{Binding Path=IsOptionNeeded, Converter={StaticResource BoolToVisibility}}">Name: </TextBlock>
+                                                    <TextBox Grid.Column="1" Text="{Binding Message}" VerticalAlignment="Center" TextWrapping="Wrap"
+                                                             TextChanged="TextBoxTextChanged"/>
+                                                    <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Option}" VerticalAlignment="Center" 
+                                                             TextWrapping="Wrap" TextChanged="TextBoxTextChanged" 
+                                                             Visibility="{Binding Path=IsOptionNeeded, Converter={StaticResource BoolToVisibility}}"/>
+                                                </Grid>
+
+                                                <Button Grid.Column="3" Margin="12" Background="Firebrick" Foreground="White" Click="DeleteEventClick">
+                                                    <materialDesign:PackIcon Kind="TrashCanOutline" />
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
+                <Button Grid.Row="2" Style="{DynamicResource MaterialDesignFloatingActionButton}" Margin="16" Content="{materialDesign:PackIcon Plus}" ToolTip="Add a new event" Click="AddNewEventButtonClick"/>
+            </Grid>
         </Grid>
     </ScrollViewer>
 </UserControl>

@@ -40,6 +40,11 @@ namespace QTBot
         // Modules
         private QTCommandsManager commandsManager = null;
         private QTTimersManager timersManager = null;
+        private QTEventsManager eventsManager = null;
+
+        public QTCommandsManager CommandsManager => this.commandsManager;
+        public QTTimersManager TimersManager => this.timersManager;
+        public QTEventsManager EventsManager => this.eventsManager;
 
         // Configurations
         private ConfigModel mainConfig = null;
@@ -65,7 +70,7 @@ namespace QTBot
         private TwitchAPI apiClient = null;
 
         public event EventHandler OnConnected;
-        public event EventHandler OnDisonnected;
+        public event EventHandler OnDisconnected;
 
         public QTCore()
         {
@@ -96,18 +101,17 @@ namespace QTBot
             WebSocketClient customClient = new WebSocketClient(clientOptions);
             this.client = new TwitchClient(customClient);
             this.Client.Initialize(credentials, this.mainConfig.StreamerChannelName);
-            SetupClientListeners();
+            this.Client.OnConnected += Client_OnConnected;
+            this.Client.OnDisconnected += Client_OnDisconnected;
+            SetupClientEventListeners();
 
             this.Client.Connect();
 
             // Setup QT chat manager
             QTChatManager.Instance.Initialize(this.Client);
 
-            // Setup QT commands manager
-            this.commandsManager = new QTCommandsManager();
-
-            // Setup QT timers manager
-            this.timersManager = new QTTimersManager();
+            // Setup modules
+            SetupModules();
 
             // Setup API client
             this.apiClient = new TwitchAPI();
@@ -159,7 +163,7 @@ namespace QTBot
 
             this.pubSubClient.Connect();
 
-            // Setup StreamElements
+            // Setup StreamElements if configured
             if (this.mainConfig.IsStreamElementsConfigured)
             {
                 StreamElementsModule.Instance.Initialize(this.mainConfig);
@@ -168,12 +172,11 @@ namespace QTBot
 
         /// <summary>
         /// Disconnect Twitch services.
-        /// TODO: Not working
         /// </summary>
         public void Disconnect()
         {
             RemovePubSubListeners();
-            RemoveClientListeners();
+            RemoveClientEventListeners();
             try
             {
                 this.pubSubClient.Disconnect();
@@ -183,8 +186,16 @@ namespace QTBot
             {
                 Utilities.Log("QTCore.Disconnect exception: " + e.StackTrace);
             }
+            finally
+            {
+                this.Client.OnConnected -= Client_OnConnected;
+                this.Client.OnDisconnected -= Client_OnDisconnected;
+            }
         }
 
+        /// <summary>
+        /// [DEPRECATED] Saves the Twitch options and shows a dialog if successful.
+        /// </summary>
         public void SetupTwitchOptions(TwitchOptions options)
         {
             this.twitchOptions = options;
@@ -196,13 +207,16 @@ namespace QTBot
 
         private async void HandleCommand(string command, IEnumerable<string> args, string username)
         {
-            var result = await this.commandsManager.ProcessCommand(command, args, username);
+            var result = await this.commandsManager?.ProcessCommand(command, args, username);
             if (!string.IsNullOrEmpty(result))
             {
                 QTChatManager.Instance.SendInstantMessage(result);
             }
         }
 
+        /// <summary>
+        /// Sets up the logging system into log files and clean up old logs if there are more than 10 of them.
+        /// </summary>
         private void SetupLogging()
         {
             try
@@ -222,6 +236,7 @@ namespace QTBot
                 Trace.Listeners.AddRange(listeners);
                 Trace.AutoFlush = true;
 
+                // Delete old logs
                 while (Directory.GetFiles(logPath).Length > 10)
                 {
                     FileSystemInfo fileInfo = new DirectoryInfo(logPath).GetFileSystemInfos().OrderBy(fi => fi.CreationTime).First();
@@ -236,30 +251,39 @@ namespace QTBot
 
             Trace.WriteLine("QT LOGS STARTING!");
         }
+
+        private void SetupModules()
+        {
+            // Setup QT commands manager
+            this.commandsManager = new QTCommandsManager();
+
+            // Setup QT timers manager
+            this.timersManager = new QTTimersManager();
+
+            // Setup QT events manager
+            this.eventsManager = new QTEventsManager();
+        }
         #endregion Core Functionality
 
         #region Client Events
-        private void SetupClientListeners()
+
+        private void SetupClientEventListeners()
         {
             this.Client.OnLog += Client_OnLog;
             this.Client.OnJoinedChannel += Client_OnJoinedChannel;
             this.Client.OnMessageReceived += Client_OnMessageReceived;
             this.Client.OnNewSubscriber += Client_OnNewSubscriber;
-            this.Client.OnConnected += Client_OnConnected;
-            this.Client.OnDisconnected += Client_OnDisconnected;
             this.Client.OnHostingStarted += Client_OnHostingStarted;
             this.Client.OnBeingHosted += Client_OnBeingHosted;
             this.Client.OnRaidNotification += Client_OnRaidNotification;
         }
 
-        private void RemoveClientListeners()
+        private void RemoveClientEventListeners()
         {
             this.Client.OnLog -= Client_OnLog;
             this.Client.OnJoinedChannel -= Client_OnJoinedChannel;
             this.Client.OnMessageReceived -= Client_OnMessageReceived;
             this.Client.OnNewSubscriber -= Client_OnNewSubscriber;
-            this.Client.OnConnected -= Client_OnConnected;
-            this.Client.OnDisconnected -= Client_OnDisconnected;
             this.Client.OnHostingStarted -= Client_OnHostingStarted;
             this.Client.OnBeingHosted -= Client_OnBeingHosted;
             this.Client.OnRaidNotification -= Client_OnRaidNotification;
@@ -277,6 +301,8 @@ namespace QTBot
             {
                 _ = QTChatManager.Instance.SendMessage($"!so {e.RaidNotification.DisplayName}", 5000);
             }
+
+            this.eventsManager?.OnRaidedEvent(e);
         }
 
         private void Client_OnBeingHosted(object sender, OnBeingHostedArgs e)
@@ -298,16 +324,16 @@ namespace QTBot
         {
             QTChatManager.Instance.ToggleChat(true);
 
-            this.timersManager.StartTimers();
+            this.timersManager?.StartTimers();
         }
 
         private void Client_OnDisconnected(object sender, TwitchLib.Communication.Events.OnDisconnectedEventArgs e)
         {
             QTChatManager.Instance.ToggleChat(false);
 
-            this.timersManager.StopTimers();
+            this.timersManager?.StopTimers();
 
-            this.OnDisonnected?.Invoke(sender, null);
+            this.OnDisconnected?.Invoke(sender, null);
         }
 
         private void Client_OnNewSubscriber(object sender, OnNewSubscriberArgs e)
@@ -318,18 +344,23 @@ namespace QTBot
         private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
             var msg = e.ChatMessage.Message;
+            // TODO: Move this to command module
             // Is command?
             if (msg.StartsWith("!"))
             {
                 var parts = msg.Split(' ');
                 HandleCommand(parts[0], parts.Skip(1), e.ChatMessage.Username);
             }
+
+            this.eventsManager?.OnMessageReceivedEvent(e);
         }
 
         private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
         {
             this.currentChannel = new JoinedChannel(e.Channel);
             this.OnConnected?.Invoke(sender, null);
+
+            // Send connected greeting message if any
             if (!string.IsNullOrWhiteSpace(this.TwitchOptions.GreetingMessage))
             {
                 QTChatManager.Instance.SendInstantMessage(this.TwitchOptions.GreetingMessage);
@@ -359,6 +390,7 @@ namespace QTBot
             this.pubSubClient.OnRaidGo += PubSubClient_OnRaidGo;
             this.pubSubClient.OnRaidUpdate += PubSubClient_OnRaidUpdate;
             this.pubSubClient.OnRaidUpdateV2 += PubSubClient_OnRaidUpdateV2;
+            this.pubSubClient.OnFollow += PubSubClient_OnFollow;
 
             this.pubSubClient.ListenToRewards(this.channelId);
             this.pubSubClient.ListenToFollows(this.channelId);
@@ -383,6 +415,14 @@ namespace QTBot
             this.pubSubClient.OnRaidGo -= PubSubClient_OnRaidGo;
             this.pubSubClient.OnRaidUpdate -= PubSubClient_OnRaidUpdate;
             this.pubSubClient.OnRaidUpdateV2 -= PubSubClient_OnRaidUpdateV2;
+            this.pubSubClient.OnFollow -= PubSubClient_OnFollow;
+
+        }
+
+        private void PubSubClient_OnFollow(object sender, TwitchLib.PubSub.Events.OnFollowArgs e)
+        {
+            Utilities.Log("PubSubClient_OnFollow");
+            this.eventsManager?.OnNewFollowerEvent(e);
         }
 
         private void PubSubClient_OnHost(object sender, TwitchLib.PubSub.Events.OnHostArgs e)
@@ -393,11 +433,13 @@ namespace QTBot
         private void PubSubClient_OnChannelSubscription(object sender, TwitchLib.PubSub.Events.OnChannelSubscriptionArgs e)
         {
             Utilities.Log("PubSubClient_OnChannelSubscription " + e.Subscription.DisplayName);
+            this.eventsManager?.OnNewSubscriberEvent(e);
         }
 
         private void PubSubClient_OnBitsReceived(object sender, TwitchLib.PubSub.Events.OnBitsReceivedArgs e)
         {
             Utilities.Log($"PubSubClient_OnBitsReceived BitsUsed: {e.BitsUsed}, TotalBitsUsed: {e.TotalBitsUsed}, message: {e.ChatMessage}");
+            this.eventsManager?.OnBitsReceivedEvent(e);
         }
 
         private void PubSubClient_OnStreamDown(object sender, TwitchLib.PubSub.Events.OnStreamDownArgs e)
@@ -423,6 +465,8 @@ namespace QTBot
             {
                 QTChatManager.Instance.QueueRedeemAlert(e.RewardTitle, e.DisplayName);
             }
+
+            this.eventsManager?.OnRewardRedeemedEvent(e);
         }
 
         private void PubSubClient_OnListenResponse(object sender, TwitchLib.PubSub.Events.OnListenResponseArgs e)
@@ -439,11 +483,13 @@ namespace QTBot
         private void PubSubClient_OnEmoteOnlyOff(object sender, TwitchLib.PubSub.Events.OnEmoteOnlyOffArgs e)
         {
             Utilities.Log("PubSubClient_OnEmoteOnlyOff");
+            this.eventsManager?.OnEmoteOnlyOffEvent(e);
         }
 
         private void PubSubClient_OnEmoteOnly(object sender, TwitchLib.PubSub.Events.OnEmoteOnlyArgs e)
         {
             Utilities.Log("PubSubClient_OnEmoteOnly");
+            this.eventsManager?.OnEmoteOnlyOnEvent(e);
         }
 
         private void PubSubClient_OnRaidUpdateV2(object sender, TwitchLib.PubSub.Events.OnRaidUpdateV2Args e)
