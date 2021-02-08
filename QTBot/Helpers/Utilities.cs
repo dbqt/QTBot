@@ -115,7 +115,7 @@ namespace QTBot.Helpers
             string finalString = stringToModify;
             foreach (var tokenValuePair in tokenValuePairs)
             {
-                finalString.Replace(tokenValuePair.Key, tokenValuePair.Value);
+                finalString = finalString.Replace(tokenValuePair.Key, tokenValuePair.Value);
             }
             return finalString;
         }

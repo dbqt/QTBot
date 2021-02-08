@@ -58,7 +58,7 @@
                 <TextBlock FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,12,0,0">Delayed shout out on raid</TextBlock>
                 <StackPanel Orientation="Horizontal">
                     <ToggleButton x:Name="IsAutoShoutOutBox" VerticalAlignment="Center" Margin="12"/>
-                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center">Automatically send shouthout (!so) command when someone raids the channel after 5s</TextBlock>
+                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center">Automatically send shout out (!so) command when someone raids the channel after 5s</TextBlock>
                 </StackPanel>
                 
                 <!-- Greeting message -->
@@ -83,7 +83,24 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <Button Margin="16" HorizontalAlignment="Right" Click="HelpButtonClick">Help</Button>
+                <Grid Margin="48,0,48,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="5*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Column="0" Text="Active" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Text="Type" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="2" Text="Message" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <Button Grid.Column="2" Grid.ColumnSpan="2" Margin="16" HorizontalAlignment="Right" Click="HelpButtonClick">Help</Button>
+                    <Line Grid.Row="1" X1="0" X2="2000" Grid.ColumnSpan="4" Stroke="{DynamicResource MaterialDesignDarkForeground}"/>
+                </Grid>
+                
                 <ListView x:Name="EventsListView" 
                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                     Margin="48,0,48,0"
@@ -108,8 +125,6 @@
                                                     <ColumnDefinition Width="5*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-
-                                                <Line X1="0" X2="2000" Grid.ColumnSpan="4" Stroke="{DynamicResource MaterialDesignDarkForeground}"/>
 
                                                 <StackPanel Grid.Column="0" Margin="12" HorizontalAlignment="Center">
                                                     <TextBlock Visibility="{Binding IsInvalid, Converter={StaticResource BoolToVisibility}}"
@@ -152,6 +167,8 @@
                                                 <Button Grid.Column="3" Margin="12" Background="Firebrick" Foreground="White" Click="DeleteEventClick">
                                                     <materialDesign:PackIcon Kind="TrashCanOutline" />
                                                 </Button>
+
+                                                <Line X1="0" X2="2000" Grid.ColumnSpan="4" Stroke="{DynamicResource MaterialDesignDarkForeground}"/>
                                             </Grid>
                                         </Border>
                                     </ControlTemplate>
