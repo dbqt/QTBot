@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static QTBot.Core.QTCommandsManager;
 
 namespace QTBot.Models
 {
@@ -14,6 +15,8 @@ namespace QTBot.Models
         public string Response { get; set; } = "";
         public int StreamElementsFixedCost { get; set; } = 0;
         public bool IsStreamElementsCustomCost { get; set; } = false;
+        public int CooldownSeconds { get; set; } = 0;
+        public Permission Permission { get; set; } = Permission.Everyone;
     }
 
     public class CommandsModel

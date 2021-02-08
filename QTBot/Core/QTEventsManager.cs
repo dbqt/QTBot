@@ -68,7 +68,7 @@ namespace QTBot.Core
         public void OnMessageReceivedEvent(OnMessageReceivedArgs args)
         {
             CheckGreetings(args.ChatMessage.DisplayName);
-
+            
             this.OnMessageReceived?.Invoke(this, args);
         }
 

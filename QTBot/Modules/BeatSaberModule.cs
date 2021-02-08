@@ -18,7 +18,6 @@ namespace QTBot.Modules
 
         public BeatSaberModule()
         {
-                      
         }
 
         public void StopListening()

@@ -205,9 +205,9 @@ namespace QTBot
             }
         }
 
-        private async void HandleCommand(string command, IEnumerable<string> args, string username)
+        private async void HandleCommand(string command, IEnumerable<string> args, OnMessageReceivedArgs messageArgs)
         {
-            var result = await this.commandsManager?.ProcessCommand(command, args, username);
+            var result = await this.commandsManager?.ProcessCommand(command, args, messageArgs);
             if (!string.IsNullOrEmpty(result))
             {
                 QTChatManager.Instance.SendInstantMessage(result);
@@ -349,7 +349,8 @@ namespace QTBot
             if (msg.StartsWith("!"))
             {
                 var parts = msg.Split(' ');
-                HandleCommand(parts[0], parts.Skip(1), e.ChatMessage.Username);
+
+                HandleCommand(parts[0], parts.Skip(1), e);
             }
 
             this.eventsManager?.OnMessageReceivedEvent(e);

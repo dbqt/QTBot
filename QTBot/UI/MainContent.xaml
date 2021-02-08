@@ -48,7 +48,7 @@
                         </MenuItem>
                         <MenuItem x:Name="TimersMenuItem" Header="Timers" Click="MenuItemClick" IsEnabled="{Binding Path=IsDisconnected}">
                         </MenuItem>
-                        <MenuItem x:Name="CommandsMenuItem" Header="Commands" Click="MenuItemClick" IsEnabled="False">
+                        <MenuItem x:Name="CommandsMenuItem" Header="Commands" Click="MenuItemClick" IsEnabled="{Binding Path=IsDisconnected}">
                         </MenuItem>
                         <MenuItem x:Name="SettingsMenuItem" Header="Settings" Click="MenuItemClick" IsEnabled="False">
                         </MenuItem>

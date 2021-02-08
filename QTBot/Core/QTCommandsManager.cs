@@ -7,11 +7,23 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TwitchLib.Client.Events;
+using TwitchLib.Client.Models;
 
 namespace QTBot.Core
 {
     public class QTCommandsManager
     {
+        public enum Permission
+        {
+            Everyone = 0,
+            //Follower = 1,
+            VIP = 2,
+            Subscriber = 3,
+            Moderator = 4,
+            Broadcaster = 5
+        }
+
         private enum PointStatus
         {
             Valid,
@@ -22,6 +34,8 @@ namespace QTBot.Core
         private CommandsModel rawCommands = null;
 
         private Dictionary<string, CommandModel> commandsLookup = new Dictionary<string, CommandModel>();
+
+        private Dictionary<string, DateTime> commandsCooldownLookup = new Dictionary<string, DateTime>();
 
         public QTCommandsManager()
         {
@@ -37,8 +51,9 @@ namespace QTBot.Core
             }
         }
 
-        public async Task<string> ProcessCommand(string command, IEnumerable<string> args, string username)
+        public async Task<string> ProcessCommand(string command, IEnumerable<string> args, OnMessageReceivedArgs messageArgs)
         {
+            string username = messageArgs.ChatMessage.DisplayName;
             // Early exit if empty command
             if (string.IsNullOrWhiteSpace(command))
             {
@@ -60,6 +75,28 @@ namespace QTBot.Core
 
             var currentCommand = this.commandsLookup[command];
 
+            // Early exit if the command is on cooldown
+            if (this.commandsCooldownLookup.ContainsKey(command))
+            {
+                var timeDelta = DateTime.Now - this.commandsCooldownLookup[command];
+                // Still on cooldown
+                if (timeDelta.TotalSeconds < currentCommand.CooldownSeconds)
+                {
+                    return null;
+                }
+                // Cooldown is done
+                else
+                {
+                    this.commandsCooldownLookup.Remove(command);
+                }
+            }
+
+            // Early exit if the user doesn't have permission to use command
+            if (GetPermissions(messageArgs.ChatMessage) < currentCommand.Permission)
+            {
+                return null;
+            }
+
             // Command has a custom cost, we need at least one argument
             if (currentCommand.IsStreamElementsCustomCost && args.Count() > 0)
             {
@@ -75,7 +112,8 @@ namespace QTBot.Core
                     var argumentArray = args.ToArray();
                     argumentArray[0] = amount.ToString();
 
-                    message = string.Format(currentCommand.Response, argumentArray);
+                    message = ReplaceArguments(currentCommand.Response, argumentArray);
+                    this.commandsCooldownLookup[command] = DateTime.Now;
                 }
                 // Is contributing an amount
                 else if (int.TryParse(args.FirstOrDefault(), out int amount))
@@ -96,7 +134,8 @@ namespace QTBot.Core
                             await StreamElementsModule.Instance.UpdatePoints(username, -amount);
                         }
                         var messageFormat = ReplaceUsername(currentCommand.Response, username);
-                        message = string.Format(messageFormat, args.ToArray());
+                        message = ReplaceArguments(messageFormat, args.ToArray());
+                        this.commandsCooldownLookup[command] = DateTime.Now;
                     }
                 }
                 else
@@ -121,14 +160,16 @@ namespace QTBot.Core
                         await StreamElementsModule.Instance.UpdatePoints(username, -amount);
                     }
                     var messageFormat = ReplaceUsername(currentCommand.Response, username);
-                    message = string.Format(messageFormat, args.ToArray());
+                    message = ReplaceArguments(messageFormat, args.ToArray());
+                    this.commandsCooldownLookup[command] = DateTime.Now;
                 }
             }
             // No cost
             else
             {
                 var messageFormat = ReplaceUsername(currentCommand.Response, username);
-                message = string.Format(messageFormat, args.ToArray());
+                message = ReplaceArguments(messageFormat, args.ToArray());
+                this.commandsCooldownLookup[command] = DateTime.Now;
             }
 
             return message;
@@ -158,10 +199,50 @@ namespace QTBot.Core
             }
         }
 
-        
         private string ReplaceUsername(string stringToModify, string username)
         {
             return Utilities.ReplaceKeywords(stringToModify, new List<KeyValuePair<string, string>>{ new KeyValuePair<string, string>("{{user}}", username)});
+        }
+
+        private string ReplaceArguments(string stringToModify, string[] args)
+        {
+            string result;
+            try
+            {
+                result = string.Format(stringToModify, args);
+            }
+            catch (Exception e)
+            {
+                Utilities.Log($"QTCommandsManager - Failed to convert {stringToModify} with {args} because of {e.Message}");
+                result = stringToModify;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Converts permission level of the user that sent the <paramref name="message"/> to <see cref="Permission"/>.
+        /// </summary>
+        private Permission GetPermissions(ChatMessage message)
+        {
+            if (message.IsBroadcaster)
+            {
+                return Permission.Broadcaster;
+            }
+            else if (message.IsModerator)
+            {
+                return Permission.Moderator;
+            }
+            else if (message.IsSubscriber)
+            {
+                return Permission.Subscriber;
+            }
+            else if (message.IsVip)
+            {
+                return Permission.VIP;
+            }
+
+            return Permission.Everyone;
         }
     }
 }
