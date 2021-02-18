@@ -71,7 +71,7 @@ namespace QTBot.Helpers
                 if (hasUpdate)
                 {
                     Utilities.ExecuteOnUIThread(() =>
-                        Utilities.ShowMessage("I got an update, please reboot me :)", "QTBot has updated")
+                        Utilities.ShowMessage("Update installed, please reboot me :)", "QTBot has updated")
                     );
                 }
             }
@@ -108,6 +108,14 @@ namespace QTBot.Helpers
         }
 
         /// <summary>
+        /// Dismiss the current dialog.
+        /// </summary>
+        public static void DismissDialog()
+        {
+            MainContent.Instance.DismissDialog();
+        }
+
+        /// <summary>
         /// Replaces the each token with the value from the <paramref name="tokenValuePairs"/> in the <paramref name="stringToModify"/> and returns the resulting string.
         /// </summary>
         public static string ReplaceKeywords(string stringToModify, List<KeyValuePair<string, string>> tokenValuePairs)
@@ -129,6 +137,7 @@ namespace QTBot.Helpers
             public string Message = null;
             public DialogBoxButtonOptions MainButton = null;
             public DialogBoxButtonOptions SecondaryButton = null;
+            public bool ShowProgressBar = false;
 
             public class DialogBoxButtonOptions
             {

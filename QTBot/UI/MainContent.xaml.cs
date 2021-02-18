@@ -1,6 +1,7 @@
 ﻿using QTBot.Helpers;
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using static QTBot.Helpers.Utilities;
@@ -150,12 +151,21 @@ namespace QTBot
                 MainButton = new DialogBoxOptions.DialogBoxButtonOptions()
                 {
                     Label = "Update",
-                    Callback = async () => await Utilities.UpdateApplication()
+                    Callback = async () => 
+                        {
+                            ShowDialog(new DialogBoxOptions()
+                            {
+                                Title = "Updating",
+                                ShowProgressBar = true
+                            });
+                            await Task.Delay(1000);
+                            await Utilities.UpdateApplication();
+                        }
                 },
                 SecondaryButton = new DialogBoxOptions.DialogBoxButtonOptions()
                 {
                     Label = "Cancel",
-                    Callback = () => this.IsDialogVisible = false
+                    Callback = () => DismissDialog()
                 }
             };
 
@@ -194,7 +204,7 @@ namespace QTBot
                 SecondaryButton = new DialogBoxOptions.DialogBoxButtonOptions()
                 {
                     Label = "Okai :3",
-                    Callback = () => this.IsDialogVisible = false
+                    Callback = () => DismissDialog()
                 }
             });
         }
@@ -204,8 +214,27 @@ namespace QTBot
         /// </summary>
         public void ShowDialog(DialogBoxOptions options)
         {
-            this.DialogBoxTitle.Text = options.Title ?? string.Empty;
-            this.DialogBoxMessage.Text = options.Message ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(options.Title))
+            {
+                this.DialogBoxTitle.Text = string.Empty;
+                this.DialogBoxTitle.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                this.DialogBoxTitle.Text = options.Title;
+                this.DialogBoxTitle.Visibility = Visibility.Visible;
+            }
+
+            if (string.IsNullOrWhiteSpace(options.Message))
+            {
+                this.DialogBoxMessage.Text = string.Empty;
+                this.DialogBoxMessage.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                this.DialogBoxMessage.Text = options.Message;
+                this.DialogBoxMessage.Visibility = Visibility.Visible;
+            }
 
             if (options.MainButton != null)
             {
@@ -229,7 +258,14 @@ namespace QTBot
                 this.DialogBoxSecondaryButton.Visibility = Visibility.Collapsed;
             }
 
+            this.DialogProgressBar.Visibility = options.ShowProgressBar ? Visibility.Visible : Visibility.Collapsed;
+
             this.IsDialogVisible = true;
+        }
+
+        public void DismissDialog()
+        {
+            this.IsDialogVisible = false;
         }
     }
 }

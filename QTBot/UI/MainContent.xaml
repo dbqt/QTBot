@@ -14,8 +14,16 @@
         <!-- Dialog Content -->
         <materialDesign:DialogHost.DialogContent>
             <StackPanel Orientation="Vertical">
-                <TextBlock x:Name="DialogBoxTitle" FontSize="16" FontWeight="Bold" Padding="16">Title</TextBlock>
-                <TextBlock x:Name="DialogBoxMessage" Padding="16">Message</TextBlock>
+                <TextBlock x:Name="DialogBoxTitle" FontSize="16" FontWeight="Bold" Padding="16" >Title</TextBlock>
+                <TextBox x:Name="DialogBoxMessage" 
+                         Padding="16" 
+                         IsReadOnly="True" 
+                         BorderThickness="0"
+                         TextWrapping="Wrap"
+                         MaxHeight="500"
+                         VerticalScrollBarVisibility="Auto"
+                         AcceptsReturn="True">Message</TextBox>
+                <ProgressBar x:Name="DialogProgressBar" IsIndeterminate="True" Style="{StaticResource MaterialDesignCircularProgressBar}" Value="0" Margin="16"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button x:Name="DialogBoxMainButton" Margin="8">Button 1</Button>
                     <Button x:Name="DialogBoxSecondaryButton"  Margin="8" Background="{DynamicResource MaterialDesignLightBackground}" Foreground="{DynamicResource MaterialDesignLightForeground}">Button 2</Button>
@@ -48,7 +56,7 @@
                         </MenuItem>
                         <MenuItem x:Name="TimersMenuItem" Header="Timers" Click="MenuItemClick" IsEnabled="{Binding Path=IsDisconnected}">
                         </MenuItem>
-                        <MenuItem x:Name="CommandsMenuItem" Header="Commands" Click="MenuItemClick" IsEnabled="{Binding Path=IsDisconnected}">
+                        <MenuItem x:Name="CommandsMenuItem" Header="Commands" Click="MenuItemClick" IsEnabled="False">
                         </MenuItem>
                         <MenuItem x:Name="SettingsMenuItem" Header="Settings" Click="MenuItemClick" IsEnabled="False">
                         </MenuItem>

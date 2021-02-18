@@ -175,16 +175,24 @@ namespace QTBot
         /// </summary>
         public void Disconnect()
         {
-            RemovePubSubListeners();
-            RemoveClientEventListeners();
             try
             {
+                RemovePubSubListeners();
                 this.pubSubClient.Disconnect();
-                this.Client.Disconnect();
             }
             catch (Exception e)
             {
-                Utilities.Log("QTCore.Disconnect exception: " + e.StackTrace);
+                Utilities.Log("QTCore.Disconnect PubSub exception: " + e.StackTrace);
+            }
+
+            try
+            {
+                RemoveClientEventListeners();
+                this.Client.Disconnect();
+            }
+            catch(Exception e)
+            {
+                Utilities.Log("QTCore.Disconnect Client exception: " + e.StackTrace);
             }
             finally
             {
@@ -322,6 +330,7 @@ namespace QTBot
 
         private void Client_OnConnected(object sender, OnConnectedArgs e)
         {
+            Utilities.Log($"ClientConnected");
             QTChatManager.Instance.ToggleChat(true);
 
             this.timersManager?.StartTimers();
@@ -329,6 +338,7 @@ namespace QTBot
 
         private void Client_OnDisconnected(object sender, TwitchLib.Communication.Events.OnDisconnectedEventArgs e)
         {
+            Utilities.Log($"ClientDisconnected");
             QTChatManager.Instance.ToggleChat(false);
 
             this.timersManager?.StopTimers();
@@ -378,6 +388,8 @@ namespace QTBot
         #region PubSub Events
         private void SetupPubSubListeners()
         {
+            RemovePubSubListeners();
+
             this.pubSubClient.OnPubSubServiceConnected += PubSubClient_OnPubSubServiceConnected;
             this.pubSubClient.OnListenResponse += PubSubClient_OnListenResponse;
             this.pubSubClient.OnEmoteOnly += PubSubClient_OnEmoteOnly;
@@ -417,7 +429,6 @@ namespace QTBot
             this.pubSubClient.OnRaidUpdate -= PubSubClient_OnRaidUpdate;
             this.pubSubClient.OnRaidUpdateV2 -= PubSubClient_OnRaidUpdateV2;
             this.pubSubClient.OnFollow -= PubSubClient_OnFollow;
-
         }
 
         private void PubSubClient_OnFollow(object sender, TwitchLib.PubSub.Events.OnFollowArgs e)

@@ -67,13 +67,20 @@ namespace QTBot.Core
         #region Core Events
         public void OnMessageReceivedEvent(OnMessageReceivedArgs args)
         {
-            CheckGreetings(args.ChatMessage.DisplayName);
-            
             this.OnMessageReceived?.Invoke(this, args);
+
+            CheckGreetings(args.ChatMessage.DisplayName);
         }
 
         public void OnNewSubscriberEvent(OnChannelSubscriptionArgs args)
         {
+            this.OnChannelSubscription?.Invoke(this, args);
+
+            if (!this.events.ContainsKey(EventType.Subscription))
+            {
+                return;
+            }
+
             var tokenReplacements = new List<KeyValuePair<string, string>>();
             // Username of subscriber or gifter
             if (string.IsNullOrWhiteSpace(args.Subscription.RecipientDisplayName))
@@ -116,12 +123,17 @@ namespace QTBot.Core
             {
                 SendEventMessageInChat(subEvent, tokenReplacements);
             }
-
-            this.OnChannelSubscription?.Invoke(this, args);
         }
 
         public void OnRaidedEvent(OnRaidNotificationArgs args)
         {
+            this.OnRaid?.Invoke(this, args);
+
+            if (!this.events.ContainsKey(EventType.Raid))
+            {
+                return;
+            }
+
             var tokenReplacements = new List<KeyValuePair<string, string>>();
             tokenReplacements.Add(new KeyValuePair<string, string>("{{user}}", args.RaidNotification.MsgParamDisplayName));
             tokenReplacements.Add(new KeyValuePair<string, string>("{{count}}", args.RaidNotification.MsgParamViewerCount));
@@ -130,12 +142,17 @@ namespace QTBot.Core
             {
                 SendEventMessageInChat(raidEvent, tokenReplacements);
             }
-
-            this.OnRaid?.Invoke(this, args);
         }
 
         public void OnBitsReceivedEvent(OnBitsReceivedArgs args)
         {
+            this.OnBitsReceived?.Invoke(this, args);
+
+            if (!this.events.ContainsKey(EventType.Bits))
+            {
+                return;
+            }
+
             var tokenReplacements = new List<KeyValuePair<string, string>>();
             tokenReplacements.Add(new KeyValuePair<string, string>("{{user}}", args.Username));
             tokenReplacements.Add(new KeyValuePair<string, string>("{{bits}}", args.BitsUsed.ToString()));
@@ -146,12 +163,17 @@ namespace QTBot.Core
             {
                 SendEventMessageInChat(bitEvent, tokenReplacements);
             }
-
-            this.OnBitsReceived?.Invoke(this, args);
         }
 
         public void OnRewardRedeemedEvent(OnRewardRedeemedArgs args)
         {
+            this.OnRewardRedeemed?.Invoke(this, args);
+
+            if (!this.events.ContainsKey(EventType.Redeem))
+            {
+                return;
+            }
+
             var tokenReplacements = new List<KeyValuePair<string, string>>();
             tokenReplacements.Add(new KeyValuePair<string, string>("{{user}}", args.DisplayName));
             tokenReplacements.Add(new KeyValuePair<string, string>("{{reward}}", args.RewardTitle));
@@ -162,12 +184,17 @@ namespace QTBot.Core
             {
                 SendEventMessageInChat(redeemEvent, tokenReplacements);
             }
-
-            this.OnRewardRedeemed?.Invoke(this, args);
         }
 
         public void OnNewFollowerEvent(OnFollowArgs args)
         {
+            this.OnFollow?.Invoke(this, args);
+
+            if (!this.events.ContainsKey(EventType.Follow))
+            {
+                return;
+            }
+
             var tokenReplacements = new List<KeyValuePair<string, string>>();
             tokenReplacements.Add(new KeyValuePair<string, string>("{{user}}", args.DisplayName));
 
@@ -175,8 +202,6 @@ namespace QTBot.Core
             {
                 SendEventMessageInChat(followEvent, tokenReplacements);
             }
-
-            this.OnFollow?.Invoke(this, args);
         }
 
         public void OnEmoteOnlyOnEvent(OnEmoteOnlyArgs args)
@@ -193,6 +218,11 @@ namespace QTBot.Core
 
         private void CheckGreetings(string username)
         {
+            if (!this.events.ContainsKey(EventType.Greeting))
+            {
+                return;
+            }
+
             // Get greeting only if it was setup for this specific user
             var greetEvents = this.events[EventType.Greeting].Where(item => item.Option.ToLowerInvariant() == username.ToLowerInvariant());
             if (greetEvents.Count() > 0)
