@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TwitchLib.Client.Events;
 using TwitchLib.PubSub.Events;
+using Microsoft.Extensions.Logging;
 
 namespace QTBot.Core
 {
@@ -53,12 +54,12 @@ namespace QTBot.Core
                     }
 
                     this.events[eventItem.Type].Add(eventItem);
-                    Utilities.Log($"QTEventsManager - Registered event for {eventItem.Type}, message: {eventItem.Message}, option: {eventItem.Option}");
+                    Utilities.Log(LogLevel.Information, $"QTEventsManager - Registered event for {eventItem.Type}, message: {eventItem.Message}, option: {eventItem.Option}");
                 }
             }
             else
             {
-                Utilities.Log($"QTEventsManager - Could not read events!");
+                Utilities.Log(LogLevel.Information, $"QTEventsManager - Could not read events!");
             }
 
             this.greetedUsers = new List<string>();
@@ -247,7 +248,7 @@ namespace QTBot.Core
         private void SendEventMessageInChat(EventModel eventItem, List<KeyValuePair<string, string>> tokenReplacements)
         {
             string message = Utilities.ReplaceKeywords(eventItem.Message, tokenReplacements);
-            Utilities.Log($"QTEventsMananger - sending: {message}");
+            Utilities.Log(LogLevel.Information, $"QTEventsMananger - sending: {message}");
             _ = QTChatManager.Instance.SendMessage(message);
         }
     }

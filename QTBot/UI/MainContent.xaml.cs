@@ -52,7 +52,7 @@ namespace QTBot
         {
             if (MainContent.Instance != null)
             {
-                Utilities.Log("Error with MainContent - MainContent was created a second time!");
+                Utilities.Log(Microsoft.Extensions.Logging.LogLevel.Error,"Error with MainContent - MainContent was created a second time!");
                 return;
             }
 

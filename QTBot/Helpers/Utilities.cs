@@ -3,16 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using Microsoft.Extensions.Logging;
+using System.Globalization;
 
 namespace QTBot.Helpers
 {
     public class Utilities
     {
+        public static bool IsDebugEnabled = true;
+
         /// <summary>
         /// Show a message box to the user.
         /// </summary>
@@ -41,11 +42,26 @@ namespace QTBot.Helpers
         }
 
         /// <summary>
-        /// Logs the message into the log file.
+        /// Logs a message into the log file stating the message severity level (in accordance with microsoft)
         /// </summary>
+        /// <param name="level">message severity level</param>
+        /// <param name="message">log message</param>
+        public static void Log(LogLevel level, string message)
+        {
+            string lvl = Enum.GetName(typeof(LogLevel), level);
+            if (level == LogLevel.Critical || level == LogLevel.Error)
+            {
+                lvl = lvl.ToUpper(new CultureInfo("en-US", false));
+            }
+            if(IsDebugEnabled || (level != LogLevel.Information && level != LogLevel.Debug))
+            {
+                Trace.WriteLine($"[{DateTime.Now.ToString()}] - [{lvl}] : {message}");
+            }            
+        }
+
         public static void Log(string message)
         {
-            Trace.WriteLine($"[{DateTime.Now.ToString()}] {message}");
+            Log(LogLevel.Information, message);
         }
 
         /// <summary>

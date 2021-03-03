@@ -1,4 +1,5 @@
-﻿using QTBot.Helpers;
+﻿using Microsoft.Extensions.Logging;
+using QTBot.Helpers;
 using QTBot.Models;
 using QTBot.Modules;
 using System;
@@ -61,10 +62,10 @@ namespace QTBot.Core
             }
 
             string message = "";
-            Utilities.Log($"From {username}, command is {command}, args are :");
+            Utilities.Log(LogLevel.Information, $"From {username}, command is {command}, args are :");
             foreach (var arg in args)
             {
-                Utilities.Log($"{arg}");
+                Utilities.Log(LogLevel.Information, $"{arg}");
             }
 
             // Early exit if the command is not found
@@ -213,7 +214,7 @@ namespace QTBot.Core
             }
             catch (Exception e)
             {
-                Utilities.Log($"QTCommandsManager - Failed to convert {stringToModify} with {args} because of {e.Message}");
+                Utilities.Log(LogLevel.Warning, $"QTCommandsManager - Failed to convert {stringToModify} with {args} because of {e.Message}");
                 result = stringToModify;
             }
 

@@ -243,6 +243,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Core\QTEventsManager.cs" />
+    <Compile Include="CustomDLLIntegration\Delegates.cs" />
+    <Compile Include="CustomDLLIntegration\IntegrationHelper.cs" />
+    <Compile Include="CustomDLLIntegration\Interfaces.cs" />
+    <Compile Include="CustomDLLIntegration\Models.cs" />
     <Compile Include="Models\EventModel.cs" />
     <Compile Include="UI\Views\Commands.xaml.cs">
       <DependentUpon>Commands.xaml</DependentUpon>

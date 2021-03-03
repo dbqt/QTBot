@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace QTBot.Helpers
             {
                 if (instance.Equals(value))
                 {
-                    Utilities.Log("Error: Trying to create a second instance of TwitchLibWrapper");
+                    Utilities.Log(LogLevel.Information, "Error: Trying to create a second instance of TwitchLibWrapper");
                     return;
                 }
                 instance = value;
