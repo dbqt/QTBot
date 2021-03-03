@@ -101,8 +101,12 @@ namespace QTBot
             WebSocketClient customClient = new WebSocketClient(clientOptions);
             this.client = new TwitchClient(customClient);
             this.Client.Initialize(credentials, this.mainConfig.StreamerChannelName);
+
+            // Setup core listeners separately
             this.Client.OnConnected += Client_OnConnected;
             this.Client.OnDisconnected += Client_OnDisconnected;
+
+            // Setup all other listeners
             SetupClientEventListeners();
 
             this.Client.Connect();
@@ -159,6 +163,13 @@ namespace QTBot
 
             // Setup PubSub client
             this.pubSubClient = new TwitchPubSub();
+
+            // Setup core listeners separately
+            this.pubSubClient.OnPubSubServiceClosed += PubSubClient_OnPubSubServiceClosed;
+            this.pubSubClient.OnPubSubServiceError += PubSubClient_OnPubSubServiceError;
+            this.pubSubClient.OnPubSubServiceConnected += PubSubClient_OnPubSubServiceConnected;
+
+            // Setup all other listeners
             SetupPubSubListeners();
 
             this.pubSubClient.Connect();
@@ -198,6 +209,10 @@ namespace QTBot
             {
                 this.Client.OnConnected -= Client_OnConnected;
                 this.Client.OnDisconnected -= Client_OnDisconnected;
+
+                this.pubSubClient.OnPubSubServiceClosed -= PubSubClient_OnPubSubServiceClosed;
+                this.pubSubClient.OnPubSubServiceError -= PubSubClient_OnPubSubServiceError;
+                this.pubSubClient.OnPubSubServiceConnected -= PubSubClient_OnPubSubServiceConnected;
             }
         }
 
@@ -390,7 +405,6 @@ namespace QTBot
         {
             RemovePubSubListeners();
 
-            this.pubSubClient.OnPubSubServiceConnected += PubSubClient_OnPubSubServiceConnected;
             this.pubSubClient.OnListenResponse += PubSubClient_OnListenResponse;
             this.pubSubClient.OnEmoteOnly += PubSubClient_OnEmoteOnly;
             this.pubSubClient.OnEmoteOnlyOff += PubSubClient_OnEmoteOnlyOff;
@@ -415,7 +429,6 @@ namespace QTBot
 
         private void RemovePubSubListeners()
         {
-            this.pubSubClient.OnPubSubServiceConnected -= PubSubClient_OnPubSubServiceConnected;
             this.pubSubClient.OnListenResponse -= PubSubClient_OnListenResponse;
             this.pubSubClient.OnEmoteOnly -= PubSubClient_OnEmoteOnly;
             this.pubSubClient.OnEmoteOnlyOff -= PubSubClient_OnEmoteOnlyOff;
@@ -429,6 +442,16 @@ namespace QTBot
             this.pubSubClient.OnRaidUpdate -= PubSubClient_OnRaidUpdate;
             this.pubSubClient.OnRaidUpdateV2 -= PubSubClient_OnRaidUpdateV2;
             this.pubSubClient.OnFollow -= PubSubClient_OnFollow;
+        }
+
+        private void PubSubClient_OnPubSubServiceError(object sender, TwitchLib.PubSub.Events.OnPubSubServiceErrorArgs e)
+        {
+            Utilities.Log($"PubSubClient_OnPubSubServiceError: {e.Exception.Message} | {e.Exception.StackTrace}");
+        }
+
+        private void PubSubClient_OnPubSubServiceClosed(object sender, EventArgs e)
+        {
+            Utilities.Log("PubSubClient_OnPubSubServiceClosed");
         }
 
         private void PubSubClient_OnFollow(object sender, TwitchLib.PubSub.Events.OnFollowArgs e)
@@ -483,7 +506,7 @@ namespace QTBot
 
         private void PubSubClient_OnListenResponse(object sender, TwitchLib.PubSub.Events.OnListenResponseArgs e)
         {
-            Utilities.Log("PubSubClient_OnListenResponse was successful: " + e.Successful);
+            Utilities.Log($"PubSubClient_OnListenResponse for {e.Topic} was successful: {e.Successful} | {e.Response.Error ?? ""}");
         }
 
         private void PubSubClient_OnPubSubServiceConnected(object sender, EventArgs e)
