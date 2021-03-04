@@ -19,7 +19,8 @@ namespace QTBot.CustomDLLIntegration
         string GetDLLDescription();
         SettingsUI GetSettingsUI();
 
-        void OnDLLStartup(StartupData data);        
+        bool DisableDLL();
+        void OnDLLStartup();        
         void OnMessageReceived(OnMessageReceivedArgs e);
 
         //These event will be fired from pubsub

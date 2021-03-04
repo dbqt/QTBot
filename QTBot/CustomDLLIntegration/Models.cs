@@ -5,10 +5,6 @@ using System.IO;
 
 namespace QTBot.CustomDLLIntegration
 {
-    public class SettingsUI
-    {
-    }
-
     public class TwitchData
     {
     }
@@ -67,4 +63,95 @@ namespace QTBot.CustomDLLIntegration
         public bool isEnabled { get; set; }
         public Guid dllGuidID { get; }
     }
+
+
+    #region UI Objects
+    public class SettingsUI
+    {
+        public SettingsUI(UISection uiS)
+        {
+            sections.Add(uiS);
+        }
+
+        public SettingsUI(List<UISection> uiS)
+        {
+            sections = uiS;
+        }
+
+        public List<UISection> sections = new List<UISection>();
+    }
+
+    public class UISection
+    {
+        public UISection(string name)
+        {
+            sectionName = name;
+        }
+
+        public string sectionName { get; }
+        public List<UIObject> sectionElements = new List<UIObject>();
+    }
+
+    public class UIObject
+    {
+        public UIObject(string ID, int order)
+        {
+            uiObjectID = ID;
+            uiObjectsOrder = order;
+        }
+
+        public string uiObjectID { get; }
+        public int uiObjectsOrder { get; }
+        public object uiValue { get; set; }
+    }
+
+    public class UIButton : UIObject
+    {
+        public UIButton(string ID, int order) : base(ID, order)
+        {
+
+        }
+    }
+
+    public class UICheckbox : UIObject
+    {
+        public UICheckbox(string ID, int order) : base(ID, order)
+        {
+
+        }
+    }
+
+    public class RadialButton : UIObject
+    {
+        public RadialButton(string ID, int order) : base(ID, order)
+        {
+
+        }
+    }
+
+    public class UITextBox : UIObject
+    {
+        public UITextBox(string ID, int order) : base(ID, order)
+        {
+
+        }
+    }
+
+    public class UISelectionDropdown : UIObject
+    {
+        public UISelectionDropdown(string ID, int order) : base(ID, order)
+        {
+
+        }
+    }
+
+    public class UITable : UIObject
+    {
+        public UITable(string ID, int order) : base(ID, order)
+        {
+
+        }
+    }
+
+    #endregion
 }
