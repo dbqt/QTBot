@@ -299,24 +299,30 @@ namespace QTBot
 
         private void SetupClientEventListeners()
         {
-            this.Client.OnLog += Client_OnLog;
-            this.Client.OnJoinedChannel += Client_OnJoinedChannel;
-            this.Client.OnMessageReceived += Client_OnMessageReceived;
-            this.Client.OnNewSubscriber += Client_OnNewSubscriber;
-            this.Client.OnHostingStarted += Client_OnHostingStarted;
-            this.Client.OnBeingHosted += Client_OnBeingHosted;
-            this.Client.OnRaidNotification += Client_OnRaidNotification;
+            if (this.Client != null)
+            {
+                this.Client.OnLog += Client_OnLog;
+                this.Client.OnJoinedChannel += Client_OnJoinedChannel;
+                this.Client.OnMessageReceived += Client_OnMessageReceived;
+                this.Client.OnNewSubscriber += Client_OnNewSubscriber;
+                this.Client.OnHostingStarted += Client_OnHostingStarted;
+                this.Client.OnBeingHosted += Client_OnBeingHosted;
+                this.Client.OnRaidNotification += Client_OnRaidNotification;
+            }
         }
 
         private void RemoveClientEventListeners()
         {
-            this.Client.OnLog -= Client_OnLog;
-            this.Client.OnJoinedChannel -= Client_OnJoinedChannel;
-            this.Client.OnMessageReceived -= Client_OnMessageReceived;
-            this.Client.OnNewSubscriber -= Client_OnNewSubscriber;
-            this.Client.OnHostingStarted -= Client_OnHostingStarted;
-            this.Client.OnBeingHosted -= Client_OnBeingHosted;
-            this.Client.OnRaidNotification -= Client_OnRaidNotification;
+            if (this.Client != null)
+            {
+                this.Client.OnLog -= Client_OnLog;
+                this.Client.OnJoinedChannel -= Client_OnJoinedChannel;
+                this.Client.OnMessageReceived -= Client_OnMessageReceived;
+                this.Client.OnNewSubscriber -= Client_OnNewSubscriber;
+                this.Client.OnHostingStarted -= Client_OnHostingStarted;
+                this.Client.OnBeingHosted -= Client_OnBeingHosted;
+                this.Client.OnRaidNotification -= Client_OnRaidNotification;
+            }
         }
 
         private void Client_OnRaidNotification(object sender, OnRaidNotificationArgs e)
@@ -420,43 +426,49 @@ namespace QTBot
         {
             RemovePubSubListeners();
 
-            this.pubSubClient.OnListenResponse += PubSubClient_OnListenResponse;
-            this.pubSubClient.OnEmoteOnly += PubSubClient_OnEmoteOnly;
-            this.pubSubClient.OnEmoteOnlyOff += PubSubClient_OnEmoteOnlyOff;
-            this.pubSubClient.OnRewardRedeemed += PubSubClient_OnRewardRedeemed;
-            this.pubSubClient.OnStreamUp += PubSubClient_OnStreamUp;
-            this.pubSubClient.OnStreamDown += PubSubClient_OnStreamDown;
-            this.pubSubClient.OnBitsReceived += PubSubClient_OnBitsReceived;
-            this.pubSubClient.OnChannelSubscription += PubSubClient_OnChannelSubscription;
-            this.pubSubClient.OnHost += PubSubClient_OnHost;
-            this.pubSubClient.OnRaidGo += PubSubClient_OnRaidGo;
-            this.pubSubClient.OnRaidUpdate += PubSubClient_OnRaidUpdate;
-            this.pubSubClient.OnRaidUpdateV2 += PubSubClient_OnRaidUpdateV2;
-            this.pubSubClient.OnFollow += PubSubClient_OnFollow;
+            if (this.pubSubClient != null)
+            {
+                this.pubSubClient.OnListenResponse += PubSubClient_OnListenResponse;
+                this.pubSubClient.OnEmoteOnly += PubSubClient_OnEmoteOnly;
+                this.pubSubClient.OnEmoteOnlyOff += PubSubClient_OnEmoteOnlyOff;
+                this.pubSubClient.OnRewardRedeemed += PubSubClient_OnRewardRedeemed;
+                this.pubSubClient.OnStreamUp += PubSubClient_OnStreamUp;
+                this.pubSubClient.OnStreamDown += PubSubClient_OnStreamDown;
+                this.pubSubClient.OnBitsReceived += PubSubClient_OnBitsReceived;
+                this.pubSubClient.OnChannelSubscription += PubSubClient_OnChannelSubscription;
+                this.pubSubClient.OnHost += PubSubClient_OnHost;
+                this.pubSubClient.OnRaidGo += PubSubClient_OnRaidGo;
+                this.pubSubClient.OnRaidUpdate += PubSubClient_OnRaidUpdate;
+                this.pubSubClient.OnRaidUpdateV2 += PubSubClient_OnRaidUpdateV2;
+                this.pubSubClient.OnFollow += PubSubClient_OnFollow;
 
-            this.pubSubClient.ListenToRewards(this.channelId);
-            this.pubSubClient.ListenToFollows(this.channelId);
-            this.pubSubClient.ListenToBitsEvents(this.channelId);
-            this.pubSubClient.ListenToChatModeratorActions(this.userId, this.channelId);
-            this.pubSubClient.ListenToRaid(this.channelId);
-            this.pubSubClient.ListenToSubscriptions(this.channelId);
+                this.pubSubClient.ListenToRewards(this.channelId);
+                this.pubSubClient.ListenToFollows(this.channelId);
+                this.pubSubClient.ListenToBitsEvents(this.channelId);
+                this.pubSubClient.ListenToChatModeratorActions(this.userId, this.channelId);
+                this.pubSubClient.ListenToRaid(this.channelId);
+                this.pubSubClient.ListenToSubscriptions(this.channelId);
+            }
         }
 
         private void RemovePubSubListeners()
         {
-            this.pubSubClient.OnListenResponse -= PubSubClient_OnListenResponse;
-            this.pubSubClient.OnEmoteOnly -= PubSubClient_OnEmoteOnly;
-            this.pubSubClient.OnEmoteOnlyOff -= PubSubClient_OnEmoteOnlyOff;
-            this.pubSubClient.OnRewardRedeemed -= PubSubClient_OnRewardRedeemed;
-            this.pubSubClient.OnStreamUp -= PubSubClient_OnStreamUp;
-            this.pubSubClient.OnStreamDown -= PubSubClient_OnStreamDown;
-            this.pubSubClient.OnBitsReceived -= PubSubClient_OnBitsReceived;
-            this.pubSubClient.OnChannelSubscription -= PubSubClient_OnChannelSubscription;
-            this.pubSubClient.OnHost -= PubSubClient_OnHost;
-            this.pubSubClient.OnRaidGo -= PubSubClient_OnRaidGo;
-            this.pubSubClient.OnRaidUpdate -= PubSubClient_OnRaidUpdate;
-            this.pubSubClient.OnRaidUpdateV2 -= PubSubClient_OnRaidUpdateV2;
-            this.pubSubClient.OnFollow -= PubSubClient_OnFollow;
+            if (this.pubSubClient != null)
+            {
+                this.pubSubClient.OnListenResponse -= PubSubClient_OnListenResponse;
+                this.pubSubClient.OnEmoteOnly -= PubSubClient_OnEmoteOnly;
+                this.pubSubClient.OnEmoteOnlyOff -= PubSubClient_OnEmoteOnlyOff;
+                this.pubSubClient.OnRewardRedeemed -= PubSubClient_OnRewardRedeemed;
+                this.pubSubClient.OnStreamUp -= PubSubClient_OnStreamUp;
+                this.pubSubClient.OnStreamDown -= PubSubClient_OnStreamDown;
+                this.pubSubClient.OnBitsReceived -= PubSubClient_OnBitsReceived;
+                this.pubSubClient.OnChannelSubscription -= PubSubClient_OnChannelSubscription;
+                this.pubSubClient.OnHost -= PubSubClient_OnHost;
+                this.pubSubClient.OnRaidGo -= PubSubClient_OnRaidGo;
+                this.pubSubClient.OnRaidUpdate -= PubSubClient_OnRaidUpdate;
+                this.pubSubClient.OnRaidUpdateV2 -= PubSubClient_OnRaidUpdateV2;
+                this.pubSubClient.OnFollow -= PubSubClient_OnFollow;
+            }
         }
 
         private void PubSubClient_OnPubSubServiceError(object sender, TwitchLib.PubSub.Events.OnPubSubServiceErrorArgs e)
