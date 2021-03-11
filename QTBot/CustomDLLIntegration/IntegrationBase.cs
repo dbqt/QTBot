@@ -1,12 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using TwitchLib.Client.Events;
 using TwitchLib.PubSub.Events;
 
@@ -14,25 +8,22 @@ namespace QTBot.CustomDLLIntegration
 {
     public abstract class IntegrationBase : DLLIntegratrionInterface
     {
-        public abstract string IntegratrionName { get; }
-        public abstract string IntegratrionDefinition { get; }
-        public abstract string IntegratrionVersion { get; }
+        public abstract string IntegrationName { get; }
+        public abstract string IntegrationDefinition { get; }
+        public abstract string IntegrationVersion { get; }
         public abstract SettingsUI DefaultUI { get; }
 
-        public string DLLSettingsPath { get; }           
+        public string DLLSettingsFileName { get; }           
 
         public event LogMessage SendLogMessage;
         public event MessageToTwitch SendMessageToTwtichChat;
 
         private Thread dllLoopThread = null;
-        private string DLLDirectoryPath;
 
-        public IntegrationBase(string dllFilePath)
+        public IntegrationBase()
         {
-            DLLDirectoryPath = Path.Combine(dllFilePath, IntegratrionName);
-            DLLSettingsPath = Path.Combine(DLLDirectoryPath, $"{IntegratrionName}Settings.json");
-
-            WriteLog(LogLevel.Information, $"DLL: {IntegratrionName} created with DirectoryPath: {DLLDirectoryPath} and SettingsPath: {DLLSettingsPath}");
+            DLLSettingsFileName = $"{IntegrationName}Settings.json";
+            WriteLog(LogLevel.Information, $"DLL: {IntegrationName} created with SettingsPath: {DLLSettingsFileName}");
         }
 
         public bool DisableDLL()
@@ -41,19 +32,31 @@ namespace QTBot.CustomDLLIntegration
             {
                 if (dllLoopThread?.ThreadState != ThreadState.Suspended)
                 {
-                    dllLoopThread?.Abort();
-                    dllLoopThread = null;
+                    dllLoopThread?.Abort();                    
                 }
 
-                WriteLog(LogLevel.Information, $"DLL: {IntegratrionName} has been stopped.");
-                return true;
+                for(int i = 0; i < 5; i++)
+                {
+                    if (dllLoopThread?.ThreadState == ThreadState.Aborted)
+                    {
+                        dllLoopThread = null;
+
+                        WriteLog(LogLevel.Information, $"DLL: {IntegrationName} has been stopped.");
+                        return true;
+                    }
+                    else
+                    {
+                        Thread.Sleep(100);
+                    }
+                }                            
             }
             catch (Exception e)
             {
-                WriteLog(LogLevel.Information, $"DLL: {IntegratrionName} has failed to stop.");
-                WriteLog(LogLevel.Error, e);
-                return false;
-            }            
+                WriteLog(LogLevel.Information, $"DLL: {IntegrationName} has failed to stop.");
+                WriteLog(LogLevel.Error, e);                
+            }
+
+            return false;
         }
 
         public bool OnDLLStartup()
@@ -62,20 +65,20 @@ namespace QTBot.CustomDLLIntegration
             {
                 if(dllLoopThread == null)
                 {
-                    dllLoopThread = new Thread(this.DLLStatup);
+                    dllLoopThread = new Thread(this.DLLStartup);
                     dllLoopThread?.Start();
 
-                    WriteLog(LogLevel.Information, $"DLL: {IntegratrionName} has started correctly.");
+                    WriteLog(LogLevel.Information, $"DLL: {IntegrationName} has started correctly.");
                     return true;
                 }
 
 
-                WriteLog(LogLevel.Error, $"Thread for dll {IntegratrionName} failed to close properly and cannot be restarted.");
+                WriteLog(LogLevel.Error, $"Thread for dll {IntegrationName} failed to close properly and cannot be restarted.");
                 return false;
             }
             catch (Exception e)
             {
-                WriteLog(LogLevel.Information, $"DLL: {IntegratrionName} failed to started correctly.");
+                WriteLog(LogLevel.Information, $"DLL: {IntegrationName} failed to started correctly.");
                 WriteLog(LogLevel.Error, e);
                 return false;
             }
@@ -88,99 +91,34 @@ namespace QTBot.CustomDLLIntegration
 
         protected void WriteLog(LogLevel level, string message)
         {
-            SendLogMessage?.Invoke(IntegratrionName, level, message);
-        }
+            SendLogMessage?.Invoke(IntegrationName, level, message);
+        }        
 
-        public SettingsUI GetSettingsUI()
-        {
-            try
-            {
-                SettingsUI rtn;
-
-                if (File.Exists(DLLSettingsPath))
-                {
-                    string StartupJSON = File.ReadAllText(DLLSettingsPath);
-                    rtn = JsonConvert.DeserializeObject(StartupJSON) as SettingsUI;
-
-                    if (rtn != null)
-                    {
-                        return rtn;
-                    }
-
-                    WriteLog(LogLevel.Warning, $"DLL: {IntegratrionName} settings file could not be deserialized. SettingsFilePath: {DLLSettingsPath}");
-                }
-                else
-                {
-                    if (Directory.Exists(DLLDirectoryPath) == false)
-                    {
-                        Directory.CreateDirectory(DLLDirectoryPath);
-                    }
-
-                    File.WriteAllText(DLLSettingsPath, JsonConvert.SerializeObject(DefaultUI));
-
-                    WriteLog(LogLevel.Information, $"DLL: {IntegratrionName} settings did not exist, creating default. SettingsFilePath: {DLLSettingsPath}");
-                }   
-            }
-            catch (Exception e)
-            {
-                WriteLog(LogLevel.Error, e);
-            }
-
-            WriteLog(LogLevel.Information, $"DLL: {IntegratrionName} failed to load settings.");
-            return null;
-        }
-
-        public bool SaveSettings(SettingsUI uiValues)
-        {
-            if(uiValues != null)
-            {
-                try
-                {
-                    if(Directory.Exists(DLLDirectoryPath) == false)
-                    {
-                        Directory.CreateDirectory(DLLDirectoryPath);
-                    }
-
-                    File.WriteAllText(DLLSettingsPath, JsonConvert.SerializeObject(uiValues));
-
-                    WriteLog(LogLevel.Information, $"DLL: {IntegratrionName} settings saved.");
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    WriteLog(LogLevel.Information, $"DLL: {IntegratrionName} failed to save settings.");
-                    WriteLog(LogLevel.Error, e);
-                }
-            }
-
-            return false;
-        }
-
-        protected abstract void DLLStatup();        
+        protected abstract void DLLStartup();        
 
         public abstract void OnBeingHosted(OnBeingHostedArgs e);
 
-        public abstract void OnBitsReceived(OnBitsReceivedArgs e);
+        public abstract void OnBitsReceived(object sender, OnBitsReceivedArgs e);
 
         public abstract void OnBotJoinedChannel(OnJoinedChannelArgs e);
 
-        public abstract void OnChannelSubscription(OnChannelSubscriptionArgs e);
+        public abstract void OnChannelSubscription(object sender, OnChannelSubscriptionArgs e);
 
-        public abstract void OnEmoteOnlyOff(OnEmoteOnlyOffArgs e);
+        public abstract void OnEmoteOnlyOff(object sender, OnEmoteOnlyOffArgs e);
 
-        public abstract void OnEmoteOnlyOn(OnEmoteOnlyArgs e);
+        public abstract void OnEmoteOnlyOn(object sender, OnEmoteOnlyArgs e);
 
-        public abstract void OnFollow(OnFollowArgs e);
+        public abstract void OnFollow(object sender, OnFollowArgs e);
 
         public abstract void OnHostingStarted(OnHostingStartedArgs e);
 
         public abstract void OnListenResponse(OnListenResponseArgs e);
 
-        public abstract void OnMessageReceived(OnMessageReceivedArgs e);
+        public abstract void OnMessageReceived(object sender, OnMessageReceivedArgs e);
 
-        public abstract void OnRaidNotification(OnRaidNotificationArgs e);
+        public abstract void OnRaidNotification(object sender, OnRaidNotificationArgs e);
 
-        public abstract void OnRewardRedeemed(OnRewardRedeemedArgs e);
+        public abstract void OnRewardRedeemed(object sender, OnRewardRedeemedArgs e);
 
         public abstract void OnStreamDown(OnStreamDownArgs e);
 

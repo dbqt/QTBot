@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QTBot.CustomDLLIntegration
 {
@@ -16,8 +14,22 @@ namespace QTBot.CustomDLLIntegration
         //dll integration variables
         private static List<DLLIntegrationModel> _DLLIntegratrions = new List<DLLIntegrationModel>();
         private static IntegrationStartup _IntegrationStartup;
+
         private static string _DLLDirectoryPath = "";
         private static string _DLLSartupJSONPath = "";
+
+        private static bool _WasStartupCalled = false;
+
+        public static void SetupIntegrationhelper(string dllDirectoryPath, string dllStartupJsonPath)
+        {
+            if (_WasStartupCalled == false)
+            {
+                _DLLDirectoryPath = dllDirectoryPath;
+                _DLLSartupJSONPath = dllStartupJsonPath;
+
+                _WasStartupCalled = true;
+            }
+        }
 
         public static List<DLLIntegrationModel> GetDLLIntegrations()
         {
@@ -28,10 +40,14 @@ namespace QTBot.CustomDLLIntegration
         /// This method is responsible for starting an thread that handles all DLL integration 
         /// </summary>
         public static void SetupDLLIntegration()
-        {
-            
+        {          
             try
             {
+                if (_WasStartupCalled == false)
+                {
+                    throw new Exception("Error, SetupDLLIntegration was called before SetupIntegrationhelper.");
+                }
+
                 if (Directory.Exists(_DLLDirectoryPath) == false)
                 {
                     Directory.CreateDirectory(_DLLDirectoryPath);
@@ -68,13 +84,13 @@ namespace QTBot.CustomDLLIntegration
                     {
                         Utilities.Log(LogLevel.Error, $"Message: {e.Message} Stack: {e.StackTrace}");
                         Utilities.ShowMessage($"There was an issue reading the JSON file located at: {_DLLSartupJSONPath}. Please make sure the JSON is valid, or delete the file to reset the DLL Integration settings.", "DLL Integration Startup JSON Error");
-                        return;
                     }                    
                 }
             }
             catch (Exception e)
             {
                 Utilities.Log(LogLevel.Error, $"Message: {e.Message} Stack: {e.StackTrace}");
+                Utilities.ShowMessage($"Error, there was an issue with integration startup. Look to logs for more detail.", "DLL Integration Startup Error");
             }
         }
 
@@ -92,8 +108,8 @@ namespace QTBot.CustomDLLIntegration
             {
                 if (integrationModel.dllProperties.isEnabled)
                 {
-                    integrationModel.dllIntegratrion.SendLogMessage += DLLIntegratrion_LogMessage;
-                    integrationModel.dllIntegratrion.OnDLLStartup();
+                    integrationModel.dllIntegration.SendLogMessage += DLLIntegratrion_LogMessage;
+                    integrationModel.dllIntegration.OnDLLStartup();
                 }
             }
         }
@@ -117,13 +133,22 @@ namespace QTBot.CustomDLLIntegration
         {
             try
             {
+                if (_WasStartupCalled == false)
+                {
+                    throw new Exception("Error, AddDLLToIntegration was called before SetupIntegrationhelper.");
+                }
+
                 var DLL = Assembly.LoadFile(dLLStartup.dllPath);
                 foreach (Type type in DLL.GetExportedTypes())
                 {
                     var dllClass = Activator.CreateInstance(type);
-                    DLLIntegratrionInterface dLLIntegratrion = dllClass as DLLIntegratrionInterface;
+                    DLLIntegratrionInterface dLLIntegratrion = dllClass as DLLIntegratrionInterface;     
                     if (dLLIntegratrion != null)
                     {
+                        if (dLLStartup.isEnabled)
+                        {
+                            AddHandlersToDLLAssembly(dLLIntegratrion);
+                        }                        
                         _DLLIntegratrions.Add(new DLLIntegrationModel(dLLIntegratrion, dLLStartup));
                     }
                 }
@@ -142,34 +167,47 @@ namespace QTBot.CustomDLLIntegration
         /// <param name="integrationGuidID">GuidID associated with the DLL integration the user wants to enable</param>
         public static void EnableDLL(Guid integrationGuidID)
         {
-            //enable the DLL in the UI and run the DLLs onstartup method
-            int count = _DLLIntegratrions.Where(x => x.dllProperties.dllGuidID == integrationGuidID).Count();            
-
-            if (count > 1)
+            try
             {
-                //error, 2 integrations with the same Guid exist in current system, Disable Both
-                Utilities.Log(LogLevel.Warning, $"Two or more DLL integrations were found with the same Guid ID. Could not enable any. To correct this issue, change one of the Guids in the startup file located at: {_DLLSartupJSONPath}, GuidID: {integrationGuidID}");
-                Utilities.ShowMessage($"Error! Two or more DLL integrations share the same Guid ID in the startup file located at: {_DLLSartupJSONPath}. Cannot enable DLL integration until this error is corrected. Problem ID: {integrationGuidID}.", "Error, DLL ID Mismatch");
-            }
-            else if (count == 1)
-            {
-                foreach (DLLIntegrationModel integratrion in _DLLIntegratrions.Where(x => x.dllProperties.dllGuidID == integrationGuidID))
+                if (_WasStartupCalled == false)
                 {
-                    if (integratrion.dllIntegratrion.OnDLLStartup())
-                    {
-                        integratrion.dllProperties.isEnabled = true;
-                        count++;
-                    }
+                    throw new Exception("Error, AddDLLToIntegration was called before SetupIntegrationhelper.");
                 }
-                UpdateDLLStartupFile();
+
+                //enable the DLL in the UI and run the DLLs onstartup method
+                int count = _DLLIntegratrions.Where(x => x.dllProperties.dllGuidID == integrationGuidID).Count();
+
+                if (count > 1)
+                {
+                    //error, 2 integrations with the same Guid exist in current system, Disable Both
+                    Utilities.Log(LogLevel.Warning, $"Two or more DLL integrations were found with the same Guid ID. Could not enable any. To correct this issue, change one of the Guids in the startup file located at: {_DLLSartupJSONPath}, GuidID: {integrationGuidID}");
+                    Utilities.ShowMessage($"Error! Two or more DLL integrations share the same Guid ID in the startup file located at: {_DLLSartupJSONPath}. Cannot enable DLL integration until this error is corrected. Problem ID: {integrationGuidID}.", "Error, DLL ID Mismatch");
+                }
+                else if (count == 1)
+                {
+                    foreach (DLLIntegrationModel integratrion in _DLLIntegratrions.Where(x => x.dllProperties.dllGuidID == integrationGuidID))
+                    {
+                        if (integratrion.dllIntegration.OnDLLStartup())
+                        {
+                            integratrion.dllProperties.isEnabled = true;
+                            AddHandlersToDLLAssembly(integratrion.dllIntegration);
+                        }
+                    }
+                    UpdateDLLStartupFile();
+                }
+                else
+                {
+                    //integration not found in current list
+                    Utilities.Log(LogLevel.Error, $"There were no DLL integrations found with the Guid ID: {integrationGuidID}.");
+                    Utilities.ShowMessage($"Error! There were no DLL integrations found with the Guid ID: {integrationGuidID} in the startup file located at: {_DLLSartupJSONPath}. Cannot enable DLL integration.", "Error, DLL ID Mismatch");
+                }
             }
-            else
+            catch (Exception e)
             {
-                //integration not found in current list
-                Utilities.Log(LogLevel.Error, $"There were no DLL integrations found with the Guid ID: {integrationGuidID}.");
-                Utilities.ShowMessage($"Error! There were no DLL integrations found with the Guid ID: {integrationGuidID} in the startup file located at: {_DLLSartupJSONPath}. Cannot enable DLL integration.", "Error, DLL ID Mismatch");
+                Utilities.Log(LogLevel.Error, $"Could not add enable dll integration with GuidID: {integrationGuidID}.");
+                Utilities.Log(LogLevel.Error, $"Message: {e.Message} Stack: {e.StackTrace}");
+                Utilities.ShowMessage($"Error! Cannot enable DLL integration. Look in logs for more information.", "Error, Unable to start DLL Integration");
             }
-            UpdateUI();
         }
 
         /// <summary>
@@ -178,42 +216,123 @@ namespace QTBot.CustomDLLIntegration
         /// <param name="integrationGuidID">The internal ID of the DLL integration. This ID should be unique to the DLL.</param>
         public static void DisableDLL(Guid integrationGuidID)
         {
-            //disable the dll in both the json file and UI
-            int count = 0;
-            foreach (DLLIntegrationModel integratrion in _DLLIntegratrions.Where(x => x.dllProperties.dllGuidID == integrationGuidID))
+            try
             {
-                integratrion.dllProperties.isEnabled = false;
-                if(integratrion.dllIntegratrion.DisableDLL() == false)
+                if (_WasStartupCalled == false)
                 {
-                    Utilities.Log(LogLevel.Warning, $"DLL was unable to disable properly. GuidID: {integrationGuidID}");
+                    throw new Exception("Error, AddDLLToIntegration was called before SetupIntegrationhelper.");
                 }
-                count++;
-            }
 
-            if(count > 1)
-            {
-                //error, 2 integrations with the same Guid exist in current system, Disable Both
-                Utilities.Log(LogLevel.Warning, $"Two DLL integrations were found with the same Guid ID. Disabling both by default. To correct this issue, change one of the Guids in the startup file located at: {_DLLSartupJSONPath}, GuidID: {integrationGuidID}");
-                UpdateDLLStartupFile();
+                //disable the dll in both the json file and UI
+                int count = 0;
+                foreach (DLLIntegrationModel integratrion in _DLLIntegratrions.Where(x => x.dllProperties.dllGuidID == integrationGuidID))
+                {
+                    integratrion.dllProperties.isEnabled = false;
+                    if (integratrion.dllIntegration.DisableDLL() == false)
+                    {
+                        Utilities.Log(LogLevel.Warning, $"DLL was unable to disable properly. GuidID: {integrationGuidID}");
+                    }
+                    RemoveHandlersFromDLLAssembly(integratrion.dllIntegration);
+                    count++;
+                }
+
+                if (count > 1)
+                {
+                    //error, 2 integrations with the same Guid exist in current system, Disable Both
+                    Utilities.Log(LogLevel.Warning, $"Two DLL integrations were found with the same Guid ID. Disabling both by default. To correct this issue, change one of the Guids in the startup file located at: {_DLLSartupJSONPath}, GuidID: {integrationGuidID}");
+                    UpdateDLLStartupFile();
+                }
+                else if (count == 1)
+                {
+                    UpdateDLLStartupFile();
+                }
+                else
+                {
+                    //integration not found in current list
+                    Utilities.Log(LogLevel.Error, $"There were no DLL integrations found with the Guid ID: {integrationGuidID}.");
+                }
+
             }
-            else if(count == 1)
+            catch(Exception e)
             {
-                UpdateDLLStartupFile();
-            }
-            else
-            {
-                //integration not found in current list
-                Utilities.Log(LogLevel.Error, $"There were no DLL integrations found with the Guid ID: {integrationGuidID}.");
-            }
-            UpdateUI();
+                Utilities.Log(LogLevel.Error, $"Message: {e.Message} Stack: {e.StackTrace}");
+                Utilities.ShowMessage($"Error! Cannot disable DLL integration. Look in logs for more information.", "Error, Unable to stop DLL Integration");
+            }            
         }
 
         /// <summary>
-        /// Method called when an update has happened and the UI needs to be updated to reflect the change
+        /// Removes all handlers from the integration DLLs that may exist
         /// </summary>
-        private static void UpdateUI()
+        public static void DisableAllEnabledDLLsHandlers()
         {
-            //message UI to update
+            foreach(DLLIntegrationModel integrationModel in _DLLIntegratrions)
+            {
+                if (integrationModel.dllProperties.isEnabled)
+                {
+                    RemoveHandlersFromDLLAssembly(integrationModel.dllIntegration);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Add handlers to all enabled integration DLLs
+        /// </summary>
+        public static void ReEnableAllEnabledDLLsHandlers()
+        {
+            foreach (DLLIntegrationModel integrationModel in _DLLIntegratrions)
+            {
+                if (integrationModel.dllProperties.isEnabled)
+                {
+                    AddHandlersToDLLAssembly(integrationModel.dllIntegration);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Add all handlers to DLL integration for events from twitch
+        /// </summary>
+        /// <param name="dLLIntegration">DLL integration</param>
+        private static void AddHandlersToDLLAssembly(DLLIntegratrionInterface dLLIntegration)
+        {
+            try
+            {
+                RemoveHandlersFromDLLAssembly(dLLIntegration);
+                QTCore.Instance.EventsManager.OnBitsReceived += dLLIntegration.OnBitsReceived;
+                QTCore.Instance.EventsManager.OnChannelSubscription += dLLIntegration.OnChannelSubscription;
+                QTCore.Instance.EventsManager.OnEmoteOnly += dLLIntegration.OnEmoteOnlyOn;
+                QTCore.Instance.EventsManager.OnEmoteOnlyOff += dLLIntegration.OnEmoteOnlyOff;
+                QTCore.Instance.EventsManager.OnFollow += dLLIntegration.OnFollow;
+                QTCore.Instance.EventsManager.OnMessageReceived += dLLIntegration.OnMessageReceived;
+                QTCore.Instance.EventsManager.OnRaid += dLLIntegration.OnRaidNotification;
+                QTCore.Instance.EventsManager.OnRewardRedeemed += dLLIntegration.OnRewardRedeemed;
+            }
+            catch (Exception e)
+            {
+                Utilities.Log(LogLevel.Error, $"Message: {e.Message} Stack: {e.StackTrace}");
+            }
+        }
+
+        /// <summary>
+        /// Remove all handlers to DLL integration for events from twitch
+        /// </summary>
+        /// <param name="dLLIntegration">DLL integration</param>
+        private static void RemoveHandlersFromDLLAssembly(DLLIntegratrionInterface dLLIntegration)
+        {
+            try
+            {
+                QTCore.Instance.EventsManager.OnBitsReceived -= dLLIntegration.OnBitsReceived;
+                QTCore.Instance.EventsManager.OnChannelSubscription -= dLLIntegration.OnChannelSubscription;
+                QTCore.Instance.EventsManager.OnEmoteOnly -= dLLIntegration.OnEmoteOnlyOn;
+                QTCore.Instance.EventsManager.OnEmoteOnlyOff -= dLLIntegration.OnEmoteOnlyOff;
+                QTCore.Instance.EventsManager.OnFollow -= dLLIntegration.OnFollow;
+                QTCore.Instance.EventsManager.OnMessageReceived -= dLLIntegration.OnMessageReceived;
+                QTCore.Instance.EventsManager.OnRaid -= dLLIntegration.OnRaidNotification;
+                QTCore.Instance.EventsManager.OnRewardRedeemed -= dLLIntegration.OnRewardRedeemed;
+            }
+            catch (Exception e)
+            {
+                Utilities.Log(LogLevel.Error, $"Message: {e.Message} Stack: {e.StackTrace}");
+            }
         }
 
         /// <summary>
@@ -231,5 +350,86 @@ namespace QTBot.CustomDLLIntegration
                 Utilities.ShowMessage($"Error! Could not save DLL integration startup file! Please check log for more details.", "Error, failed to save file!");
             }            
         }
+
+        /// <summary>
+        /// Turns the SettingsUI object into json and saves the json to the DLL integrations settings file
+        /// </summary>
+        /// <param name="dLLIntegration">DLL integration</param>
+        /// <param name="uiValues"></param>
+        /// <returns>Returns if the save failed or worked</returns>
+        public static bool SaveDLLSettingsToFile(DLLIntegratrionInterface dLLIntegration, SettingsUI uiValues)
+        {
+            if (uiValues != null)
+            {
+                try
+                {
+                    string dllDirectoryPath = Path.Combine(_DLLDirectoryPath, dLLIntegration.IntegrationName);
+                    string dllSettingsFilePath = Path.Combine(dllDirectoryPath, dLLIntegration.DLLSettingsFileName);
+                    if (Directory.Exists(dllDirectoryPath) == false)
+                    {
+                        Directory.CreateDirectory(dllDirectoryPath);
+                    }
+
+                    File.WriteAllText(dllSettingsFilePath, JsonConvert.SerializeObject(uiValues));
+
+                    Utilities.Log(LogLevel.Information, $"DLL: {dLLIntegration.IntegrationName} settings saved.");
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    Utilities.Log(LogLevel.Information, $"DLL: {dLLIntegration.IntegrationName} failed to save settings.");
+                    Utilities.Log(e);
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Opens the DLL integration settings file, reads the json from the file and creates a SettingsUI object from the json
+        /// </summary>
+        /// <param name="dLLIntegration">DLL integration</param>
+        /// <returns>Returns the SettingsUI stored in the DLL integrations settings file</returns>
+        public static SettingsUI RetrieveDLLSettings(DLLIntegratrionInterface dLLIntegration)
+        {
+            try
+            {
+                SettingsUI rtn;
+                string dllDirectoryPath = Path.Combine(_DLLDirectoryPath, dLLIntegration.IntegrationName);
+                string dllSettingsFilePath = Path.Combine(dllDirectoryPath, dLLIntegration.DLLSettingsFileName);
+
+                if (File.Exists(dllSettingsFilePath))
+                {
+                    string StartupJSON = File.ReadAllText(dllSettingsFilePath);
+                    rtn = JsonConvert.DeserializeObject(StartupJSON) as SettingsUI;
+
+                    if (rtn != null)
+                    {
+                        return rtn;
+                    }
+
+                    Utilities.Log(LogLevel.Warning, $"DLL: {dLLIntegration.IntegrationName} settings file could not be deserialized. SettingsFilePath: {dLLIntegration.IntegrationName}");
+                }
+                else
+                {
+                    if (Directory.Exists(dllDirectoryPath) == false)
+                    {
+                        Directory.CreateDirectory(dllDirectoryPath);
+                    }
+
+                    File.WriteAllText(dllSettingsFilePath, JsonConvert.SerializeObject(dLLIntegration.DefaultUI));
+
+                    Utilities.Log(LogLevel.Information, $"DLL: {dLLIntegration.IntegrationName} settings did not exist, creating default. SettingsFilePath: {dLLIntegration.IntegrationName}");
+                }
+            }
+            catch (Exception e)
+            {
+                Utilities.Log(e);
+            }
+
+            Utilities.Log(LogLevel.Information, $"DLL: {dLLIntegration.IntegrationName} failed to load settings.");
+            return null;
+        }
+
     }
 }

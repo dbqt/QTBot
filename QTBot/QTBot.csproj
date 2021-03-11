@@ -248,6 +248,7 @@
     <Compile Include="CustomDLLIntegration\IntegrationHelper.cs" />
     <Compile Include="CustomDLLIntegration\Interfaces.cs" />
     <Compile Include="CustomDLLIntegration\Models.cs" />
+    <Compile Include="CustomDLLIntegration\UIModels.cs" />
     <Compile Include="Models\EventModel.cs" />
     <Compile Include="UI\Views\Commands.xaml.cs">
       <DependentUpon>Commands.xaml</DependentUpon>

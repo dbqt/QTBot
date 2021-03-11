@@ -172,6 +172,8 @@ namespace QTBot
             }
 
             // Check Dlls folder and DLLs settings for additional DLLIntegration and startup
+            string integrationFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DLLIntegration");
+            IntegrationHelper.SetupIntegrationhelper(integrationFolderPath, Path.Combine(integrationFolderPath, "DLLIntegrationSetup.json"));
             IntegrationHelper.SetupDLLIntegration();
         }
 
@@ -315,15 +317,7 @@ namespace QTBot
                 _ = QTChatManager.Instance.SendMessage($"!so {e.RaidNotification.DisplayName}", 5000);
             }
 
-            this.eventsManager?.OnRaidedEvent(e);
-
-            foreach (DLLIntegrationModel dLLIntegrationModel in IntegrationHelper.GetDLLIntegrations())
-            {
-                if (dLLIntegrationModel.dllProperties.isEnabled)
-                {
-                    dLLIntegrationModel.dllIntegratrion.OnRaidNotification(e);
-                }
-            }
+            this.eventsManager?.OnRaidedEvent(e);            
         }
 
         private void Client_OnBeingHosted(object sender, OnBeingHostedArgs e)
@@ -337,7 +331,7 @@ namespace QTBot
             {
                 if (dLLIntegrationModel.dllProperties.isEnabled)
                 {
-                    dLLIntegrationModel.dllIntegratrion.OnBeingHosted(e);
+                    dLLIntegrationModel.dllIntegration.OnBeingHosted(e);
                 }
             }
         }
@@ -352,7 +346,7 @@ namespace QTBot
             {
                 if (dLLIntegrationModel.dllProperties.isEnabled)
                 {
-                    dLLIntegrationModel.dllIntegratrion.OnHostingStarted(e);
+                    dLLIntegrationModel.dllIntegration.OnHostingStarted(e);
                 }
             }
         }
@@ -363,6 +357,7 @@ namespace QTBot
             QTChatManager.Instance.ToggleChat(true);
 
             this.timersManager?.StartTimers();
+            IntegrationHelper.ReEnableAllEnabledDLLsHandlers();
         }
 
         private void Client_OnDisconnected(object sender, TwitchLib.Communication.Events.OnDisconnectedEventArgs e)
@@ -373,6 +368,7 @@ namespace QTBot
             this.timersManager?.StopTimers();
 
             this.OnDisconnected?.Invoke(sender, null);
+            IntegrationHelper.DisableAllEnabledDLLsHandlers();
         }
 
         private void Client_OnNewSubscriber(object sender, OnNewSubscriberArgs e)
@@ -410,7 +406,7 @@ namespace QTBot
             {
                 if (dLLIntegrationModel.dllProperties.isEnabled)
                 {
-                    dLLIntegrationModel.dllIntegratrion.OnBotJoinedChannel(e);
+                    dLLIntegrationModel.dllIntegration.OnBotJoinedChannel(e);
                 }
             }
         }
@@ -472,14 +468,6 @@ namespace QTBot
         {
             Utilities.Log(LogLevel.Information, "PubSubClient_OnFollow");
             this.eventsManager?.OnNewFollowerEvent(e);
-
-            foreach (DLLIntegrationModel dLLIntegrationModel in IntegrationHelper.GetDLLIntegrations())
-            {
-                if (dLLIntegrationModel.dllProperties.isEnabled)
-                {
-                    dLLIntegrationModel.dllIntegratrion.OnFollow(e);
-                }
-            }
         }
 
         private void PubSubClient_OnHost(object sender, TwitchLib.PubSub.Events.OnHostArgs e)
@@ -491,28 +479,12 @@ namespace QTBot
         {
             Utilities.Log(LogLevel.Information, "PubSubClient_OnChannelSubscription " + e.Subscription.DisplayName);
             this.eventsManager?.OnNewSubscriberEvent(e);
-
-            foreach (DLLIntegrationModel dLLIntegrationModel in IntegrationHelper.GetDLLIntegrations())
-            {
-                if (dLLIntegrationModel.dllProperties.isEnabled)
-                {
-                    dLLIntegrationModel.dllIntegratrion.OnChannelSubscription(e);
-                }
-            }
         }
 
         private void PubSubClient_OnBitsReceived(object sender, TwitchLib.PubSub.Events.OnBitsReceivedArgs e)
         {
             Utilities.Log(LogLevel.Information, $"PubSubClient_OnBitsReceived BitsUsed: {e.BitsUsed}, TotalBitsUsed: {e.TotalBitsUsed}, message: {e.ChatMessage}");
             this.eventsManager?.OnBitsReceivedEvent(e);
-
-            foreach (DLLIntegrationModel dLLIntegrationModel in IntegrationHelper.GetDLLIntegrations())
-            {
-                if (dLLIntegrationModel.dllProperties.isEnabled)
-                {
-                    dLLIntegrationModel.dllIntegratrion.OnBitsReceived(e);
-                }
-            }
         }
 
         private void PubSubClient_OnStreamDown(object sender, TwitchLib.PubSub.Events.OnStreamDownArgs e)
@@ -523,7 +495,7 @@ namespace QTBot
             {
                 if (dLLIntegrationModel.dllProperties.isEnabled)
                 {
-                    dLLIntegrationModel.dllIntegratrion.OnStreamDown(e);
+                    dLLIntegrationModel.dllIntegration.OnStreamDown(e);
                 }
             }
         }
@@ -536,7 +508,7 @@ namespace QTBot
             {
                 if (dLLIntegrationModel.dllProperties.isEnabled)
                 {
-                    dLLIntegrationModel.dllIntegratrion.OnStreamUp(e);
+                    dLLIntegrationModel.dllIntegration.OnStreamUp(e);
                 }
             }
         }
@@ -556,14 +528,6 @@ namespace QTBot
             }
 
             this.eventsManager?.OnRewardRedeemedEvent(e);
-
-            foreach (DLLIntegrationModel dLLIntegrationModel in IntegrationHelper.GetDLLIntegrations())
-            {
-                if (dLLIntegrationModel.dllProperties.isEnabled)
-                {
-                    dLLIntegrationModel.dllIntegratrion.OnRewardRedeemed(e);
-                }
-            }
         }
 
         private void PubSubClient_OnListenResponse(object sender, TwitchLib.PubSub.Events.OnListenResponseArgs e)
@@ -574,7 +538,7 @@ namespace QTBot
             {
                 if (dLLIntegrationModel.dllProperties.isEnabled)
                 {
-                    dLLIntegrationModel.dllIntegratrion.OnListenResponse(e);
+                    dLLIntegrationModel.dllIntegration.OnListenResponse(e);
                 }
             }
         }
@@ -589,28 +553,12 @@ namespace QTBot
         {
             Utilities.Log(LogLevel.Information, "PubSubClient_OnEmoteOnlyOff");
             this.eventsManager?.OnEmoteOnlyOffEvent(e);
-
-            foreach (DLLIntegrationModel dLLIntegrationModel in IntegrationHelper.GetDLLIntegrations())
-            {
-                if (dLLIntegrationModel.dllProperties.isEnabled)
-                {
-                    dLLIntegrationModel.dllIntegratrion.OnEmoteOnlyOff(e);
-                }
-            }
         }
 
         private void PubSubClient_OnEmoteOnly(object sender, TwitchLib.PubSub.Events.OnEmoteOnlyArgs e)
         {
             Utilities.Log(LogLevel.Information, "PubSubClient_OnEmoteOnly");
             this.eventsManager?.OnEmoteOnlyOnEvent(e);
-
-            foreach (DLLIntegrationModel dLLIntegrationModel in IntegrationHelper.GetDLLIntegrations())
-            {
-                if (dLLIntegrationModel.dllProperties.isEnabled)
-                {
-                    dLLIntegrationModel.dllIntegratrion.OnEmoteOnlyOn(e);
-                }
-            }
         }
 
         private void PubSubClient_OnRaidUpdateV2(object sender, TwitchLib.PubSub.Events.OnRaidUpdateV2Args e)

@@ -59,6 +59,19 @@ namespace QTBot.Helpers
             }            
         }
 
+        /// <summary>
+        /// Logs a message into the log file stating the message and stack of the exception and an Error severity level (in accordance with microsoft)
+        /// </summary>
+        /// <param name="e">the exception to log</param>
+        public static void Log(Exception e)
+        {            
+            Log(LogLevel.Error, $"Message: { e.Message}, Stack: { e.StackTrace}");
+        }
+
+        /// <summary>
+        /// Logs a message into the log file with a default severity level of Information(in accordance with microsoft)
+        /// </summary>
+        /// <param name="message">log message</param>
         public static void Log(string message)
         {
             Log(LogLevel.Information, message);

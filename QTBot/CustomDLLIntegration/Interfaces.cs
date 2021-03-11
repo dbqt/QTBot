@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using TwitchLib.Client.Events;
+﻿using TwitchLib.Client.Events;
 using TwitchLib.PubSub.Events;
 
 namespace QTBot.CustomDLLIntegration
@@ -8,37 +7,33 @@ namespace QTBot.CustomDLLIntegration
     {
         event LogMessage SendLogMessage;
         event MessageToTwitch SendMessageToTwtichChat;
-        string IntegratrionName { get; }
-        string IntegratrionDefinition { get; }
-        string IntegratrionVersion { get; }
+        string IntegrationName { get; }
+        string IntegrationDefinition { get; }
+        string IntegrationVersion { get; }
+        string DLLSettingsFileName { get; }
         SettingsUI DefaultUI { get; }
-
-        SettingsUI GetSettingsUI();
-        bool SaveSettings(SettingsUI uiValues);
 
         bool DisableDLL();
         bool OnDLLStartup();        
-        void OnMessageReceived(OnMessageReceivedArgs e);
+        void OnMessageReceived(object sender, OnMessageReceivedArgs e);
 
         //These event will be fired from pubsub
         void OnStreamUp(OnStreamUpArgs e);
         void OnStreamDown(OnStreamDownArgs e);
 
         void OnListenResponse(OnListenResponseArgs e);
-        void OnEmoteOnlyOn(OnEmoteOnlyArgs e);
-        void OnEmoteOnlyOff(OnEmoteOnlyOffArgs e);
-        void OnRewardRedeemed(OnRewardRedeemedArgs e);        
-        void OnBitsReceived(OnBitsReceivedArgs e);
-        void OnChannelSubscription(OnChannelSubscriptionArgs e);
-        void OnFollow(OnFollowArgs e);
+        void OnEmoteOnlyOn(object sender, OnEmoteOnlyArgs e);
+        void OnEmoteOnlyOff(object sender, OnEmoteOnlyOffArgs e);
+        void OnRewardRedeemed(object sender, OnRewardRedeemedArgs e);        
+        void OnBitsReceived(object sender, OnBitsReceivedArgs e);
+        void OnChannelSubscription(object sender, OnChannelSubscriptionArgs e);
+        void OnFollow(object sender, OnFollowArgs e);
 
         //These Events will be fired from the client
         void OnBotJoinedChannel(OnJoinedChannelArgs e);
 
         void OnHostingStarted(OnHostingStartedArgs e);
         void OnBeingHosted(OnBeingHostedArgs e);
-        void OnRaidNotification(OnRaidNotificationArgs e);
-
-        
+        void OnRaidNotification(object sender, OnRaidNotificationArgs e);        
     }
 }
