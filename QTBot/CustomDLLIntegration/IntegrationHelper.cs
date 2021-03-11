@@ -16,7 +16,7 @@ namespace QTBot.CustomDLLIntegration
         private static IntegrationStartup _IntegrationStartup;
 
         private static string _DLLDirectoryPath = "";
-        private static string _DLLSartupJSONPath = "";
+        private static string _DLLStartupJSONPath = "";
 
         private static bool _WasStartupCalled = false;
 
@@ -25,7 +25,7 @@ namespace QTBot.CustomDLLIntegration
             if (_WasStartupCalled == false)
             {
                 _DLLDirectoryPath = dllDirectoryPath;
-                _DLLSartupJSONPath = dllStartupJsonPath;
+                _DLLStartupJSONPath = dllStartupJsonPath;
 
                 _WasStartupCalled = true;
             }
@@ -56,25 +56,30 @@ namespace QTBot.CustomDLLIntegration
                 List<string> filePaths = Directory.GetFiles(_DLLDirectoryPath).ToList<string>();
                 if (filePaths.Count > 0)
                 {
-                    if (File.Exists(_DLLSartupJSONPath) == false)
+                    string startupJSON = string.Empty;
+                    if (File.Exists(_DLLStartupJSONPath))
+                    {
+                        //*warning* this way of reading the file will fail if there is a large amount of DLLs to integrate (more than 1000). ReadAllText puts the whole file into ram
+                        startupJSON = File.ReadAllText(_DLLStartupJSONPath);
+                        _IntegrationStartup = JsonConvert.DeserializeObject(startupJSON) as IntegrationStartup;
+                    }
+                    else
                     {
                         //DLLs detected but no startup file was found. Add new file with all DLLs disabled.  
-                        _IntegrationStartup = new IntegrationStartup(filePaths);                        
+                        _IntegrationStartup = new IntegrationStartup(filePaths);
                     }
 
-                    //*warning* this way of reading the file will fail if there is a large amount of DLLs to integrate (more than 1000). ReadAllText puts the whole file into ram
-                    string StartupJSON = File.ReadAllText(_DLLSartupJSONPath);
                     try
                     {
-                        _IntegrationStartup = JsonConvert.DeserializeObject(StartupJSON) as IntegrationStartup;
+                        
                         if (_IntegrationStartup != null)
                         {
                             ReadAndStartDLLIntegration();
                         }
                         else
                         {
-                            Utilities.Log(LogLevel.Error, $"Could not deserialize json. JSON: {StartupJSON}");
-                            Utilities.ShowMessage($"There was an issue reading the JSON file located at: {_DLLSartupJSONPath}. Please make sure the JSON is valid, or delete the file to reset the DLL Integration settings.", "DLL Integration Startup JSON Error");
+                            Utilities.Log(LogLevel.Error, $"Could not deserialize json. JSON: {startupJSON}");
+                            Utilities.ShowMessage($"There was an issue reading the JSON file located at: {_DLLStartupJSONPath}. Please make sure the JSON is valid, or delete the file to reset the DLL Integration settings.", "DLL Integration Startup JSON Error");
                             return;
                         }
 
@@ -83,7 +88,7 @@ namespace QTBot.CustomDLLIntegration
                     catch (Exception e)
                     {
                         Utilities.Log(LogLevel.Error, $"Message: {e.Message} Stack: {e.StackTrace}");
-                        Utilities.ShowMessage($"There was an issue reading the JSON file located at: {_DLLSartupJSONPath}. Please make sure the JSON is valid, or delete the file to reset the DLL Integration settings.", "DLL Integration Startup JSON Error");
+                        Utilities.ShowMessage($"There was an issue reading the JSON file located at: {_DLLStartupJSONPath}. Please make sure the JSON is valid, or delete the file to reset the DLL Integration settings.", "DLL Integration Startup JSON Error");
                     }                    
                 }
             }
@@ -148,7 +153,8 @@ namespace QTBot.CustomDLLIntegration
                         if (dLLStartup.isEnabled)
                         {
                             AddHandlersToDLLAssembly(dLLIntegratrion);
-                        }                        
+                        }
+                        RetrieveDLLSettings(dLLIntegratrion);
                         _DLLIntegratrions.Add(new DLLIntegrationModel(dLLIntegratrion, dLLStartup));
                     }
                 }
@@ -180,8 +186,8 @@ namespace QTBot.CustomDLLIntegration
                 if (count > 1)
                 {
                     //error, 2 integrations with the same Guid exist in current system, Disable Both
-                    Utilities.Log(LogLevel.Warning, $"Two or more DLL integrations were found with the same Guid ID. Could not enable any. To correct this issue, change one of the Guids in the startup file located at: {_DLLSartupJSONPath}, GuidID: {integrationGuidID}");
-                    Utilities.ShowMessage($"Error! Two or more DLL integrations share the same Guid ID in the startup file located at: {_DLLSartupJSONPath}. Cannot enable DLL integration until this error is corrected. Problem ID: {integrationGuidID}.", "Error, DLL ID Mismatch");
+                    Utilities.Log(LogLevel.Warning, $"Two or more DLL integrations were found with the same Guid ID. Could not enable any. To correct this issue, change one of the Guids in the startup file located at: {_DLLStartupJSONPath}, GuidID: {integrationGuidID}");
+                    Utilities.ShowMessage($"Error! Two or more DLL integrations share the same Guid ID in the startup file located at: {_DLLStartupJSONPath}. Cannot enable DLL integration until this error is corrected. Problem ID: {integrationGuidID}.", "Error, DLL ID Mismatch");
                 }
                 else if (count == 1)
                 {
@@ -199,7 +205,7 @@ namespace QTBot.CustomDLLIntegration
                 {
                     //integration not found in current list
                     Utilities.Log(LogLevel.Error, $"There were no DLL integrations found with the Guid ID: {integrationGuidID}.");
-                    Utilities.ShowMessage($"Error! There were no DLL integrations found with the Guid ID: {integrationGuidID} in the startup file located at: {_DLLSartupJSONPath}. Cannot enable DLL integration.", "Error, DLL ID Mismatch");
+                    Utilities.ShowMessage($"Error! There were no DLL integrations found with the Guid ID: {integrationGuidID} in the startup file located at: {_DLLStartupJSONPath}. Cannot enable DLL integration.", "Error, DLL ID Mismatch");
                 }
             }
             catch (Exception e)
@@ -239,7 +245,7 @@ namespace QTBot.CustomDLLIntegration
                 if (count > 1)
                 {
                     //error, 2 integrations with the same Guid exist in current system, Disable Both
-                    Utilities.Log(LogLevel.Warning, $"Two DLL integrations were found with the same Guid ID. Disabling both by default. To correct this issue, change one of the Guids in the startup file located at: {_DLLSartupJSONPath}, GuidID: {integrationGuidID}");
+                    Utilities.Log(LogLevel.Warning, $"Two DLL integrations were found with the same Guid ID. Disabling both by default. To correct this issue, change one of the Guids in the startup file located at: {_DLLStartupJSONPath}, GuidID: {integrationGuidID}");
                     UpdateDLLStartupFile();
                 }
                 else if (count == 1)
@@ -305,6 +311,12 @@ namespace QTBot.CustomDLLIntegration
                 QTCore.Instance.EventsManager.OnMessageReceived += dLLIntegration.OnMessageReceived;
                 QTCore.Instance.EventsManager.OnRaid += dLLIntegration.OnRaidNotification;
                 QTCore.Instance.EventsManager.OnRewardRedeemed += dLLIntegration.OnRewardRedeemed;
+                QTCore.Instance.EventsManager.OnListenResponse += dLLIntegration.OnListenResponse;
+                QTCore.Instance.EventsManager.OnStreamUpResponse += dLLIntegration.OnStreamUp;
+                QTCore.Instance.EventsManager.OnStreamDownResponse += dLLIntegration.OnStreamDown;
+                QTCore.Instance.EventsManager.OnBeingHostResponse += dLLIntegration.OnBeingHosted;
+                QTCore.Instance.EventsManager.OnHostingStartedResponse += dLLIntegration.OnHostingStarted;
+                QTCore.Instance.EventsManager.OnJoinedChannelResponse += dLLIntegration.OnBotJoinedChannel;
             }
             catch (Exception e)
             {
@@ -328,6 +340,12 @@ namespace QTBot.CustomDLLIntegration
                 QTCore.Instance.EventsManager.OnMessageReceived -= dLLIntegration.OnMessageReceived;
                 QTCore.Instance.EventsManager.OnRaid -= dLLIntegration.OnRaidNotification;
                 QTCore.Instance.EventsManager.OnRewardRedeemed -= dLLIntegration.OnRewardRedeemed;
+                QTCore.Instance.EventsManager.OnListenResponse -= dLLIntegration.OnListenResponse;
+                QTCore.Instance.EventsManager.OnStreamUpResponse -= dLLIntegration.OnStreamUp;
+                QTCore.Instance.EventsManager.OnStreamDownResponse -= dLLIntegration.OnStreamDown;
+                QTCore.Instance.EventsManager.OnBeingHostResponse -= dLLIntegration.OnBeingHosted;
+                QTCore.Instance.EventsManager.OnHostingStartedResponse -= dLLIntegration.OnHostingStarted;
+                QTCore.Instance.EventsManager.OnJoinedChannelResponse -= dLLIntegration.OnBotJoinedChannel;
             }
             catch (Exception e)
             {
@@ -342,7 +360,7 @@ namespace QTBot.CustomDLLIntegration
         {
             try
             {
-                File.WriteAllText(_DLLSartupJSONPath, JsonConvert.SerializeObject(_IntegrationStartup));
+                File.WriteAllText(_DLLStartupJSONPath, JsonConvert.SerializeObject(_IntegrationStartup, Formatting.Indented));
             }
             catch(Exception e)
             {
@@ -370,7 +388,7 @@ namespace QTBot.CustomDLLIntegration
                         Directory.CreateDirectory(dllDirectoryPath);
                     }
 
-                    File.WriteAllText(dllSettingsFilePath, JsonConvert.SerializeObject(uiValues));
+                    File.WriteAllText(dllSettingsFilePath, JsonConvert.SerializeObject(uiValues, Formatting.Indented));
 
                     Utilities.Log(LogLevel.Information, $"DLL: {dLLIntegration.IntegrationName} settings saved.");
                     return true;
@@ -405,6 +423,7 @@ namespace QTBot.CustomDLLIntegration
 
                     if (rtn != null)
                     {
+                        dLLIntegration.CurrentSettingsUI = rtn;
                         return rtn;
                     }
 
@@ -417,7 +436,7 @@ namespace QTBot.CustomDLLIntegration
                         Directory.CreateDirectory(dllDirectoryPath);
                     }
 
-                    File.WriteAllText(dllSettingsFilePath, JsonConvert.SerializeObject(dLLIntegration.DefaultUI));
+                    File.WriteAllText(dllSettingsFilePath, JsonConvert.SerializeObject(dLLIntegration.DefaultUI, Formatting.Indented));
 
                     Utilities.Log(LogLevel.Information, $"DLL: {dLLIntegration.IntegrationName} settings did not exist, creating default. SettingsFilePath: {dLLIntegration.IntegrationName}");
                 }

@@ -13,7 +13,9 @@ namespace QTBot.CustomDLLIntegration
         public abstract string IntegrationVersion { get; }
         public abstract SettingsUI DefaultUI { get; }
 
-        public string DLLSettingsFileName { get; }           
+        public SettingsUI CurrentSettingsUI { get; set; }
+
+        public string DLLSettingsFileName { get; }
 
         public event LogMessage SendLogMessage;
         public event MessageToTwitch SendMessageToTwtichChat;
@@ -94,13 +96,13 @@ namespace QTBot.CustomDLLIntegration
             SendLogMessage?.Invoke(IntegrationName, level, message);
         }        
 
-        protected abstract void DLLStartup();        
+        protected abstract void DLLStartup();
 
-        public abstract void OnBeingHosted(OnBeingHostedArgs e);
+        public abstract void OnBeingHosted(object sender, OnBeingHostedArgs e);
 
         public abstract void OnBitsReceived(object sender, OnBitsReceivedArgs e);
 
-        public abstract void OnBotJoinedChannel(OnJoinedChannelArgs e);
+        public abstract void OnBotJoinedChannel(object sender, OnJoinedChannelArgs e);
 
         public abstract void OnChannelSubscription(object sender, OnChannelSubscriptionArgs e);
 
@@ -110,9 +112,9 @@ namespace QTBot.CustomDLLIntegration
 
         public abstract void OnFollow(object sender, OnFollowArgs e);
 
-        public abstract void OnHostingStarted(OnHostingStartedArgs e);
+        public abstract void OnHostingStarted(object sender, OnHostingStartedArgs e);
 
-        public abstract void OnListenResponse(OnListenResponseArgs e);
+        public abstract void OnListenResponse(object sender, OnListenResponseArgs e);
 
         public abstract void OnMessageReceived(object sender, OnMessageReceivedArgs e);
 
@@ -120,8 +122,8 @@ namespace QTBot.CustomDLLIntegration
 
         public abstract void OnRewardRedeemed(object sender, OnRewardRedeemedArgs e);
 
-        public abstract void OnStreamDown(OnStreamDownArgs e);
+        public abstract void OnStreamDown(object sender, OnStreamDownArgs e);
 
-        public abstract void OnStreamUp(OnStreamUpArgs e);        
+        public abstract void OnStreamUp(object sender, OnStreamUpArgs e);        
     }
 }

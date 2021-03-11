@@ -103,8 +103,12 @@ namespace QTBot
             WebSocketClient customClient = new WebSocketClient(clientOptions);
             this.client = new TwitchClient(customClient);
             this.Client.Initialize(credentials, this.mainConfig.StreamerChannelName);
+
+            // Setup core listeners separately
             this.Client.OnConnected += Client_OnConnected;
             this.Client.OnDisconnected += Client_OnDisconnected;
+
+            // Setup all other listeners
             SetupClientEventListeners();
 
             this.Client.Connect();
@@ -161,6 +165,13 @@ namespace QTBot
 
             // Setup PubSub client
             this.pubSubClient = new TwitchPubSub();
+
+            // Setup core listeners separately
+            this.pubSubClient.OnPubSubServiceClosed += PubSubClient_OnPubSubServiceClosed;
+            this.pubSubClient.OnPubSubServiceError += PubSubClient_OnPubSubServiceError;
+            this.pubSubClient.OnPubSubServiceConnected += PubSubClient_OnPubSubServiceConnected;
+
+            // Setup all other listeners
             SetupPubSubListeners();
 
             this.pubSubClient.Connect();
@@ -172,7 +183,7 @@ namespace QTBot
             }
 
             // Check Dlls folder and DLLs settings for additional DLLIntegration and startup
-            string integrationFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DLLIntegration");
+            string integrationFolderPath = Path.Combine(Utilities.GetDataDirectory(), "DLLIntegration");
             IntegrationHelper.SetupIntegrationhelper(integrationFolderPath, Path.Combine(integrationFolderPath, "DLLIntegrationSetup.json"));
             IntegrationHelper.SetupDLLIntegration();
         }
@@ -205,6 +216,10 @@ namespace QTBot
             {
                 this.Client.OnConnected -= Client_OnConnected;
                 this.Client.OnDisconnected -= Client_OnDisconnected;
+
+                this.pubSubClient.OnPubSubServiceClosed -= PubSubClient_OnPubSubServiceClosed;
+                this.pubSubClient.OnPubSubServiceError -= PubSubClient_OnPubSubServiceError;
+                this.pubSubClient.OnPubSubServiceConnected -= PubSubClient_OnPubSubServiceConnected;
             }
         }
 
@@ -327,13 +342,7 @@ namespace QTBot
             Utilities.Log(LogLevel.Information, "BeingHosted notification with Viewers" + e.BeingHostedNotification.Viewers);
             Utilities.Log(LogLevel.Information, "BeingHosted notification with BotUsername" + e.BeingHostedNotification.BotUsername);
 
-            foreach (DLLIntegrationModel dLLIntegrationModel in IntegrationHelper.GetDLLIntegrations())
-            {
-                if (dLLIntegrationModel.dllProperties.isEnabled)
-                {
-                    dLLIntegrationModel.dllIntegration.OnBeingHosted(e);
-                }
-            }
+            this.eventsManager?.OnBeingHostedResponseEvent(e);
         }
 
         private void Client_OnHostingStarted(object sender, OnHostingStartedArgs e)
@@ -342,13 +351,7 @@ namespace QTBot
             Utilities.Log(LogLevel.Information, "HostingStarted notification with TargetChannel " + e.HostingStarted.TargetChannel);
             Utilities.Log(LogLevel.Information, "HostingStarted notification with Viewers " + e.HostingStarted.Viewers);
 
-            foreach (DLLIntegrationModel dLLIntegrationModel in IntegrationHelper.GetDLLIntegrations())
-            {
-                if (dLLIntegrationModel.dllProperties.isEnabled)
-                {
-                    dLLIntegrationModel.dllIntegration.OnHostingStarted(e);
-                }
-            }
+            this.eventsManager?.OnHostingStartedResponseEvent(e);
         }
 
         private void Client_OnConnected(object sender, OnConnectedArgs e)
@@ -396,18 +399,12 @@ namespace QTBot
             this.currentChannel = new JoinedChannel(e.Channel);
             this.OnConnected?.Invoke(sender, null);
 
+            this.eventsManager?.OnJoinedChannelResponseEvent(e);
+
             // Send connected greeting message if any
             if (!string.IsNullOrWhiteSpace(this.TwitchOptions.GreetingMessage))
             {
                 QTChatManager.Instance.SendInstantMessage(this.TwitchOptions.GreetingMessage);
-            }
-
-            foreach (DLLIntegrationModel dLLIntegrationModel in IntegrationHelper.GetDLLIntegrations())
-            {
-                if (dLLIntegrationModel.dllProperties.isEnabled)
-                {
-                    dLLIntegrationModel.dllIntegration.OnBotJoinedChannel(e);
-                }
             }
         }
 
@@ -423,7 +420,6 @@ namespace QTBot
         {
             RemovePubSubListeners();
 
-            this.pubSubClient.OnPubSubServiceConnected += PubSubClient_OnPubSubServiceConnected;
             this.pubSubClient.OnListenResponse += PubSubClient_OnListenResponse;
             this.pubSubClient.OnEmoteOnly += PubSubClient_OnEmoteOnly;
             this.pubSubClient.OnEmoteOnlyOff += PubSubClient_OnEmoteOnlyOff;
@@ -448,7 +444,6 @@ namespace QTBot
 
         private void RemovePubSubListeners()
         {
-            this.pubSubClient.OnPubSubServiceConnected -= PubSubClient_OnPubSubServiceConnected;
             this.pubSubClient.OnListenResponse -= PubSubClient_OnListenResponse;
             this.pubSubClient.OnEmoteOnly -= PubSubClient_OnEmoteOnly;
             this.pubSubClient.OnEmoteOnlyOff -= PubSubClient_OnEmoteOnlyOff;
@@ -462,6 +457,16 @@ namespace QTBot
             this.pubSubClient.OnRaidUpdate -= PubSubClient_OnRaidUpdate;
             this.pubSubClient.OnRaidUpdateV2 -= PubSubClient_OnRaidUpdateV2;
             this.pubSubClient.OnFollow -= PubSubClient_OnFollow;
+        }
+
+        private void PubSubClient_OnPubSubServiceError(object sender, TwitchLib.PubSub.Events.OnPubSubServiceErrorArgs e)
+        {
+            Utilities.Log($"PubSubClient_OnPubSubServiceError: {e.Exception.Message} | {e.Exception.StackTrace}");
+        }
+
+        private void PubSubClient_OnPubSubServiceClosed(object sender, EventArgs e)
+        {
+            Utilities.Log("PubSubClient_OnPubSubServiceClosed");
         }
 
         private void PubSubClient_OnFollow(object sender, TwitchLib.PubSub.Events.OnFollowArgs e)
@@ -490,27 +495,13 @@ namespace QTBot
         private void PubSubClient_OnStreamDown(object sender, TwitchLib.PubSub.Events.OnStreamDownArgs e)
         {
             Utilities.Log(LogLevel.Information, "PubSubClient_OnStreamDown");
-
-            foreach(DLLIntegrationModel dLLIntegrationModel in IntegrationHelper.GetDLLIntegrations())
-            {
-                if (dLLIntegrationModel.dllProperties.isEnabled)
-                {
-                    dLLIntegrationModel.dllIntegration.OnStreamDown(e);
-                }
-            }
+            this.eventsManager?.OnStreamDownResponseEvent(e);
         }
 
         private void PubSubClient_OnStreamUp(object sender, TwitchLib.PubSub.Events.OnStreamUpArgs e)
         {
             Utilities.Log(LogLevel.Information, "PubSubClient_OnStreamUp");
-
-            foreach (DLLIntegrationModel dLLIntegrationModel in IntegrationHelper.GetDLLIntegrations())
-            {
-                if (dLLIntegrationModel.dllProperties.isEnabled)
-                {
-                    dLLIntegrationModel.dllIntegration.OnStreamUp(e);
-                }
-            }
+            this.eventsManager?.OnStreamUpResponseEvent(e);
         }
 
         private void PubSubClient_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
@@ -532,15 +523,8 @@ namespace QTBot
 
         private void PubSubClient_OnListenResponse(object sender, TwitchLib.PubSub.Events.OnListenResponseArgs e)
         {
-            Utilities.Log(LogLevel.Information, "PubSubClient_OnListenResponse was successful: " + e.Successful);
-
-            foreach (DLLIntegrationModel dLLIntegrationModel in IntegrationHelper.GetDLLIntegrations())
-            {
-                if (dLLIntegrationModel.dllProperties.isEnabled)
-                {
-                    dLLIntegrationModel.dllIntegration.OnListenResponse(e);
-                }
-            }
+            Utilities.Log($"PubSubClient_OnListenResponse for {e.Topic} was successful: {e.Successful} | {e.Response.Error ?? ""}");
+            this.eventsManager?.OnListenResponseEvent(e);
         }
 
         private void PubSubClient_OnPubSubServiceConnected(object sender, EventArgs e)

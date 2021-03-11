@@ -33,6 +33,13 @@ namespace QTBot.Core
         public event EventHandler<OnRewardRedeemedArgs> OnRewardRedeemed;
         public event EventHandler<OnRaidNotificationArgs> OnRaid;
         public event EventHandler<OnChannelSubscriptionArgs> OnChannelSubscription;
+        public event EventHandler<OnListenResponseArgs> OnListenResponse;
+        public event EventHandler<OnStreamUpArgs> OnStreamUpResponse;
+        public event EventHandler<OnStreamDownArgs> OnStreamDownResponse;
+
+        public event EventHandler<OnJoinedChannelArgs> OnJoinedChannelResponse;
+        public event EventHandler<OnBeingHostedArgs> OnBeingHostResponse;
+        public event EventHandler<OnHostingStartedArgs> OnHostingStartedResponse;
 
         private EventsModel rawEventsModel = null;
         private Dictionary<EventType, List<EventModel>> events = null;
@@ -213,6 +220,36 @@ namespace QTBot.Core
         public void OnEmoteOnlyOffEvent(OnEmoteOnlyOffArgs args)
         {
             this.OnEmoteOnlyOff?.Invoke(this, args);
+        }
+
+        public void OnListenResponseEvent(OnListenResponseArgs args)
+        {
+            this.OnListenResponse?.Invoke(this, args);
+        }
+
+        public void OnStreamUpResponseEvent(OnStreamUpArgs args)
+        {
+            this.OnStreamUpResponse?.Invoke(this, args);
+        }
+
+        public void OnStreamDownResponseEvent(OnStreamDownArgs args)
+        {
+            this.OnStreamDownResponse?.Invoke(this, args);
+        }
+
+        public void OnJoinedChannelResponseEvent(OnJoinedChannelArgs args)
+        {
+            this.OnJoinedChannelResponse?.Invoke(this, args);
+        }
+
+        public void OnBeingHostedResponseEvent(OnBeingHostedArgs args)
+        {
+            this.OnBeingHostResponse?.Invoke(this, args);
+        }
+
+        public void OnHostingStartedResponseEvent(OnHostingStartedArgs args)
+        {
+            this.OnHostingStartedResponse?.Invoke(this, args);
         }
 
         #endregion Core Events

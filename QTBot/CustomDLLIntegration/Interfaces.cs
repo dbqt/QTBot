@@ -12,16 +12,17 @@ namespace QTBot.CustomDLLIntegration
         string IntegrationVersion { get; }
         string DLLSettingsFileName { get; }
         SettingsUI DefaultUI { get; }
+        SettingsUI CurrentSettingsUI { get; set; }
 
         bool DisableDLL();
         bool OnDLLStartup();        
         void OnMessageReceived(object sender, OnMessageReceivedArgs e);
 
         //These event will be fired from pubsub
-        void OnStreamUp(OnStreamUpArgs e);
-        void OnStreamDown(OnStreamDownArgs e);
+        void OnStreamUp(object sender, OnStreamUpArgs e);
+        void OnStreamDown(object sender, OnStreamDownArgs e);
 
-        void OnListenResponse(OnListenResponseArgs e);
+        void OnListenResponse(object sender, OnListenResponseArgs e);
         void OnEmoteOnlyOn(object sender, OnEmoteOnlyArgs e);
         void OnEmoteOnlyOff(object sender, OnEmoteOnlyOffArgs e);
         void OnRewardRedeemed(object sender, OnRewardRedeemedArgs e);        
@@ -30,10 +31,10 @@ namespace QTBot.CustomDLLIntegration
         void OnFollow(object sender, OnFollowArgs e);
 
         //These Events will be fired from the client
-        void OnBotJoinedChannel(OnJoinedChannelArgs e);
+        void OnBotJoinedChannel(object sender, OnJoinedChannelArgs e);
 
-        void OnHostingStarted(OnHostingStartedArgs e);
-        void OnBeingHosted(OnBeingHostedArgs e);
+        void OnHostingStarted(object sender, OnHostingStartedArgs e);
+        void OnBeingHosted(object sender, OnBeingHostedArgs e);
         void OnRaidNotification(object sender, OnRaidNotificationArgs e);        
     }
 }
