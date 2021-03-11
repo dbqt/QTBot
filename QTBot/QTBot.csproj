@@ -244,6 +244,7 @@
     </ApplicationDefinition>
     <Compile Include="Core\QTEventsManager.cs" />
     <Compile Include="CustomDLLIntegration\Delegates.cs" />
+    <Compile Include="CustomDLLIntegration\IntegrationBase.cs" />
     <Compile Include="CustomDLLIntegration\IntegrationHelper.cs" />
     <Compile Include="CustomDLLIntegration\Interfaces.cs" />
     <Compile Include="CustomDLLIntegration\Models.cs" />

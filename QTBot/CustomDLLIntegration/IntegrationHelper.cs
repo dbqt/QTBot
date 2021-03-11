@@ -155,9 +155,11 @@ namespace QTBot.CustomDLLIntegration
             {
                 foreach (DLLIntegrationModel integratrion in _DLLIntegratrions.Where(x => x.dllProperties.dllGuidID == integrationGuidID))
                 {
-                    integratrion.dllProperties.isEnabled = true;
-                    integratrion.dllIntegratrion.OnDLLStartup();
-                    count++;
+                    if (integratrion.dllIntegratrion.OnDLLStartup())
+                    {
+                        integratrion.dllProperties.isEnabled = true;
+                        count++;
+                    }
                 }
                 UpdateDLLStartupFile();
             }

@@ -11,16 +11,13 @@ namespace QTBot.CustomDLLIntegration
         string IntegratrionName { get; }
         string IntegratrionDefinition { get; }
         string IntegratrionVersion { get; }
+        SettingsUI DefaultUI { get; }
 
-        void WriteLog(string integrationName, LogLevel level, string message);
-        string GetDLLSettingsPath();
-        string GetDLLName();
-        string GetDLLVersion();
-        string GetDLLDescription();
         SettingsUI GetSettingsUI();
+        bool SaveSettings(SettingsUI uiValues);
 
         bool DisableDLL();
-        void OnDLLStartup();        
+        bool OnDLLStartup();        
         void OnMessageReceived(OnMessageReceivedArgs e);
 
         //These event will be fired from pubsub
