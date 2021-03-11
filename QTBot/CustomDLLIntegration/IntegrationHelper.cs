@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
+
 namespace QTBot.CustomDLLIntegration
 {
     public static class IntegrationHelper
@@ -61,7 +62,8 @@ namespace QTBot.CustomDLLIntegration
                     {
                         //*warning* this way of reading the file will fail if there is a large amount of DLLs to integrate (more than 1000). ReadAllText puts the whole file into ram
                         startupJSON = File.ReadAllText(_DLLStartupJSONPath);
-                        _IntegrationStartup = JsonConvert.DeserializeObject(startupJSON) as IntegrationStartup;
+
+                        _IntegrationStartup = JsonConvert.DeserializeObject<IntegrationStartup>(startupJSON);
                     }
                     else
                     {
@@ -104,9 +106,12 @@ namespace QTBot.CustomDLLIntegration
         /// </summary>
         private static void ReadAndStartDLLIntegration()
         {
-            foreach (DLLStartup dLLStartup in _IntegrationStartup.dllsToStart)
+            foreach (DLLStartup dLLStartup in _IntegrationStartup.dllsToStart.ToList())
             {
-                AddDLLToIntegration(dLLStartup);
+                if(!AddDLLToIntegration(dLLStartup))
+                {
+                    _IntegrationStartup.dllsToStart.Remove(dLLStartup);
+                }
             }
 
             foreach(DLLIntegrationModel integrationModel in _DLLIntegratrions)
@@ -134,7 +139,7 @@ namespace QTBot.CustomDLLIntegration
         /// Adds the DLL assembly to a managed list using the properties in the DLLStartup object passed by the user
         /// </summary>
         /// <param name="dLLStartup">The DLLStartup object that contains the properties of the dll assembly</param>
-        public static void AddDLLToIntegration(DLLStartup dLLStartup)
+        public static bool AddDLLToIntegration(DLLStartup dLLStartup)
         {
             try
             {
@@ -144,19 +149,29 @@ namespace QTBot.CustomDLLIntegration
                 }
 
                 var DLL = Assembly.LoadFile(dLLStartup.dllPath);
-                foreach (Type type in DLL.GetExportedTypes())
+                try
                 {
-                    var dllClass = Activator.CreateInstance(type);
-                    DLLIntegratrionInterface dLLIntegratrion = dllClass as DLLIntegratrionInterface;     
-                    if (dLLIntegratrion != null)
+                    foreach (Type type in DLL.GetExportedTypes())
                     {
-                        if (dLLStartup.isEnabled)
+                    
+                        var dllClass = Activator.CreateInstance(type);
+                        DLLIntegratrionInterface dLLIntegratrion = dllClass as DLLIntegratrionInterface;
+                        if (dLLIntegratrion != null)
                         {
-                            AddHandlersToDLLAssembly(dLLIntegratrion);
+                            if (dLLStartup.isEnabled)
+                            {
+                                AddHandlersToDLLAssembly(dLLIntegratrion);
+                            }
+                            RetrieveDLLSettings(dLLIntegratrion);
+                            _DLLIntegratrions.Add(new DLLIntegrationModel(dLLIntegratrion, dLLStartup));
                         }
-                        RetrieveDLLSettings(dLLIntegratrion);
-                        _DLLIntegratrions.Add(new DLLIntegrationModel(dLLIntegratrion, dLLStartup));
                     }
+
+                    return true;
+                }
+                catch (FileNotFoundException f)
+                {
+                    Utilities.Log(LogLevel.Warning, $"Could not get types for {dLLStartup.dllName}. {f.StackTrace}");
                 }
             }
             catch (Exception e)
@@ -165,6 +180,8 @@ namespace QTBot.CustomDLLIntegration
                 Utilities.Log(LogLevel.Error, $"Message: {e.Message} Stack: {e.StackTrace}");
                 DisableDLL(dLLStartup.dllGuidID);
             }
+
+            return false;
         }
 
         /// <summary>
@@ -419,7 +436,7 @@ namespace QTBot.CustomDLLIntegration
                 if (File.Exists(dllSettingsFilePath))
                 {
                     string StartupJSON = File.ReadAllText(dllSettingsFilePath);
-                    rtn = JsonConvert.DeserializeObject(StartupJSON) as SettingsUI;
+                    rtn = JsonConvert.DeserializeObject<SettingsUI>(StartupJSON);
 
                     if (rtn != null)
                     {
