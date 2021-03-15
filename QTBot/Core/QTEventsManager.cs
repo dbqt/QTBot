@@ -1,14 +1,11 @@
-﻿using QTBot.Helpers;
+﻿using Microsoft.Extensions.Logging;
+using QTBot.Helpers;
 using QTBot.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TwitchLib.Client.Events;
 using TwitchLib.PubSub.Events;
-using Microsoft.Extensions.Logging;
 
 namespace QTBot.Core
 {
@@ -48,19 +45,19 @@ namespace QTBot.Core
 
         public QTEventsManager()
         {
-            this.rawEventsModel = ConfigManager.ReadEvents();
-            if (this.rawEventsModel != null)
+            rawEventsModel = ConfigManager.ReadEvents();
+            if (rawEventsModel != null)
             {
                 events = new Dictionary<EventType, List<EventModel>>();
-                foreach (var eventItem in this.rawEventsModel.Events.Where(item => item.Active))
+                foreach (var eventItem in rawEventsModel.Events.Where(item => item.Active))
                 {
                     // Initialize list of events if it's the first of that type
-                    if (!this.events.ContainsKey(eventItem.Type))
+                    if (!events.ContainsKey(eventItem.Type))
                     {
-                        this.events.Add(eventItem.Type, new List<EventModel>());
+                        events.Add(eventItem.Type, new List<EventModel>());
                     }
 
-                    this.events[eventItem.Type].Add(eventItem);
+                    events[eventItem.Type].Add(eventItem);
                     Utilities.Log(LogLevel.Information, $"QTEventsManager - Registered event for {eventItem.Type}, message: {eventItem.Message}, option: {eventItem.Option}");
                 }
             }
@@ -69,22 +66,22 @@ namespace QTBot.Core
                 Utilities.Log(LogLevel.Information, $"QTEventsManager - Could not read events!");
             }
 
-            this.greetedUsers = new List<string>();
+            greetedUsers = new List<string>();
         }
 
         #region Core Events
         public void OnMessageReceivedEvent(OnMessageReceivedArgs args)
         {
-            this.OnMessageReceived?.Invoke(this, args);
+            OnMessageReceived?.Invoke(this, args);
 
             CheckGreetings(args.ChatMessage.DisplayName);
         }
 
         public void OnNewSubscriberEvent(OnChannelSubscriptionArgs args)
         {
-            this.OnChannelSubscription?.Invoke(this, args);
+            OnChannelSubscription?.Invoke(this, args);
 
-            if (!this.events.ContainsKey(EventType.Subscription))
+            if (!events.ContainsKey(EventType.Subscription))
             {
                 return;
             }
@@ -127,7 +124,7 @@ namespace QTBot.Core
                     break;
             }
 
-            foreach (var subEvent in this.events[EventType.Subscription])
+            foreach (var subEvent in events[EventType.Subscription])
             {
                 SendEventMessageInChat(subEvent, tokenReplacements);
             }
@@ -135,9 +132,9 @@ namespace QTBot.Core
 
         public void OnRaidedEvent(OnRaidNotificationArgs args)
         {
-            this.OnRaid?.Invoke(this, args);
+            OnRaid?.Invoke(this, args);
 
-            if (!this.events.ContainsKey(EventType.Raid))
+            if (!events.ContainsKey(EventType.Raid))
             {
                 return;
             }
@@ -146,7 +143,7 @@ namespace QTBot.Core
             tokenReplacements.Add(new KeyValuePair<string, string>("{{user}}", args.RaidNotification.MsgParamDisplayName));
             tokenReplacements.Add(new KeyValuePair<string, string>("{{count}}", args.RaidNotification.MsgParamViewerCount));
 
-            foreach (var raidEvent in this.events[EventType.Raid])
+            foreach (var raidEvent in events[EventType.Raid])
             {
                 SendEventMessageInChat(raidEvent, tokenReplacements);
             }
@@ -154,9 +151,9 @@ namespace QTBot.Core
 
         public void OnBitsReceivedEvent(OnBitsReceivedArgs args)
         {
-            this.OnBitsReceived?.Invoke(this, args);
+            OnBitsReceived?.Invoke(this, args);
 
-            if (!this.events.ContainsKey(EventType.Bits))
+            if (!events.ContainsKey(EventType.Bits))
             {
                 return;
             }
@@ -167,7 +164,7 @@ namespace QTBot.Core
             tokenReplacements.Add(new KeyValuePair<string, string>("{{total_bits}}", args.TotalBitsUsed.ToString()));
             tokenReplacements.Add(new KeyValuePair<string, string>("{{message}}", args.ChatMessage));
 
-            foreach (var bitEvent in this.events[EventType.Bits])
+            foreach (var bitEvent in events[EventType.Bits])
             {
                 SendEventMessageInChat(bitEvent, tokenReplacements);
             }
@@ -175,9 +172,9 @@ namespace QTBot.Core
 
         public void OnRewardRedeemedEvent(OnRewardRedeemedArgs args)
         {
-            this.OnRewardRedeemed?.Invoke(this, args);
+            OnRewardRedeemed?.Invoke(this, args);
 
-            if (!this.events.ContainsKey(EventType.Redeem))
+            if (!events.ContainsKey(EventType.Redeem))
             {
                 return;
             }
@@ -188,7 +185,7 @@ namespace QTBot.Core
             tokenReplacements.Add(new KeyValuePair<string, string>("{{message}}", args.Message));
 
             // Filter only redeems with matching title
-            foreach (var redeemEvent in this.events[EventType.Redeem].Where(redeem => redeem.Option.ToLowerInvariant() == args.RewardTitle.ToLowerInvariant()))
+            foreach (var redeemEvent in events[EventType.Redeem].Where(redeem => redeem.Option.ToLowerInvariant() == args.RewardTitle.ToLowerInvariant()))
             {
                 SendEventMessageInChat(redeemEvent, tokenReplacements);
             }
@@ -196,9 +193,9 @@ namespace QTBot.Core
 
         public void OnNewFollowerEvent(OnFollowArgs args)
         {
-            this.OnFollow?.Invoke(this, args);
+            OnFollow?.Invoke(this, args);
 
-            if (!this.events.ContainsKey(EventType.Follow))
+            if (!events.ContainsKey(EventType.Follow))
             {
                 return;
             }
@@ -206,7 +203,7 @@ namespace QTBot.Core
             var tokenReplacements = new List<KeyValuePair<string, string>>();
             tokenReplacements.Add(new KeyValuePair<string, string>("{{user}}", args.DisplayName));
 
-            foreach (var followEvent in this.events[EventType.Follow])
+            foreach (var followEvent in events[EventType.Follow])
             {
                 SendEventMessageInChat(followEvent, tokenReplacements);
             }
@@ -214,62 +211,62 @@ namespace QTBot.Core
 
         public void OnEmoteOnlyOnEvent(OnEmoteOnlyArgs args)
         {
-            this.OnEmoteOnly?.Invoke(this, args);
+            OnEmoteOnly?.Invoke(this, args);
         }
 
         public void OnEmoteOnlyOffEvent(OnEmoteOnlyOffArgs args)
         {
-            this.OnEmoteOnlyOff?.Invoke(this, args);
+            OnEmoteOnlyOff?.Invoke(this, args);
         }
 
         public void OnListenResponseEvent(OnListenResponseArgs args)
         {
-            this.OnListenResponse?.Invoke(this, args);
+            OnListenResponse?.Invoke(this, args);
         }
 
         public void OnStreamUpResponseEvent(OnStreamUpArgs args)
         {
-            this.OnStreamUpResponse?.Invoke(this, args);
+            OnStreamUpResponse?.Invoke(this, args);
         }
 
         public void OnStreamDownResponseEvent(OnStreamDownArgs args)
         {
-            this.OnStreamDownResponse?.Invoke(this, args);
+            OnStreamDownResponse?.Invoke(this, args);
         }
 
         public void OnJoinedChannelResponseEvent(OnJoinedChannelArgs args)
         {
-            this.OnJoinedChannelResponse?.Invoke(this, args);
+            OnJoinedChannelResponse?.Invoke(this, args);
         }
 
         public void OnBeingHostedResponseEvent(OnBeingHostedArgs args)
         {
-            this.OnBeingHostResponse?.Invoke(this, args);
+            OnBeingHostResponse?.Invoke(this, args);
         }
 
         public void OnHostingStartedResponseEvent(OnHostingStartedArgs args)
         {
-            this.OnHostingStartedResponse?.Invoke(this, args);
+            OnHostingStartedResponse?.Invoke(this, args);
         }
 
         #endregion Core Events
 
         private void CheckGreetings(string username)
         {
-            if (!this.events.ContainsKey(EventType.Greeting))
+            if (!events.ContainsKey(EventType.Greeting))
             {
                 return;
             }
 
             // Get greeting only if it was setup for this specific user
-            var greetEvents = this.events[EventType.Greeting].Where(item => item.Option.ToLowerInvariant() == username.ToLowerInvariant());
+            var greetEvents = events[EventType.Greeting].Where(item => item.Option.ToLowerInvariant() == username.ToLowerInvariant());
             if (greetEvents.Count() > 0)
             {
                 // But only if the user was never greeted
-                if (!this.greetedUsers.Contains(username))
+                if (!greetedUsers.Contains(username))
                 {
                     // Add the user to the list so we don't greet them again
-                    this.greetedUsers.Add(username);
+                    greetedUsers.Add(username);
 
                     var tokenReplacements = new List<KeyValuePair<string, string>>();
                     tokenReplacements.Add(new KeyValuePair<string, string>("{{user}}", username));

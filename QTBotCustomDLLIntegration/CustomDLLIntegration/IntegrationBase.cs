@@ -6,7 +6,7 @@ using TwitchLib.PubSub.Events;
 
 namespace QTBot.CustomDLLIntegration
 {
-    public abstract class IntegrationBase : DLLIntegratrionInterface
+    public abstract class IntegrationBase : DLLIntegrationInterface
     {
         public abstract string IntegrationName { get; }
         public abstract string IntegrationDefinition { get; }
@@ -18,7 +18,7 @@ namespace QTBot.CustomDLLIntegration
         public string DLLSettingsFileName { get; }
 
         public event LogMessage SendLogMessage;
-        public event MessageToTwitch SendMessageToTwtichChat;
+        public event MessageToTwitch SendMessageToTwitchChat;
 
         private Thread dllLoopThread = null;
 
@@ -34,10 +34,10 @@ namespace QTBot.CustomDLLIntegration
             {
                 if (dllLoopThread?.ThreadState != ThreadState.Suspended)
                 {
-                    dllLoopThread?.Abort();                    
+                    dllLoopThread?.Abort();
                 }
 
-                for(int i = 0; i < 5; i++)
+                for (int i = 0; i < 5; i++)
                 {
                     if (dllLoopThread?.ThreadState == ThreadState.Aborted)
                     {
@@ -50,12 +50,12 @@ namespace QTBot.CustomDLLIntegration
                     {
                         Thread.Sleep(100);
                     }
-                }                            
+                }
             }
             catch (Exception e)
             {
                 WriteLog(LogLevel.Information, $"DLL: {IntegrationName} has failed to stop.");
-                WriteLog(LogLevel.Error, e);                
+                WriteLog(LogLevel.Error, e);
             }
 
             return false;
@@ -65,9 +65,9 @@ namespace QTBot.CustomDLLIntegration
         {
             try
             {
-                if(dllLoopThread == null)
+                if (dllLoopThread == null)
                 {
-                    dllLoopThread = new Thread(this.DLLStartup);
+                    dllLoopThread = new Thread(DLLStartup);
                     dllLoopThread?.Start();
 
                     WriteLog(LogLevel.Information, $"DLL: {IntegrationName} has started correctly.");
@@ -94,7 +94,7 @@ namespace QTBot.CustomDLLIntegration
         protected void WriteLog(LogLevel level, string message)
         {
             SendLogMessage?.Invoke(IntegrationName, level, message);
-        }        
+        }
 
         protected abstract void DLLStartup();
 
@@ -124,6 +124,6 @@ namespace QTBot.CustomDLLIntegration
 
         public abstract void OnStreamDown(object sender, OnStreamDownArgs e);
 
-        public abstract void OnStreamUp(object sender, OnStreamUpArgs e);        
+        public abstract void OnStreamUp(object sender, OnStreamUpArgs e);
     }
 }

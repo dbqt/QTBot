@@ -1,10 +1,4 @@
-﻿using QTBot.Helpers;
-using QTBot.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using QTBot.Models;
 
 namespace QTBot.Core
 {
@@ -19,7 +13,7 @@ namespace QTBot.Core
         public string GreetingMessage;
 
         public TwitchOptions() { }
- 
+
         public TwitchOptions(TwitchOptionsModel model)
         {
             IsRedemptionInChat = model.IsRedemptionInChat;
@@ -33,11 +27,11 @@ namespace QTBot.Core
         {
             return new TwitchOptionsModel()
             {
-                IsRedemptionInChat = this.IsRedemptionInChat,
-                IsRedemptionTagUser = this.IsRedemptionTagUser,
-                RedemptionTagUser = this.RedemptionTagUser,
-                IsAutoShoutOutHost = this.IsAutoShoutOutHost,
-                GreetingMessage = this.GreetingMessage
+                IsRedemptionInChat = IsRedemptionInChat,
+                IsRedemptionTagUser = IsRedemptionTagUser,
+                RedemptionTagUser = RedemptionTagUser,
+                IsAutoShoutOutHost = IsAutoShoutOutHost,
+                GreetingMessage = GreetingMessage
             };
         }
     }

@@ -3,10 +3,10 @@ using TwitchLib.PubSub.Events;
 
 namespace QTBot.CustomDLLIntegration
 {
-    public interface DLLIntegratrionInterface
+    public interface DLLIntegrationInterface
     {
         event LogMessage SendLogMessage;
-        event MessageToTwitch SendMessageToTwtichChat;
+        event MessageToTwitch SendMessageToTwitchChat;
         string IntegrationName { get; }
         string IntegrationDefinition { get; }
         string IntegrationVersion { get; }
@@ -15,7 +15,7 @@ namespace QTBot.CustomDLLIntegration
         SettingsUI CurrentSettingsUI { get; set; }
 
         bool DisableDLL();
-        bool OnDLLStartup();        
+        bool OnDLLStartup();
         void OnMessageReceived(object sender, OnMessageReceivedArgs e);
 
         //These event will be fired from pubsub
@@ -25,7 +25,7 @@ namespace QTBot.CustomDLLIntegration
         void OnListenResponse(object sender, OnListenResponseArgs e);
         void OnEmoteOnlyOn(object sender, OnEmoteOnlyArgs e);
         void OnEmoteOnlyOff(object sender, OnEmoteOnlyOffArgs e);
-        void OnRewardRedeemed(object sender, OnRewardRedeemedArgs e);        
+        void OnRewardRedeemed(object sender, OnRewardRedeemedArgs e);
         void OnBitsReceived(object sender, OnBitsReceivedArgs e);
         void OnChannelSubscription(object sender, OnChannelSubscriptionArgs e);
         void OnFollow(object sender, OnFollowArgs e);
@@ -35,6 +35,6 @@ namespace QTBot.CustomDLLIntegration
 
         void OnHostingStarted(object sender, OnHostingStartedArgs e);
         void OnBeingHosted(object sender, OnBeingHostedArgs e);
-        void OnRaidNotification(object sender, OnRaidNotificationArgs e);        
+        void OnRaidNotification(object sender, OnRaidNotificationArgs e);
     }
 }

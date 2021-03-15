@@ -1,7 +1,6 @@
 ﻿using QTBot.Helpers;
 using System;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -35,24 +34,24 @@ namespace QTBot.UI.Views
             QTCore.Instance.LoadConfigs();
             if (QTCore.Instance.IsMainConfigLoaded)
             {
-                this.ConfigCheck.Visibility = Visibility.Collapsed;
+                ConfigCheck.Visibility = Visibility.Collapsed;
             }
             else
             {
-                this.ConfigCheck.Visibility = Visibility.Visible;
+                ConfigCheck.Visibility = Visibility.Visible;
             }
 
-            this.CurrentStreamerText.Text = "Bot will post to this channel: " + QTCore.Instance.CurrentChannelName;
-            this.CurrentBotText.Text = "Bot will be posting as: " + QTCore.Instance.BotUserName;
+            CurrentStreamerText.Text = "Bot will post to this channel: " + QTCore.Instance.CurrentChannelName;
+            CurrentBotText.Text = "Bot will be posting as: " + QTCore.Instance.BotUserName;
         }
 
         private void InstanceOnConnected(object sender, EventArgs e)
         {
             Utilities.ExecuteOnUIThread(() =>
             {
-                this.isConnected = true;
-                this.TestMessage.IsEnabled = this.isConnected;
-                this.TestRedeem.IsEnabled = this.isConnected;
+                isConnected = true;
+                TestMessage.IsEnabled = isConnected;
+                TestRedeem.IsEnabled = isConnected;
             });
         }
 
@@ -60,9 +59,9 @@ namespace QTBot.UI.Views
         {
             Utilities.ExecuteOnUIThread(() =>
             {
-                this.isConnected = false;
-                this.TestMessage.IsEnabled = this.isConnected;
-                this.TestRedeem.IsEnabled = this.isConnected;
+                isConnected = false;
+                TestMessage.IsEnabled = isConnected;
+                TestRedeem.IsEnabled = isConnected;
             });
         }
 
@@ -88,7 +87,7 @@ namespace QTBot.UI.Views
 
         private void ToggleInstructionPanel(object sender, RoutedEventArgs e)
         {
-            this.InstructionPanel.Visibility = this.InstructionPanel.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            InstructionPanel.Visibility = InstructionPanel.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         }
     }
 }

@@ -4,68 +4,80 @@ namespace QTBot.CustomDLLIntegration
 {
     public class SettingsUI
     {
+        public SettingsUI() { }
+
         public SettingsUI(UISection uiS)
         {
-            sections.Add(uiS);
+            Sections.Add(uiS);
         }
 
         public SettingsUI(List<UISection> uiS)
         {
-            sections = uiS;
+            Sections = uiS;
         }
 
-        public List<UISection> sections = new List<UISection>();
+        public List<UISection> Sections = new List<UISection>();
     }
 
     public class UISection
     {
+        public UISection() { }
+
         public UISection(string name)
         {
-            sectionName = name;
+            SectionName = name;
         }
 
-        public string sectionName { get; }
-        public List<UIObject> sectionElements = new List<UIObject>();
+        public string SectionName { get; }
+        public List<UIObject> SectionElements = new List<UIObject>();
     }
 
     public class UIObject
     {
+        public UIObject() { }
+
         public UIObject(string ID, string propertyName, int order, string displayedText)
         {
-            uiObjectID = ID;
-            uiObjectsOrder = order;
-            uiPropertyName = propertyName;
+            UIObjectID = ID;
+            UIObjectsOrder = order;
+            UIPropertyName = propertyName;
             text = displayedText;
         }
 
-        public string uiObjectID { get; }
-        public string uiPropertyName { get; }
-        public int uiObjectsOrder { get; }
-        public object uiValue { get; set; }
+        public string UIObjectID { get; }
+        public string UIPropertyName { get; }
+        public int UIObjectsOrder { get; }
+        public object UIValue { get; set; }
 
         private string text;
     }
 
     public class UICheckbox : UIObject
     {
+        public UICheckbox() { }
+
         public UICheckbox(string ID, string propertyName, int order, string displayedText) : base(ID, propertyName, order, displayedText)
         {
 
         }
     }
 
-    public class RadialButton : UIObject
+    public class UIRadialButton : UIObject
     {
-        public RadialButton(string ID, string propertyName, int order, List<KeyValuePair<string, object>> userOptions, string displayedText) : base(ID, propertyName, order, displayedText)
+        public UIRadialButton() { }
+
+        public UIRadialButton(string ID, string propertyName, int order, List<KeyValuePair<string, object>> userOptions, string displayedText) : base(ID, propertyName, order, displayedText)
         {
-            options = userOptions;
+            Options = userOptions;
         }
 
-        public List<KeyValuePair<string, object>> options { get; }
+        public List<KeyValuePair<string, object>> Options { get; }
     }
 
     public class UITextBox : UIObject
     {
+        public UITextBox() { }
+
         public UITextBox(string ID, string propertyName, int order, string displayedText) : base(ID, propertyName, order, displayedText)
         {
 
@@ -74,45 +86,53 @@ namespace QTBot.CustomDLLIntegration
 
     public class UISlider : UIObject
     {
+        public UISlider() { }
+
         public UISlider(string ID, string propertyName, int order, string displayedText, int max, int min, int current, int increment) : base(ID, propertyName, order, displayedText)
         {
-            maxValue = max;
-            minValue = min;
-            currentValue = current;
-            incrementValue = increment;
+            MaxValue = max;
+            MinValue = min;
+            CurrentValue = current;
+            IncrementValue = increment;
         }
 
-        public int maxValue { get; }
-        public int minValue { get; }
-        public int currentValue { get; }
-        public int incrementValue { get; }
+        public int MaxValue { get; }
+        public int MinValue { get; }
+        public int CurrentValue { get; }
+        public int IncrementValue { get; }
     }
 
     public class UISelectionDropdown : UIObject
     {
+        public UISelectionDropdown() { }
+
         public UISelectionDropdown(string ID, string propertyName, int order, List<KeyValuePair<string, object>> dropDownList, string displayedText) : base(ID, propertyName, order, displayedText)
         {
-            list = dropDownList;
+            List = dropDownList;
         }
 
-        public List<KeyValuePair<string, object>> list { get; }
+        public List<KeyValuePair<string, object>> List { get; }
     }
 
     public class UIEditableDropdown : UIObject
     {
+        public UIEditableDropdown() { }
+
         public UIEditableDropdown(string ID, string propertyName, List<KeyValuePair<string, object>> dropDownList, int order, string displayedText, string valueDisplayText) : base(ID, propertyName, order, displayedText)
         {
-            list = dropDownList;
-            valueLabel = valueDisplayText;
+            List = dropDownList;
+            ValueLabel = valueDisplayText;
         }
 
-        public List<KeyValuePair<string, object>> list { get; }
+        public List<KeyValuePair<string, object>> List { get; }
 
-        public string valueLabel { get; }
+        public string ValueLabel { get; }
     }
 
     public class UITable : UIObject
     {
+        public UITable() { }
+
         public UITable(string ID, string propertyName, int order, string displayedText) : base(ID, propertyName, order, displayedText)
         {
 
@@ -121,6 +141,8 @@ namespace QTBot.CustomDLLIntegration
 
     public class UIButton : UIObject
     {
+        public UIButton() { }
+
         public UIButton(string ID, string propertyName, int order, string displayedText) : base(ID, propertyName, order, displayedText)
         {
 

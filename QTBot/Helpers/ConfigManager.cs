@@ -2,13 +2,7 @@
 using QTBot.Core;
 using QTBot.Models;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.IO.Packaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QTBot.Helpers
 {
@@ -162,7 +156,7 @@ namespace QTBot.Helpers
                 {
                     Utilities.Log($"ConfigManager - {fileName} not found, creating a new file...");
                     var fileStream = File.Create(filePath);
-                    fileStream.Close();                
+                    fileStream.Close();
                 }
 
                 Utilities.Log($"ConfigManager - saving to {fileName}...");

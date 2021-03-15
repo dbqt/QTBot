@@ -4,9 +4,7 @@ using QTBot.Models;
 using QTBot.Modules;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
@@ -40,14 +38,14 @@ namespace QTBot.Core
 
         public QTCommandsManager()
         {
-            this.rawCommands = ConfigManager.ReadCommands();
+            rawCommands = ConfigManager.ReadCommands();
             // Populate commands loop up with aliases
-            foreach (var command in this.rawCommands.Commands)
+            foreach (var command in rawCommands.Commands)
             {
-                this.commandsLookup.Add(command.Keyword, command);
+                commandsLookup.Add(command.Keyword, command);
                 foreach (var alias in command.Aliases)
                 {
-                    this.commandsLookup.Add(alias, command);
+                    commandsLookup.Add(alias, command);
                 }
             }
         }
@@ -69,17 +67,17 @@ namespace QTBot.Core
             }
 
             // Early exit if the command is not found
-            if (!this.commandsLookup.ContainsKey(command))
+            if (!commandsLookup.ContainsKey(command))
             {
                 return null;
             }
 
-            var currentCommand = this.commandsLookup[command];
+            var currentCommand = commandsLookup[command];
 
             // Early exit if the command is on cooldown
-            if (this.commandsCooldownLookup.ContainsKey(command))
+            if (commandsCooldownLookup.ContainsKey(command))
             {
-                var timeDelta = DateTime.Now - this.commandsCooldownLookup[command];
+                var timeDelta = DateTime.Now - commandsCooldownLookup[command];
                 // Still on cooldown
                 if (timeDelta.TotalSeconds < currentCommand.CooldownSeconds)
                 {
@@ -88,7 +86,7 @@ namespace QTBot.Core
                 // Cooldown is done
                 else
                 {
-                    this.commandsCooldownLookup.Remove(command);
+                    commandsCooldownLookup.Remove(command);
                 }
             }
 
@@ -114,7 +112,7 @@ namespace QTBot.Core
                     argumentArray[0] = amount.ToString();
 
                     message = ReplaceArguments(currentCommand.Response, argumentArray);
-                    this.commandsCooldownLookup[command] = DateTime.Now;
+                    commandsCooldownLookup[command] = DateTime.Now;
                 }
                 // Is contributing an amount
                 else if (int.TryParse(args.FirstOrDefault(), out int amount))
@@ -136,7 +134,7 @@ namespace QTBot.Core
                         }
                         var messageFormat = ReplaceUsername(currentCommand.Response, username);
                         message = ReplaceArguments(messageFormat, args.ToArray());
-                        this.commandsCooldownLookup[command] = DateTime.Now;
+                        commandsCooldownLookup[command] = DateTime.Now;
                     }
                 }
                 else
@@ -162,7 +160,7 @@ namespace QTBot.Core
                     }
                     var messageFormat = ReplaceUsername(currentCommand.Response, username);
                     message = ReplaceArguments(messageFormat, args.ToArray());
-                    this.commandsCooldownLookup[command] = DateTime.Now;
+                    commandsCooldownLookup[command] = DateTime.Now;
                 }
             }
             // No cost
@@ -170,7 +168,7 @@ namespace QTBot.Core
             {
                 var messageFormat = ReplaceUsername(currentCommand.Response, username);
                 message = ReplaceArguments(messageFormat, args.ToArray());
-                this.commandsCooldownLookup[command] = DateTime.Now;
+                commandsCooldownLookup[command] = DateTime.Now;
             }
 
             return message;
@@ -202,7 +200,7 @@ namespace QTBot.Core
 
         private string ReplaceUsername(string stringToModify, string username)
         {
-            return Utilities.ReplaceKeywords(stringToModify, new List<KeyValuePair<string, string>>{ new KeyValuePair<string, string>("{{user}}", username)});
+            return Utilities.ReplaceKeywords(stringToModify, new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("{{user}}", username) });
         }
 
         private string ReplaceArguments(string stringToModify, string[] args)

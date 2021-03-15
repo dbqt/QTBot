@@ -23,9 +23,9 @@ namespace QTBot.UI.Views
         {
             get { return timersList; }
             set
-            { 
+            {
                 timersList = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.TimersList)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TimersList)));
             }
         }
 
@@ -34,7 +34,7 @@ namespace QTBot.UI.Views
             InitializeComponent();
             DataContext = this;
 
-            this.TimersList = new List<TimerInternal>();
+            TimersList = new List<TimerInternal>();
 
             // Load for the first time
             LoadTimers();
@@ -46,9 +46,9 @@ namespace QTBot.UI.Views
         /// </summary>
         private void AddTimer(TimerModel model)
         {
-            this.TimersList.Add(new TimerInternal(model));
+            TimersList.Add(new TimerInternal(model));
             UpdateTimersIndex();
-            this.TimersListView.Items.Refresh();
+            TimersListView.Items.Refresh();
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace QTBot.UI.Views
         /// </summary>
         private void LoadTimers()
         {
-            this.TimersList.Clear();
+            TimersList.Clear();
 
             var rawTimers = ConfigManager.ReadTimers();
             foreach (var timer in rawTimers.Timers)
@@ -70,9 +70,9 @@ namespace QTBot.UI.Views
         /// </summary>
         private void UpdateTimersIndex()
         {
-            foreach (var timer in this.TimersList)
+            foreach (var timer in TimersList)
             {
-                timer.Index = this.TimersList.IndexOf(timer);
+                timer.Index = TimersList.IndexOf(timer);
             }
         }
 
@@ -81,7 +81,7 @@ namespace QTBot.UI.Views
         /// </summary>
         private void UpdateTimersValidity()
         {
-            foreach (var timer in this.TimersList)
+            foreach (var timer in TimersList)
             {
                 timer.UpdateValidity();
             }
@@ -94,17 +94,17 @@ namespace QTBot.UI.Views
         /// </summary>
         private void OnSaveButtonClick(object sender, RoutedEventArgs e)
         {
-            lock (this.itemLock)
+            lock (itemLock)
             {
                 UpdateTimersValidity();
 
-                if (this.TimersList.Any(item => item.IsInvalid))
+                if (TimersList.Any(item => item.IsInvalid))
                 {
                     MainContent.Instance.ShowSimpleDialog("Errors in timers", "Please make there are no invalid values in timers.");
                 }
                 else
                 {
-                    ConfigManager.SaveTimers(new TimersModel() { Timers = this.TimersList.ConvertAll((item) => item.ToModel()) });
+                    ConfigManager.SaveTimers(new TimersModel() { Timers = TimersList.ConvertAll((item) => item.ToModel()) });
                     MainContent.Instance.ShowSimpleDialog("Timers saved!", "");
                 }
             }
@@ -115,7 +115,7 @@ namespace QTBot.UI.Views
         /// </summary>
         private void ReloadButtonClick(object sender, RoutedEventArgs e)
         {
-            lock (this.itemLock)
+            lock (itemLock)
             {
                 LoadTimers();
                 MainContent.Instance.ShowSimpleDialog("Timers reloaded!", "");
@@ -127,7 +127,7 @@ namespace QTBot.UI.Views
         /// </summary>
         private void AddNewTimerClick(object sender, RoutedEventArgs e)
         {
-            lock (this.itemLock)
+            lock (itemLock)
             {
                 AddTimer(new TimerModel());
             }
@@ -138,12 +138,12 @@ namespace QTBot.UI.Views
         /// </summary>
         private void DeleteTimerClick(object sender, RoutedEventArgs e)
         {
-            lock (this.itemLock)
+            lock (itemLock)
             {
                 var data = (TimerInternal)((Button)sender).DataContext;
-                this.TimersList.RemoveAt(data.Index);
+                TimersList.RemoveAt(data.Index);
                 UpdateTimersIndex();
-                this.TimersListView.Items.Refresh();
+                TimersListView.Items.Refresh();
             }
         }
 
@@ -176,11 +176,11 @@ namespace QTBot.UI.Views
 
             public TimerInternal(TimerModel model)
             {
-                this.Name = model.Name;
-                this.Message = model.Message;
-                this.DelayMin = model.DelayMin;
-                this.OffsetMin = model.DelayMin;
-                this.Active = model.Active;
+                Name = model.Name;
+                Message = model.Message;
+                DelayMin = model.DelayMin;
+                OffsetMin = model.DelayMin;
+                Active = model.Active;
             }
 
             public event PropertyChangedEventHandler PropertyChanged;
@@ -192,11 +192,11 @@ namespace QTBot.UI.Views
             {
                 return new TimerModel()
                 {
-                    Name = this.Name,
-                    Message = this.Message,
-                    DelayMin = this.DelayMin,
-                    OffsetMin = this.OffsetMin,
-                    Active = this.Active
+                    Name = Name,
+                    Message = Message,
+                    DelayMin = DelayMin,
+                    OffsetMin = OffsetMin,
+                    Active = Active
                 };
             }
 
@@ -206,8 +206,8 @@ namespace QTBot.UI.Views
             public void UpdateValidity()
             {
                 // Is invalid if name is empty OR message is empty OR delayMin is 0 or less OR offsetMin is less than 0
-                this.IsInvalid = string.IsNullOrWhiteSpace(this.Name) || string.IsNullOrWhiteSpace(this.Message) || this.DelayMin <= 0 || this.OffsetMin < 0;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsInvalid)));
+                IsInvalid = string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Message) || DelayMin <= 0 || OffsetMin < 0;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsInvalid)));
             }
         }
     }

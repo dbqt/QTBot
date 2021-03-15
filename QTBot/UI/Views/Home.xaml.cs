@@ -1,8 +1,5 @@
 ﻿using QTBot.Helpers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -30,17 +27,17 @@ namespace QTBot.UI.Views
             QTCore.Instance.LoadConfigs();
             if (QTCore.Instance.IsMainConfigLoaded)
             {
-                this.ConfigCheck.Visibility = Visibility.Collapsed;
-                this.Connect.IsEnabled = true;
+                ConfigCheck.Visibility = Visibility.Collapsed;
+                Connect.IsEnabled = true;
             }
             else
             {
-                this.ConfigCheck.Visibility = Visibility.Visible;
-                this.Connect.IsEnabled = false;
+                ConfigCheck.Visibility = Visibility.Visible;
+                Connect.IsEnabled = false;
             }
 
-            this.CurrentStreamerText.Text = "Bot will post to this channel: " + QTCore.Instance.CurrentChannelName;
-            this.CurrentBotText.Text = "Bot will be posting as: " + QTCore.Instance.BotUserName;
+            CurrentStreamerText.Text = "Bot will post to this channel: " + QTCore.Instance.CurrentChannelName;
+            CurrentBotText.Text = "Bot will be posting as: " + QTCore.Instance.BotUserName;
         }
 
         #region Events
@@ -49,9 +46,9 @@ namespace QTBot.UI.Views
         {
             Utilities.ExecuteOnUIThread(() =>
             {
-                this.isConnected = true;
-                this.ConnectionStatus.Text = "Connected";
-                this.Connect.Content = "Disconnect";
+                isConnected = true;
+                ConnectionStatus.Text = "Connected";
+                Connect.Content = "Disconnect";
             });
         }
 
@@ -59,15 +56,15 @@ namespace QTBot.UI.Views
         {
             Utilities.ExecuteOnUIThread(() =>
             {
-                this.isConnected = false;
-                this.ConnectionStatus.Text = "Disconnected";
-                this.Connect.Content = "Connect";
+                isConnected = false;
+                ConnectionStatus.Text = "Disconnected";
+                Connect.Content = "Connect";
             });
         }
 
         private void OnConnectClick(object sender, RoutedEventArgs e)
         {
-            if (this.isConnected)
+            if (isConnected)
             {
                 QTCore.Instance.Disconnect();
             }

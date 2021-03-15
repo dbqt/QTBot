@@ -1,12 +1,12 @@
-﻿using Squirrel;
+﻿using Microsoft.Extensions.Logging;
+using Squirrel;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
-using Microsoft.Extensions.Logging;
-using System.Globalization;
 
 namespace QTBot.Helpers
 {
@@ -53,10 +53,10 @@ namespace QTBot.Helpers
             {
                 lvl = lvl.ToUpper(new CultureInfo("en-US", false));
             }
-            if(IsDebugEnabled || (level != LogLevel.Information && level != LogLevel.Debug))
+            if (IsDebugEnabled || (level != LogLevel.Information && level != LogLevel.Debug))
             {
                 Trace.WriteLine($"[{DateTime.Now.ToString()}] - [{lvl}] : {message}");
-            }            
+            }
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace QTBot.Helpers
         /// </summary>
         /// <param name="e">the exception to log</param>
         public static void Log(Exception e)
-        {            
+        {
             Log(LogLevel.Error, $"Message: { e.Message}, Stack: { e.StackTrace}");
         }
 
@@ -121,7 +121,7 @@ namespace QTBot.Helpers
                 {
                     return false;
                 }
-                
+
                 var hasUpdate = updateInfo.CurrentlyInstalledVersion.Version != updateInfo.FutureReleaseEntry.Version;
 
                 return hasUpdate;

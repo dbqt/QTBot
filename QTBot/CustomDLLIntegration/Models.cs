@@ -1,23 +1,21 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 
 namespace QTBot.CustomDLLIntegration
 {
-
     public class DLLIntegrationModel
     {
         public DLLIntegrationModel() { }
 
-        public DLLIntegrationModel(DLLIntegratrionInterface dllI, DLLStartup startup)
+        public DLLIntegrationModel(DLLIntegrationInterface dllI, DLLStartup startup)
         {
-            dllIntegration = dllI;
-            dllProperties = startup;
+            DllIntegration = dllI;
+            DllProperties = startup;
         }
 
-        public DLLIntegratrionInterface dllIntegration { get; }
-        public DLLStartup dllProperties { get; }
+        public DLLIntegrationInterface DllIntegration { get; }
+        public DLLStartup DllProperties { get; }
     }
 
     public class IntegrationStartup
@@ -26,17 +24,17 @@ namespace QTBot.CustomDLLIntegration
 
         public IntegrationStartup(List<string> dllPaths)
         {
-            dllsToStart = new List<DLLStartup>();
-            foreach(string dllPath in dllPaths)
+            DllsToStart = new List<DLLStartup>();
+            foreach (string dllPath in dllPaths)
             {
-                if(Path.GetExtension(dllPath) == ".dll")
+                if (Path.GetExtension(dllPath) == ".dll")
                 {
-                    dllsToStart.Add(new DLLStartup(dllPath));
+                    DllsToStart.Add(new DLLStartup(dllPath));
                 }
             }
         }
 
-        public List<DLLStartup> dllsToStart { get; } = new List<DLLStartup>();
+        public List<DLLStartup> DllsToStart { get; set; }
     }
 
     public class DLLStartup
@@ -49,15 +47,15 @@ namespace QTBot.CustomDLLIntegration
 
         public DLLStartup(string filePath, bool enabled, Guid guidID)
         {
-            dllName = Path.GetFileNameWithoutExtension(filePath);
-            isEnabled = enabled;
-            dllPath = filePath;
-            dllGuidID = guidID;
+            DllName = Path.GetFileNameWithoutExtension(filePath);
+            IsEnabled = enabled;
+            DllPath = filePath;
+            DllGuidID = guidID;
         }
 
-        public string dllName { get; } = "";
-        public string dllPath { get; } = "";
-        public bool isEnabled { get; set; } = false;
-        public Guid dllGuidID { get; }
+        public string DllName { get; set; } = "";
+        public string DllPath { get; set; } = "";
+        public bool IsEnabled { get; set; } = false;
+        public Guid DllGuidID { get; set; }
     }
 }

@@ -28,15 +28,15 @@ namespace QTBot.UI.Views
             set
             {
                 eventsList = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.EventsList)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EventsList)));
             }
         }
 
         public Events()
         {
             InitializeComponent();
-            this.DataContext = this;
-            this.EventsList = new List<EventInternal>();
+            DataContext = this;
+            EventsList = new List<EventInternal>();
 
             LoadEvents();
         }
@@ -48,14 +48,14 @@ namespace QTBot.UI.Views
         {
             // Legacy events
             var options = QTCore.Instance.TwitchOptions;
-            this.IsRedemptionInChatBox.IsChecked = options.IsRedemptionInChat;
-            this.IsTagUserBox.IsChecked = options.IsRedemptionTagUser;
-            this.UserNameTextBox.Text = options.RedemptionTagUser;
-            this.IsAutoShoutOutBox.IsChecked = options.IsAutoShoutOutHost;
-            this.GreetingMessage.Text = options.GreetingMessage;
+            IsRedemptionInChatBox.IsChecked = options.IsRedemptionInChat;
+            IsTagUserBox.IsChecked = options.IsRedemptionTagUser;
+            UserNameTextBox.Text = options.RedemptionTagUser;
+            IsAutoShoutOutBox.IsChecked = options.IsAutoShoutOutHost;
+            GreetingMessage.Text = options.GreetingMessage;
 
             // Custom events
-            this.EventsList.Clear();
+            EventsList.Clear();
             var rawEvents = ConfigManager.ReadEvents();
             foreach (var item in rawEvents.Events)
             {
@@ -68,9 +68,9 @@ namespace QTBot.UI.Views
         /// </summary>
         private void AddNewEvent(EventInternal newEvent)
         {
-            this.EventsList.Add(newEvent);
+            EventsList.Add(newEvent);
             UpdateEventsIndex();
-            this.EventsListView.Items.Refresh();
+            EventsListView.Items.Refresh();
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace QTBot.UI.Views
         /// </summary>
         private void UpdateValidity()
         {
-            foreach (var eventItem in this.EventsList)
+            foreach (var eventItem in EventsList)
             {
                 eventItem.UpdateValidity();
             }
@@ -89,20 +89,20 @@ namespace QTBot.UI.Views
         /// </summary>
         private void UpdateEventsIndex()
         {
-            foreach (var eventItem in this.EventsList)
+            foreach (var eventItem in EventsList)
             {
-                eventItem.Index = this.EventsList.IndexOf(eventItem);
+                eventItem.Index = EventsList.IndexOf(eventItem);
             }
         }
 
         #region Callbacks
         private void OnSaveButtonClick(object sender, RoutedEventArgs e)
         {
-            lock (this.itemLock)
+            lock (itemLock)
             {
                 UpdateValidity();
 
-                if (this.EventsList.Any(item => item.IsInvalid))
+                if (EventsList.Any(item => item.IsInvalid))
                 {
                     MainContent.Instance.ShowSimpleDialog("Errors in events", "Please make there are no invalid values in events.");
                 }
@@ -111,16 +111,16 @@ namespace QTBot.UI.Views
                     // Legacy events
                     var twitchOptions = new TwitchOptions()
                     {
-                        IsRedemptionInChat = this.IsRedemptionInChatBox.IsChecked ?? false,
-                        IsRedemptionTagUser = this.IsTagUserBox.IsChecked ?? false,
-                        RedemptionTagUser = this.UserNameTextBox.Text,
-                        IsAutoShoutOutHost = this.IsAutoShoutOutBox.IsChecked ?? false,
-                        GreetingMessage = this.GreetingMessage.Text ?? "Hai hai, I'm connected and ready to go!"
+                        IsRedemptionInChat = IsRedemptionInChatBox.IsChecked ?? false,
+                        IsRedemptionTagUser = IsTagUserBox.IsChecked ?? false,
+                        RedemptionTagUser = UserNameTextBox.Text,
+                        IsAutoShoutOutHost = IsAutoShoutOutBox.IsChecked ?? false,
+                        GreetingMessage = GreetingMessage.Text ?? "Hai hai, I'm connected and ready to go!"
                     };
                     ConfigManager.SaveTwitchOptionsConfigs(twitchOptions);
 
                     // Custom events
-                    ConfigManager.SaveEvents(new EventsModel() { Events = this.EventsList.ConvertAll(item => item.ToModel()) });
+                    ConfigManager.SaveEvents(new EventsModel() { Events = EventsList.ConvertAll(item => item.ToModel()) });
 
                     MainContent.Instance.ShowSimpleDialog("Events saved!", "");
                 }
@@ -129,7 +129,7 @@ namespace QTBot.UI.Views
 
         private void ReloadButtonClick(object sender, RoutedEventArgs e)
         {
-            lock(this.itemLock)
+            lock (itemLock)
             {
                 LoadEvents();
                 MainContent.Instance.ShowSimpleDialog("Events reloaded!", "");
@@ -138,29 +138,29 @@ namespace QTBot.UI.Views
 
         private void LegacyEventToggleClick(object sender, RoutedEventArgs e)
         {
-            if (this.LegacyEventContainer.Visibility != Visibility.Visible)
+            if (LegacyEventContainer.Visibility != Visibility.Visible)
             {
-                this.LegacyEventContainer.Visibility = Visibility.Visible;
-                this.LegacyEventToggleIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.ExpandLess;
+                LegacyEventContainer.Visibility = Visibility.Visible;
+                LegacyEventToggleIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.ExpandLess;
             }
             else
             {
-                this.LegacyEventContainer.Visibility = Visibility.Collapsed;
-                this.LegacyEventToggleIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.ExpandMore;
+                LegacyEventContainer.Visibility = Visibility.Collapsed;
+                LegacyEventToggleIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.ExpandMore;
             }
         }
 
         private void CustomEventToggleClick(object sender, RoutedEventArgs e)
         {
-            if (this.CustomEventsContainer.Visibility != Visibility.Visible)
+            if (CustomEventsContainer.Visibility != Visibility.Visible)
             {
-                this.CustomEventsContainer.Visibility = Visibility.Visible;
-                this.CustomEventToggleIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.ExpandLess;
+                CustomEventsContainer.Visibility = Visibility.Visible;
+                CustomEventToggleIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.ExpandLess;
             }
             else
             {
-                this.CustomEventsContainer.Visibility = Visibility.Collapsed;
-                this.CustomEventToggleIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.ExpandMore;
+                CustomEventsContainer.Visibility = Visibility.Collapsed;
+                CustomEventToggleIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.ExpandMore;
             }
         }
 
@@ -171,12 +171,12 @@ namespace QTBot.UI.Views
 
         private void DeleteEventClick(object sender, RoutedEventArgs e)
         {
-            lock (this.itemLock)
+            lock (itemLock)
             {
                 var data = (EventInternal)((Button)sender).DataContext;
-                this.EventsList.RemoveAt(data.Index);
+                EventsList.RemoveAt(data.Index);
                 UpdateEventsIndex();
-                this.EventsListView.Items.Refresh();
+                EventsListView.Items.Refresh();
             }
         }
 
@@ -250,13 +250,13 @@ Greeting events
             {
                 get
                 {
-                    return this.type;
+                    return type;
                 }
                 set
                 {
-                    this.type = value;
-                    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Type)));
-                    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsOptionNeeded)));
+                    type = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Type)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsOptionNeeded)));
                 }
             }
 
@@ -271,10 +271,10 @@ Greeting events
 
             public EventInternal(EventModel model)
             {
-                this.Type = model.Type;
-                this.Message = model.Message;
-                this.Option = model.Option;
-                this.Active = model.Active;
+                Type = model.Type;
+                Message = model.Message;
+                Option = model.Option;
+                Active = model.Active;
             }
 
             /// <summary>
@@ -284,10 +284,10 @@ Greeting events
             {
                 return new EventModel()
                 {
-                    Type = this.Type,
-                    Message = this.Message,
-                    Option = this.Option,
-                    Active = this.Active
+                    Type = Type,
+                    Message = Message,
+                    Option = Option,
+                    Active = Active
                 };
             }
 
@@ -297,8 +297,8 @@ Greeting events
             public void UpdateValidity()
             {
                 // Is invalid if message is empty OR option is needed but empty
-                this.IsInvalid = string.IsNullOrWhiteSpace(this.Message) || (this.IsOptionNeeded && string.IsNullOrWhiteSpace(this.Option));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsInvalid)));
+                IsInvalid = string.IsNullOrWhiteSpace(Message) || (IsOptionNeeded && string.IsNullOrWhiteSpace(Option));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsInvalid)));
             }
         }
 

@@ -26,25 +26,25 @@ namespace QTBot
         {
             get
             {
-                return this.isDisconnected;
+                return isDisconnected;
             }
             set
             {
-                this.isDisconnected = value;
-                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsDisconnected)));
+                isDisconnected = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDisconnected)));
             }
         }
 
         public bool IsDialogVisible
         {
             get
-            { 
-                return this.isDialogVisible;
+            {
+                return isDialogVisible;
             }
-            set 
-            { 
-                this.isDialogVisible = value;
-                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsDialogVisible)));
+            set
+            {
+                isDialogVisible = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDialogVisible)));
             }
         }
 
@@ -52,7 +52,7 @@ namespace QTBot
         {
             if (MainContent.Instance != null)
             {
-                Utilities.Log(Microsoft.Extensions.Logging.LogLevel.Error,"Error with MainContent - MainContent was created a second time!");
+                Utilities.Log(Microsoft.Extensions.Logging.LogLevel.Error, "Error with MainContent - MainContent was created a second time!");
                 return;
             }
 
@@ -66,43 +66,43 @@ namespace QTBot
 
             // Setup views
             HideAllViews();
-            this.Home.Visibility = Visibility.Visible;
+            Home.Visibility = Visibility.Visible;
 
             // Setup dialog system
-            this.DialogBoxMainButton.Click += DialogBoxMainButtonClick;
-            this.DialogBoxSecondaryButton.Click += DialogBoxSecondaryButtonClick;
+            DialogBoxMainButton.Click += DialogBoxMainButtonClick;
+            DialogBoxSecondaryButton.Click += DialogBoxSecondaryButtonClick;
 
             CheckUpdate();
         }
 
         private void InstanceOnConnected(object sender, EventArgs e)
         {
-            this.IsDisconnected = false;
+            IsDisconnected = false;
         }
 
         private void InstanceOnDisconnected(object sender, EventArgs e)
         {
-            this.IsDisconnected = true;
+            IsDisconnected = true;
         }
 
         ~MainContent()
         {
-            this.DialogBoxMainButton.Click -= DialogBoxMainButtonClick;
-            this.DialogBoxSecondaryButton.Click -= DialogBoxSecondaryButtonClick;
+            DialogBoxMainButton.Click -= DialogBoxMainButtonClick;
+            DialogBoxSecondaryButton.Click -= DialogBoxSecondaryButtonClick;
             QTCore.Instance.OnConnected -= InstanceOnConnected;
             QTCore.Instance.OnDisconnected -= InstanceOnDisconnected;
         }
 
         private async void CheckUpdate()
         {
-            this.UpdateAlertButton.Visibility = Visibility.Collapsed;
+            UpdateAlertButton.Visibility = Visibility.Collapsed;
 
             var needToUpdate = await Utilities.CheckForUpdate();
             if (needToUpdate)
             {
                 Utilities.ExecuteOnUIThread(() =>
                 {
-                    this.UpdateAlertButton.Visibility = Visibility.Visible;
+                    UpdateAlertButton.Visibility = Visibility.Visible;
                 });
             }
         }
@@ -119,27 +119,30 @@ namespace QTBot
             switch (clickedPageName)
             {
                 case "Setup":
-                    this.Setup.Visibility = Visibility.Visible;
+                    Setup.Visibility = Visibility.Visible;
                     break;
                 case "Events":
-                    this.Events.Visibility = Visibility.Visible;
+                    Events.Visibility = Visibility.Visible;
                     break;
                 case "Timers":
-                    this.Timers.Visibility = Visibility.Visible;
+                    Timers.Visibility = Visibility.Visible;
                     break;
                 case "Commands":
-                    this.Commands.Visibility = Visibility.Visible;
+                    Commands.Visibility = Visibility.Visible;
+                    break;
+                case "Integrations":
+                    Integrations.Visibility = Visibility.Visible;
                     break;
                 case "Settings":
-                    this.Settings.Visibility = Visibility.Visible;
+                    Settings.Visibility = Visibility.Visible;
                     break;
                 case "Home":
                 default:
-                    this.Home.Visibility = Visibility.Visible;
+                    Home.Visibility = Visibility.Visible;
                     break;
             }
-            this.Header.Text = clickedPageName;
-            this.MenuButton.IsChecked = false;
+            Header.Text = clickedPageName;
+            MenuButton.IsChecked = false;
         }
 
         private void UpdateAlertButtonClick(object sender, RoutedEventArgs e)
@@ -151,7 +154,7 @@ namespace QTBot
                 MainButton = new DialogBoxOptions.DialogBoxButtonOptions()
                 {
                     Label = "Update",
-                    Callback = async () => 
+                    Callback = async () =>
                         {
                             ShowDialog(new DialogBoxOptions()
                             {
@@ -174,12 +177,12 @@ namespace QTBot
 
         private void DialogBoxMainButtonClick(object sender, RoutedEventArgs e)
         {
-            this.dialogMainAction?.Invoke();
+            dialogMainAction?.Invoke();
         }
 
         private void DialogBoxSecondaryButtonClick(object sender, RoutedEventArgs e)
         {
-            this.dialogSecondaryAction?.Invoke();
+            dialogSecondaryAction?.Invoke();
         }
 
         /// <summary>
@@ -187,18 +190,19 @@ namespace QTBot
         /// </summary>
         private void HideAllViews()
         {
-            this.Home.Visibility = Visibility.Collapsed;
-            this.Setup.Visibility = Visibility.Collapsed;
-            this.Events.Visibility = Visibility.Collapsed;
-            this.Timers.Visibility = Visibility.Collapsed;
-            this.Commands.Visibility = Visibility.Collapsed;
-            this.Settings.Visibility = Visibility.Collapsed;
+            Home.Visibility = Visibility.Collapsed;
+            Setup.Visibility = Visibility.Collapsed;
+            Events.Visibility = Visibility.Collapsed;
+            Timers.Visibility = Visibility.Collapsed;
+            Commands.Visibility = Visibility.Collapsed;
+            Integrations.Visibility = Visibility.Collapsed;
+            Settings.Visibility = Visibility.Collapsed;
         }
 
         public void ShowSimpleDialog(string title, string message)
         {
             ShowDialog(new DialogBoxOptions()
-            { 
+            {
                 Title = title,
                 Message = message,
                 SecondaryButton = new DialogBoxOptions.DialogBoxButtonOptions()
@@ -216,56 +220,56 @@ namespace QTBot
         {
             if (string.IsNullOrWhiteSpace(options.Title))
             {
-                this.DialogBoxTitle.Text = string.Empty;
-                this.DialogBoxTitle.Visibility = Visibility.Collapsed;
+                DialogBoxTitle.Text = string.Empty;
+                DialogBoxTitle.Visibility = Visibility.Collapsed;
             }
             else
             {
-                this.DialogBoxTitle.Text = options.Title;
-                this.DialogBoxTitle.Visibility = Visibility.Visible;
+                DialogBoxTitle.Text = options.Title;
+                DialogBoxTitle.Visibility = Visibility.Visible;
             }
 
             if (string.IsNullOrWhiteSpace(options.Message))
             {
-                this.DialogBoxMessage.Text = string.Empty;
-                this.DialogBoxMessage.Visibility = Visibility.Collapsed;
+                DialogBoxMessage.Text = string.Empty;
+                DialogBoxMessage.Visibility = Visibility.Collapsed;
             }
             else
             {
-                this.DialogBoxMessage.Text = options.Message;
-                this.DialogBoxMessage.Visibility = Visibility.Visible;
+                DialogBoxMessage.Text = options.Message;
+                DialogBoxMessage.Visibility = Visibility.Visible;
             }
 
             if (options.MainButton != null)
             {
-                this.DialogBoxMainButton.Content = options.MainButton.Label;
-                this.dialogMainAction = options.MainButton.Callback;
-                this.DialogBoxMainButton.Visibility = Visibility.Visible;
+                DialogBoxMainButton.Content = options.MainButton.Label;
+                dialogMainAction = options.MainButton.Callback;
+                DialogBoxMainButton.Visibility = Visibility.Visible;
             }
             else
             {
-                this.DialogBoxMainButton.Visibility = Visibility.Collapsed;
+                DialogBoxMainButton.Visibility = Visibility.Collapsed;
             }
 
             if (options.SecondaryButton != null)
             {
-                this.DialogBoxSecondaryButton.Content = options.SecondaryButton.Label;
-                this.dialogSecondaryAction = options.SecondaryButton.Callback;
-                this.DialogBoxSecondaryButton.Visibility = Visibility.Visible;
+                DialogBoxSecondaryButton.Content = options.SecondaryButton.Label;
+                dialogSecondaryAction = options.SecondaryButton.Callback;
+                DialogBoxSecondaryButton.Visibility = Visibility.Visible;
             }
             else
             {
-                this.DialogBoxSecondaryButton.Visibility = Visibility.Collapsed;
+                DialogBoxSecondaryButton.Visibility = Visibility.Collapsed;
             }
 
-            this.DialogProgressBar.Visibility = options.ShowProgressBar ? Visibility.Visible : Visibility.Collapsed;
+            DialogProgressBar.Visibility = options.ShowProgressBar ? Visibility.Visible : Visibility.Collapsed;
 
-            this.IsDialogVisible = true;
+            IsDialogVisible = true;
         }
 
         public void DismissDialog()
         {
-            this.IsDialogVisible = false;
+            IsDialogVisible = false;
         }
     }
 }

@@ -121,7 +121,7 @@
       <HintPath>..\packages\squirrel.windows.2.0.1\lib\Net45\NuGet.Squirrel.dll</HintPath>
     </Reference>
     <Reference Include="QTBotCustomDLLIntegration, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\QTBotCustomDLLIntegration.1.0.0\lib\netstandard2.0\QTBotCustomDLLIntegration.dll</HintPath>
+      <HintPath>..\packages\QTBotCustomDLLIntegration.1.0.3\lib\netstandard2.0\QTBotCustomDLLIntegration.dll</HintPath>
     </Reference>
     <Reference Include="SharpCompress, Version=0.17.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpCompress.0.17.1\lib\net45\SharpCompress.dll</HintPath>
@@ -258,6 +258,9 @@
     <Compile Include="UI\Views\Home.xaml.cs">
       <DependentUpon>Home.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\Views\Integration.xaml.cs">
+      <DependentUpon>Integration.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\Views\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
@@ -267,10 +270,6 @@
     <Compile Include="UI\Views\Timers.xaml.cs">
       <DependentUpon>Timers.xaml</DependentUpon>
     </Compile>
-    <Page Include="UI\LegacyContent.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="UI\MainContent.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -297,10 +296,6 @@
     <Compile Include="Models\ConfigModel.cs" />
     <Compile Include="Models\TwitchOptionsModel.cs" />
     <Compile Include="Modules\StreamElementsModule.cs" />
-    <Compile Include="System\Deployment\Application.cs" />
-    <Compile Include="UI\LegacyContent.xaml.cs">
-      <DependentUpon>LegacyContent.xaml</DependentUpon>
-    </Compile>
     <Compile Include="UI\MainContent.xaml.cs">
       <DependentUpon>MainContent.xaml</DependentUpon>
     </Compile>
@@ -317,6 +312,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\Views\Home.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Views\Integration.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

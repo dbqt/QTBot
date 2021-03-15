@@ -1,11 +1,7 @@
 ﻿using Newtonsoft.Json;
 using QTBot.Helpers;
 using QTBot.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace QTBot.Modules
@@ -22,21 +18,21 @@ namespace QTBot.Modules
 
         public void Initialize(ConfigModel config)
         {
-            this.Config = config;
-            if (this.IsSetup)
+            Config = config;
+            if (IsSetup)
             {
-                this.httpClient = new HttpClient();
-                this.httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", this.Config.StreamElementsJWTToken); ;
+                httpClient = new HttpClient();
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", Config.StreamElementsJWTToken); ;
             }
         }
 
         public async Task<int> GetPoints(string username)
         {
             int points = -1;
-            if (this.IsSetup)
+            if (IsSetup)
             {
-                string url = $"{BaseUrl}/points/{this.Config.StreamElementsChannelId}/{username}";
-                var response = await this.httpClient.GetAsync(url);
+                string url = $"{BaseUrl}/points/{Config.StreamElementsChannelId}/{username}";
+                var response = await httpClient.GetAsync(url);
                 if (response != null && response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -54,10 +50,10 @@ namespace QTBot.Modules
         public async Task<int> UpdatePoints(string username, int points)
         {
             int finalPoints = -1;
-            if (this.IsSetup)
+            if (IsSetup)
             {
-                string url = $"{BaseUrl}/points/{this.Config.StreamElementsChannelId}/{username}/{points}";
-                var response = await this.httpClient.PutAsync(url, null);
+                string url = $"{BaseUrl}/points/{Config.StreamElementsChannelId}/{username}/{points}";
+                var response = await httpClient.PutAsync(url, null);
                 if (response != null && response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -75,10 +71,10 @@ namespace QTBot.Modules
         public async Task<int> GetCounter(string counterName)
         {
             int counter = -1;
-            if (this.IsSetup)
+            if (IsSetup)
             {
-                string url = $"{BaseUrl}/bot/{this.Config.StreamElementsChannelId}/counters/{counterName}";
-                var response = await this.httpClient.GetAsync(url);
+                string url = $"{BaseUrl}/bot/{Config.StreamElementsChannelId}/counters/{counterName}";
+                var response = await httpClient.GetAsync(url);
                 if (response != null && response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();

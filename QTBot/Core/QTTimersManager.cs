@@ -1,10 +1,7 @@
 ﻿using QTBot.Helpers;
 using QTBot.Models;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,7 +27,7 @@ namespace QTBot.Core
         public void StopTimers()
         {
             Utilities.Log($"QTTimersManager Stopping all timers");
-            foreach (var timer in this.timerTasks)
+            foreach (var timer in timerTasks)
             {
                 timer.Value.Cancel();
             }
@@ -41,17 +38,17 @@ namespace QTBot.Core
             Utilities.Log($"QTTimersManager Reset all timers");
 
             StopTimers();
-            this.timerTasks.Clear();
+            timerTasks.Clear();
 
-            this.rawTimers = ConfigManager.ReadTimers();
-            if (this.rawTimers != null)
+            rawTimers = ConfigManager.ReadTimers();
+            if (rawTimers != null)
             {
-                foreach (var rawTimer in this.rawTimers.Timers.Where(timer => timer.Active))
+                foreach (var rawTimer in rawTimers.Timers.Where(timer => timer.Active))
                 {
                     var cancellationToken = new CancellationTokenSource();
                     if (!string.IsNullOrEmpty(rawTimer.Name) && !string.IsNullOrEmpty(rawTimer.Message) && rawTimer.OffsetMin > -1 && rawTimer.OffsetMin > -1)
                     {
-                        this.timerTasks.Add(TimerMessage(rawTimer.Name, rawTimer.OffsetMin, rawTimer.DelayMin, rawTimer.Message, cancellationToken), cancellationToken);
+                        timerTasks.Add(TimerMessage(rawTimer.Name, rawTimer.OffsetMin, rawTimer.DelayMin, rawTimer.Message, cancellationToken), cancellationToken);
                         Utilities.Log($"QTTimersManager [{rawTimer.Name}] - Registered!");
                     }
                     else

@@ -1,7 +1,7 @@
-﻿using QTBot.Helpers;
+﻿using Microsoft.Extensions.Logging;
+using QTBot.Helpers;
 using System.Windows;
 using System.Windows.Threading;
-using Microsoft.Extensions.Logging;
 
 namespace QTBot
 {
@@ -23,7 +23,7 @@ namespace QTBot
 
         private void AppDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            Utilities.Log(LogLevel.Error ,$"Unhandled Exception: {e.Exception.Message} - {e.Exception.StackTrace}");
+            Utilities.Log(LogLevel.Error, $"Unhandled Exception: {e.Exception.Message} - {e.Exception.StackTrace}");
 
             e.Handled = true;
 

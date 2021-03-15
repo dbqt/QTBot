@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.30517.126
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QTBot", "QTBot\QTBot.csproj", "{CDDDCCE7-7503-4706-8EE7-9CACCC6044F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QTBotCustomDLLIntegration", "QTBotCustomDLLIntegration\QTBotCustomDLLIntegration.csproj", "{EAD2AAA0-88A0-428F-B61E-1264B90526AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QTBotCustomDLLIntegration", "QTBotCustomDLLIntegration\QTBotCustomDLLIntegration.csproj", "{EAD2AAA0-88A0-428F-B61E-1264B90526AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QTBotIntegrationTest", "QTBotIntegrationTest\QTBotIntegrationTest.csproj", "{2B86B918-89A5-4F75-8080-74C62BEEC4A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{EAD2AAA0-88A0-428F-B61E-1264B90526AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAD2AAA0-88A0-428F-B61E-1264B90526AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAD2AAA0-88A0-428F-B61E-1264B90526AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B86B918-89A5-4F75-8080-74C62BEEC4A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B86B918-89A5-4F75-8080-74C62BEEC4A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B86B918-89A5-4F75-8080-74C62BEEC4A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B86B918-89A5-4F75-8080-74C62BEEC4A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

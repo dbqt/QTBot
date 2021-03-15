@@ -1,8 +1,5 @@
 ﻿using QTBot.Helpers;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using TwitchLib.Client;
 
@@ -31,14 +28,14 @@ namespace QTBot.Core
         /// </summary>
         public void ToggleChat(bool active)
         {
-            if (this.isActive == active)
+            if (isActive == active)
             {
                 // Early return because there is no change in state
                 return;
             }
 
-            this.isActive = active;
-            if (this.isActive)
+            isActive = active;
+            if (isActive)
             {
                 _ = InitiateRedeemsLoop();
             }
@@ -58,7 +55,7 @@ namespace QTBot.Core
         /// </summary>
         public void SendInstantMessage(string message)
         {
-            this.client.SendMessage(QTCore.Instance.CurrentChannel, message);
+            client.SendMessage(QTCore.Instance.CurrentChannel, message);
         }
 
         /// <summary>
@@ -68,13 +65,13 @@ namespace QTBot.Core
         {
             lock (redeemLock)
             {
-                if (!this.redemptionsCollection.ContainsKey(title))
+                if (!redemptionsCollection.ContainsKey(title))
                 {
-                    this.redemptionsCollection.Add(title, new List<string>());
+                    redemptionsCollection.Add(title, new List<string>());
                 }
 
-                this.redemptionsCollection[title].Add(user);
-                this.redemptionsCollectionDirty = true;
+                redemptionsCollection[title].Add(user);
+                redemptionsCollectionDirty = true;
             }
         }
 
@@ -83,13 +80,13 @@ namespace QTBot.Core
         /// </summary>
         private async Task InitiateRedeemsLoop()
         {
-            while(this.isActive)
+            while (isActive)
             {
-                this.redemptionsCollectionDirty = false;
+                redemptionsCollectionDirty = false;
                 await Task.Delay(CycleDelay);
 
                 // If the redemption collection got dirty, that means a new redeem came in during the delay
-                if (this.redemptionsCollectionDirty)
+                if (redemptionsCollectionDirty)
                 {
                     continue;
                 }
@@ -103,7 +100,7 @@ namespace QTBot.Core
 
         private void GenerateRedeemsAlertMessage()
         {
-            if (this.redemptionsCollection.Count == 0)
+            if (redemptionsCollection.Count == 0)
             {
                 return;
             }
@@ -111,7 +108,7 @@ namespace QTBot.Core
             Dictionary<string, int> redeemCounter = new Dictionary<string, int>();
             HashSet<string> names = new HashSet<string>();
 
-            foreach (var redemption in this.redemptionsCollection)
+            foreach (var redemption in redemptionsCollection)
             {
                 // Add redeem with number
                 int count = redemption.Value.Count;
@@ -135,7 +132,7 @@ namespace QTBot.Core
                 redemption.Value.Clear();
             }
 
-            this.redemptionsCollection.Clear();
+            redemptionsCollection.Clear();
 
             // Create message
             string message = string.Empty;
