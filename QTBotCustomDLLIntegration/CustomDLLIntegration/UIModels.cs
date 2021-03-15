@@ -62,11 +62,11 @@ namespace QTBot.CustomDLLIntegration
         }
     }
 
-    public class UIRadialButton : UIObject
+    public class UIRadioButton : UIObject
     {
-        public UIRadialButton() { }
+        public UIRadioButton() { }
 
-        public UIRadialButton(string ID, string propertyName, int order, List<KeyValuePair<string, object>> userOptions, string displayedText) : base(ID, propertyName, order, displayedText)
+        public UIRadioButton(string ID, string propertyName, int order, List<KeyValuePair<string, object>> userOptions, string displayedText) : base(ID, propertyName, order, displayedText)
         {
             Options = userOptions;
         }

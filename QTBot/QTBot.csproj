@@ -121,7 +121,7 @@
       <HintPath>..\packages\squirrel.windows.2.0.1\lib\Net45\NuGet.Squirrel.dll</HintPath>
     </Reference>
     <Reference Include="QTBotCustomDLLIntegration, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\QTBotCustomDLLIntegration.1.0.3\lib\netstandard2.0\QTBotCustomDLLIntegration.dll</HintPath>
+      <HintPath>..\packages\QTBotCustomDLLIntegration.1.0.5\lib\netstandard2.0\QTBotCustomDLLIntegration.dll</HintPath>
     </Reference>
     <Reference Include="SharpCompress, Version=0.17.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpCompress.0.17.1\lib\net45\SharpCompress.dll</HintPath>

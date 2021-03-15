@@ -19,7 +19,7 @@ namespace QTBotIntegrationTest
                 var sections = new List<UISection>();
                 var section1 = new UISection("One");
                 var s1CheckBox = new UICheckbox("0s1", "someBool", 0, "Some bool");
-                var s1RadialButton = new UIRadialButton("1s1", "radial", 1, 
+                var s1RadialButton = new UIRadioButton("1s1", "radial", 1, 
                     new List<KeyValuePair<string, object>>() {
                         new KeyValuePair<string, object>("a", "a value"),
                         new KeyValuePair<string, object>("b", "b value") 
@@ -54,6 +54,11 @@ namespace QTBotIntegrationTest
 
                 return new SettingsUI(sections);
             }
+        }
+
+        public override void Dispose()
+        {
+            // I dunno
         }
 
         public override void OnBeingHosted(object sender, global::TwitchLib.Client.Events.OnBeingHostedArgs e)

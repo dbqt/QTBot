@@ -111,6 +111,9 @@ namespace QTBot.CustomDLLIntegration
                 {
                     integrationModel.DllIntegration.SendLogMessage += DLLIntegratrion_LogMessage;
                     AddHandlersToDLLAssembly(integrationModel.DllIntegration);
+
+                    RetrieveDLLSettings(integrationModel.DllIntegration);
+
                     integrationModel.DllIntegration.OnDLLStartup();
                 }
             }
@@ -468,6 +471,5 @@ namespace QTBot.CustomDLLIntegration
             Utilities.Log(LogLevel.Information, $"DLL: {dLLIntegration.IntegrationName} failed to load settings.");
             return null;
         }
-
     }
 }

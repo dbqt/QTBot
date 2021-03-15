@@ -6,7 +6,7 @@ using TwitchLib.PubSub.Events;
 
 namespace QTBot.CustomDLLIntegration
 {
-    public abstract class IntegrationBase : DLLIntegrationInterface
+    public abstract class IntegrationBase : DLLIntegrationInterface, IDisposable
     {
         public abstract string IntegrationName { get; }
         public abstract string IntegrationDefinition { get; }
@@ -125,5 +125,7 @@ namespace QTBot.CustomDLLIntegration
         public abstract void OnStreamDown(object sender, OnStreamDownArgs e);
 
         public abstract void OnStreamUp(object sender, OnStreamUpArgs e);
+
+        public abstract void Dispose();
     }
 }
