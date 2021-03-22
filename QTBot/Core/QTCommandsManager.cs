@@ -38,6 +38,11 @@ namespace QTBot.Core
 
         public QTCommandsManager()
         {
+            // nothing
+        }
+
+        public void InitializeCommands()
+        {
             rawCommands = ConfigManager.ReadCommands();
             // Populate commands loop up with aliases
             foreach (var command in rawCommands.Commands)

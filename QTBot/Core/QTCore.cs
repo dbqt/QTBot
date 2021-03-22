@@ -75,6 +75,12 @@ namespace QTBot
             SetupLogging();
             LoadConfigs();
 
+            Utilities.Log(LogLevel.Information, "QTCore - Creating modules");
+            // Create modules
+            this.commandsManager = new QTCommandsManager();
+            this.timersManager = new QTTimersManager();
+            this.eventsManager = new QTEventsManager();
+
             // Check Dlls folder and DLLs settings for additional DLLIntegration
             string integrationFolderPath = Path.Combine(Utilities.GetDataDirectory(), "DLLIntegration");
             IntegrationHelper.SetupIntegrationhelper(integrationFolderPath, Path.Combine(integrationFolderPath, "DLLIntegrationSetup.json"));
@@ -84,6 +90,7 @@ namespace QTBot
         #region Core Functionality
         public void LoadConfigs()
         {
+            Utilities.Log(LogLevel.Information, "QTCore - Loading configurations");
             mainConfig = ConfigManager.ReadConfig();
             twitchOptions = new TwitchOptions(ConfigManager.ReadTwitchOptionsConfigs());
         }
@@ -93,6 +100,7 @@ namespace QTBot
         /// </summary>
         public async Task Setup()
         {
+            Utilities.Log(LogLevel.Information, $"QTCore - Setting up client for {mainConfig.BotChannelName} to {mainConfig.StreamerChannelName}");
             ConnectionCredentials credentials = new ConnectionCredentials(mainConfig.BotChannelName, mainConfig.BotOAuthToken);
             var clientOptions = new ClientOptions
             {
@@ -112,13 +120,11 @@ namespace QTBot
             // Setup all other listeners
             SetupClientEventListeners();
 
+            // Connect client after all listeners are setup
             Client.Connect();
 
-            // Setup QT chat manager
-            QTChatManager.Instance.Initialize(Client);
-
             // Setup modules
-            SetupModules();
+            InitializeModules();
 
             // Setup API client
             apiClient = new TwitchAPI();
@@ -165,6 +171,7 @@ namespace QTBot
             userId = authUser.Id;
 
             // Setup PubSub client
+            Utilities.Log(LogLevel.Information, $"QTCore - Setting up PubSub");
             pubSubClient = new TwitchPubSub();
 
             // Setup core listeners separately
@@ -180,10 +187,12 @@ namespace QTBot
             // Setup StreamElements if configured
             if (mainConfig.IsStreamElementsConfigured)
             {
+                Utilities.Log(LogLevel.Information, $"QTCore - Setting up StreamElementsModule");
                 StreamElementsModule.Instance.Initialize(mainConfig);
             }
 
             // Start integrations
+            Utilities.Log(LogLevel.Information, $"QTCore - Starting up integrations");
             IntegrationHelper.StartDLLIntegration();
         }
 
@@ -281,16 +290,16 @@ namespace QTBot
             Trace.WriteLine("QT LOGS STARTING!");
         }
 
-        private void SetupModules()
+        private void InitializeModules()
         {
-            // Setup QT commands manager
-            commandsManager = new QTCommandsManager();
+            // Setup QT chat manager
+            QTChatManager.Instance.Initialize(Client);
 
-            // Setup QT timers manager
-            timersManager = new QTTimersManager();
+            // Setup QT commands manager
+            this.commandsManager.InitializeCommands();
 
             // Setup QT events manager
-            eventsManager = new QTEventsManager();
+            this.eventsManager.InitializeEvents();
         }
         #endregion Core Functionality
 

@@ -22,6 +22,7 @@ namespace QTBot.CustomDLLIntegration
 
         public static void SetupIntegrationhelper(string dllDirectoryPath, string dllStartupJsonPath)
         {
+            Utilities.Log(LogLevel.Information, $"IntegrationHelper - SetupIntegrationhelper");
             if (_WasStartupCalled == false)
             {
                 _DLLDirectoryPath = dllDirectoryPath;
@@ -43,6 +44,8 @@ namespace QTBot.CustomDLLIntegration
         {
             try
             {
+                Utilities.Log(LogLevel.Information, $"IntegrationHelper - SetupDLLIntegration");
+
                 if (!_WasStartupCalled)
                 {
                     throw new Exception("Error, SetupDLLIntegration was called before SetupIntegrationhelper.");
@@ -107,6 +110,7 @@ namespace QTBot.CustomDLLIntegration
         {
             foreach (DLLIntegrationModel integrationModel in _DLLIntegrations)
             {
+                Utilities.Log(LogLevel.Information, $"IntegrationHelper : {integrationModel.DllProperties.DllName} is started: {integrationModel.DllProperties.IsEnabled}");
                 if (integrationModel.DllProperties.IsEnabled)
                 {
                     integrationModel.DllIntegration.SendLogMessage += DLLIntegratrion_LogMessage;
@@ -124,6 +128,7 @@ namespace QTBot.CustomDLLIntegration
         /// </summary>
         private static void ReadDLLIntegration()
         {
+            Utilities.Log(LogLevel.Information, $"IntegrationHelper - ReadDLLIntegration");
             foreach (DLLStartup dLLStartup in _IntegrationStartup.DllsToStart.ToList())
             {
                 if (!AddDLLToIntegration(dLLStartup))
@@ -168,6 +173,7 @@ namespace QTBot.CustomDLLIntegration
                         DLLIntegrationInterface dLLIntegration = dllClass as DLLIntegrationInterface;
                         if (dLLIntegration != null)
                         {
+                            Utilities.Log(LogLevel.Information, $"IntegrationHelper.cs : {dLLIntegration.IntegrationName} was added to the list of all integrations");
                             _DLLIntegrations.Add(new DLLIntegrationModel(dLLIntegration, dLLStartup));
                         }
                     }
@@ -293,6 +299,7 @@ namespace QTBot.CustomDLLIntegration
         /// </summary>
         public static void DisableAllEnabledDLLsHandlers()
         {
+            Utilities.Log(LogLevel.Information, $"IntegrationHelper - DisableAllEnabledDLLsHandlers");
             foreach (DLLIntegrationModel integrationModel in _DLLIntegrations)
             {
                 if (integrationModel.DllProperties.IsEnabled)
@@ -307,6 +314,7 @@ namespace QTBot.CustomDLLIntegration
         /// </summary>
         public static void ReEnableAllEnabledDLLsHandlers()
         {
+            Utilities.Log(LogLevel.Information, $"IntegrationHelper - ReEnableAllEnabledDLLsHandlers");
             foreach (DLLIntegrationModel integrationModel in _DLLIntegrations)
             {
                 if (integrationModel.DllProperties.IsEnabled)
@@ -324,6 +332,8 @@ namespace QTBot.CustomDLLIntegration
         {
             try
             {
+                Utilities.Log(LogLevel.Information, $"IntegrationHelper - AddHandlersToDLLAssembly for {dLLIntegration.IntegrationName}");
+
                 RemoveHandlersFromDLLAssembly(dLLIntegration);
                 QTCore.Instance.EventsManager.OnBitsReceived += dLLIntegration.OnBitsReceived;
                 QTCore.Instance.EventsManager.OnChannelSubscription += dLLIntegration.OnChannelSubscription;
@@ -354,6 +364,8 @@ namespace QTBot.CustomDLLIntegration
         {
             try
             {
+                Utilities.Log(LogLevel.Information, $"IntegrationHelper - RemoveHandlersFromDLLAssembly for {dLLIntegration.IntegrationName}");
+
                 QTCore.Instance.EventsManager.OnBitsReceived -= dLLIntegration.OnBitsReceived;
                 QTCore.Instance.EventsManager.OnChannelSubscription -= dLLIntegration.OnChannelSubscription;
                 QTCore.Instance.EventsManager.OnEmoteOnly -= dLLIntegration.OnEmoteOnlyOn;
@@ -382,6 +394,7 @@ namespace QTBot.CustomDLLIntegration
         {
             try
             {
+                Utilities.Log(LogLevel.Information, $"IntegrationHelper - UpdateDLLStartupFile");
                 File.WriteAllText(_DLLStartupJSONPath, JsonConvert.SerializeObject(_IntegrationStartup, Formatting.Indented));
             }
             catch (Exception e)
@@ -410,7 +423,12 @@ namespace QTBot.CustomDLLIntegration
                         Directory.CreateDirectory(dllDirectoryPath);
                     }
 
-                    File.WriteAllText(dllSettingsFilePath, JsonConvert.SerializeObject(uiValues, Formatting.Indented));
+                    string settingsUIJson = JsonConvert.SerializeObject(uiValues, Formatting.Indented, new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.Auto
+                    });
+
+                    File.WriteAllText(dllSettingsFilePath, settingsUIJson);
 
                     Utilities.Log(LogLevel.Information, $"DLL: {dLLIntegration.IntegrationName} settings saved.");
                     return true;
@@ -434,19 +452,23 @@ namespace QTBot.CustomDLLIntegration
         {
             try
             {
-                SettingsUI rtn;
                 string dllDirectoryPath = Path.Combine(_DLLDirectoryPath, dLLIntegration.IntegrationName);
                 string dllSettingsFilePath = Path.Combine(dllDirectoryPath, dLLIntegration.DLLSettingsFileName);
 
                 if (File.Exists(dllSettingsFilePath))
                 {
-                    string StartupJSON = File.ReadAllText(dllSettingsFilePath);
-                    rtn = JsonConvert.DeserializeObject<SettingsUI>(StartupJSON);
+                    string startupJson = File.ReadAllText(dllSettingsFilePath);
 
-                    if (rtn != null)
+                    SettingsUI settingsUIJson = JsonConvert.DeserializeObject<SettingsUI>(startupJson, new JsonSerializerSettings
                     {
-                        dLLIntegration.CurrentSettingsUI = rtn;
-                        return rtn;
+                        TypeNameHandling = TypeNameHandling.Auto
+                    });
+
+                    if (settingsUIJson != null)
+                    {
+                        dLLIntegration.CurrentSettingsUI = settingsUIJson;
+                        Utilities.Log(LogLevel.Information, $"DLL: {dLLIntegration.IntegrationName} loaded with existing settings.");
+                        return dLLIntegration.CurrentSettingsUI;
                     }
 
                     Utilities.Log(LogLevel.Warning, $"DLL: {dLLIntegration.IntegrationName} settings file could not be deserialized. SettingsFilePath: {dLLIntegration.IntegrationName}");
@@ -458,9 +480,15 @@ namespace QTBot.CustomDLLIntegration
                         Directory.CreateDirectory(dllDirectoryPath);
                     }
 
-                    File.WriteAllText(dllSettingsFilePath, JsonConvert.SerializeObject(dLLIntegration.DefaultUI, Formatting.Indented));
+                    string settingsUIJson = JsonConvert.SerializeObject(dLLIntegration.DefaultUI, Formatting.Indented, new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.Auto
+                    });
 
+                    File.WriteAllText(dllSettingsFilePath, settingsUIJson);
                     Utilities.Log(LogLevel.Information, $"DLL: {dLLIntegration.IntegrationName} settings did not exist, creating default. SettingsFilePath: {dLLIntegration.IntegrationName}");
+                    dLLIntegration.CurrentSettingsUI = dLLIntegration.DefaultUI;
+                    return dLLIntegration.CurrentSettingsUI;
                 }
             }
             catch (Exception e)

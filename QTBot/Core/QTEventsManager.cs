@@ -45,6 +45,11 @@ namespace QTBot.Core
 
         public QTEventsManager()
         {
+            greetedUsers = new List<string>();
+        }
+
+        public void InitializeEvents()
+        {
             rawEventsModel = ConfigManager.ReadEvents();
             if (rawEventsModel != null)
             {
@@ -65,8 +70,6 @@ namespace QTBot.Core
             {
                 Utilities.Log(LogLevel.Information, $"QTEventsManager - Could not read events!");
             }
-
-            greetedUsers = new List<string>();
         }
 
         #region Core Events

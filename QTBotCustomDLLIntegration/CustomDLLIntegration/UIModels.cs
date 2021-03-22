@@ -28,7 +28,7 @@ namespace QTBot.CustomDLLIntegration
             SectionName = name;
         }
 
-        public string SectionName { get; }
+        public string SectionName { get; set; }
         public List<UIObject> SectionElements = new List<UIObject>();
     }
 
@@ -41,24 +41,25 @@ namespace QTBot.CustomDLLIntegration
             UIObjectID = ID;
             UIObjectsOrder = order;
             UIPropertyName = propertyName;
-            text = displayedText;
+            UIText = displayedText;
         }
 
-        public string UIObjectID { get; }
-        public string UIPropertyName { get; }
-        public int UIObjectsOrder { get; }
+        public string UIObjectID { get; set; }
+        public string UIPropertyName { get; set; }
+        public int UIObjectsOrder { get; set; }
         public object UIValue { get; set; }
-
-        private string text;
+        public string UIText { get; set; }
     }
 
     public class UICheckbox : UIObject
     {
-        public UICheckbox() { }
+        public UICheckbox()
+        {
+            
+        }
 
         public UICheckbox(string ID, string propertyName, int order, string displayedText) : base(ID, propertyName, order, displayedText)
         {
-
         }
     }
 
@@ -71,7 +72,7 @@ namespace QTBot.CustomDLLIntegration
             Options = userOptions;
         }
 
-        public List<KeyValuePair<string, object>> Options { get; }
+        public List<KeyValuePair<string, object>> Options { get; set; }
     }
 
     public class UITextBox : UIObject
@@ -96,10 +97,10 @@ namespace QTBot.CustomDLLIntegration
             IncrementValue = increment;
         }
 
-        public int MaxValue { get; }
-        public int MinValue { get; }
-        public int CurrentValue { get; }
-        public int IncrementValue { get; }
+        public int MaxValue { get; set; }
+        public int MinValue { get; set; }
+        public int CurrentValue { get; set; }
+        public int IncrementValue { get; set; }
     }
 
     public class UISelectionDropdown : UIObject
@@ -111,7 +112,7 @@ namespace QTBot.CustomDLLIntegration
             List = dropDownList;
         }
 
-        public List<KeyValuePair<string, object>> List { get; }
+        public List<KeyValuePair<string, object>> List { get; set; }
     }
 
     public class UIEditableDropdown : UIObject
@@ -124,9 +125,9 @@ namespace QTBot.CustomDLLIntegration
             ValueLabel = valueDisplayText;
         }
 
-        public List<KeyValuePair<string, object>> List { get; }
+        public List<KeyValuePair<string, object>> List { get; set; }
 
-        public string ValueLabel { get; }
+        public string ValueLabel { get; set; }
     }
 
     public class UITable : UIObject
