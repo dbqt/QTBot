@@ -50,19 +50,19 @@ namespace QTBot.Core
 
         public void InitializeEvents()
         {
-            rawEventsModel = ConfigManager.ReadEvents();
+            this.rawEventsModel = ConfigManager.ReadEvents();
             if (rawEventsModel != null)
             {
-                events = new Dictionary<EventType, List<EventModel>>();
+                this.events = new Dictionary<EventType, List<EventModel>>();
                 foreach (var eventItem in rawEventsModel.Events.Where(item => item.Active))
                 {
                     // Initialize list of events if it's the first of that type
-                    if (!events.ContainsKey(eventItem.Type))
+                    if (!this.events.ContainsKey(eventItem.Type))
                     {
-                        events.Add(eventItem.Type, new List<EventModel>());
+                        this.events.Add(eventItem.Type, new List<EventModel>());
                     }
 
-                    events[eventItem.Type].Add(eventItem);
+                    this.events[eventItem.Type].Add(eventItem);
                     Utilities.Log(LogLevel.Information, $"QTEventsManager - Registered event for {eventItem.Type}, message: {eventItem.Message}, option: {eventItem.Option}");
                 }
             }

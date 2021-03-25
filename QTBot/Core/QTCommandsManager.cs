@@ -43,14 +43,17 @@ namespace QTBot.Core
 
         public void InitializeCommands()
         {
-            rawCommands = ConfigManager.ReadCommands();
+            this.commandsLookup.Clear();
+
+            this.rawCommands = ConfigManager.ReadCommands();
+
             // Populate commands loop up with aliases
             foreach (var command in rawCommands.Commands)
             {
-                commandsLookup.Add(command.Keyword, command);
+                this.commandsLookup.Add(command.Keyword, command);
                 foreach (var alias in command.Aliases)
                 {
-                    commandsLookup.Add(alias, command);
+                    this.commandsLookup.Add(alias, command);
                 }
             }
         }

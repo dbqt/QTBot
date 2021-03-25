@@ -70,6 +70,8 @@ namespace QTBot
         public event EventHandler OnConnected;
         public event EventHandler OnDisconnected;
 
+        private bool shouldBeConnected = false;
+
         public QTCore()
         {
             SetupLogging();
@@ -194,6 +196,8 @@ namespace QTBot
             // Start integrations
             Utilities.Log(LogLevel.Information, $"QTCore - Starting up integrations");
             IntegrationHelper.StartDLLIntegration();
+
+            this.shouldBeConnected = true;
         }
 
         /// <summary>
@@ -201,6 +205,8 @@ namespace QTBot
         /// </summary>
         public void Disconnect()
         {
+            this.shouldBeConnected = false;
+
             try
             {
                 RemovePubSubListeners();
@@ -487,6 +493,12 @@ namespace QTBot
         private void PubSubClient_OnPubSubServiceClosed(object sender, EventArgs e)
         {
             Utilities.Log("PubSubClient_OnPubSubServiceClosed");
+
+            if (this.shouldBeConnected)
+            {
+                Utilities.Log("PubSubClient was closed, but should have stayed connected - attempting to reconnect silently");
+                //this.pubSubClient.Connect();
+            }
         }
 
         private void PubSubClient_OnFollow(object sender, TwitchLib.PubSub.Events.OnFollowArgs e)
