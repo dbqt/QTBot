@@ -70,7 +70,8 @@ namespace QTBot
         public event EventHandler OnConnected;
         public event EventHandler OnDisconnected;
 
-        private bool shouldBeConnected = false;
+        private bool isPubSubConnected = false;
+        private bool isPubSubListeningTopicFailed = false;
 
         public QTCore()
         {
@@ -100,8 +101,11 @@ namespace QTBot
         /// <summary>
         /// Initial setup of the services
         /// </summary>
-        public async Task Setup()
+        public void Setup()
         {
+            this.isPubSubConnected = false;
+            this.isPubSubListeningTopicFailed = false;
+
             Utilities.Log(LogLevel.Information, $"QTCore - Setting up client for {mainConfig.BotChannelName} to {mainConfig.StreamerChannelName}");
             ConnectionCredentials credentials = new ConnectionCredentials(mainConfig.BotChannelName, mainConfig.BotOAuthToken);
             var clientOptions = new ClientOptions
@@ -116,18 +120,98 @@ namespace QTBot
             Client.Initialize(credentials, mainConfig.StreamerChannelName);
 
             // Setup core listeners separately
+            Client.OnConnected -= Client_OnConnected;
+            Client.OnDisconnected -= Client_OnDisconnected;
+            Client.OnConnectionError -= Client_OnConnectionError;
             Client.OnConnected += Client_OnConnected;
             Client.OnDisconnected += Client_OnDisconnected;
-
-            // Setup all other listeners
-            SetupClientEventListeners();
+            Client.OnConnectionError += Client_OnConnectionError;
 
             // Connect client after all listeners are setup
             Client.Connect();
 
-            // Setup modules
-            InitializeModules();
+            Utilities.Log(LogLevel.Information, $"QTCore - Client is connected: {Client.IsConnected}");
 
+            Task.Run(async () =>
+            {
+                await Task.Delay(3000);
+                Utilities.ExecuteOnUIThread(() =>
+                {
+                    if (!Client.IsConnected || !this.isPubSubConnected || this.isPubSubListeningTopicFailed)
+                    {
+                        Utilities.ShowMessage("Something failed to connect, try again. If this persists, tell Dbqt :(");
+                        Disconnect();
+                    }
+                    else
+                    {
+                        OnConnected?.Invoke(null, null);
+                        Utilities.Log(LogLevel.Information, "QTCore - All connections successful");
+                    }
+                });
+            });
+        }
+
+        /// <summary>
+        /// Disconnect Twitch services.
+        /// </summary>
+        public void Disconnect()
+        {
+            try
+            {
+                if (pubSubClient != null)
+                {
+                    RemovePubSubListeners();
+                    pubSubClient.Disconnect();
+                }
+            }
+            catch (Exception e)
+            {
+                Utilities.Log(LogLevel.Error, "QTCore.Disconnect PubSub exception: " + e.StackTrace);
+            }
+
+            try
+            {
+                if (Client != null)
+                {
+                    RemoveClientEventListeners();
+                    Client?.Disconnect();
+                }
+            }
+            catch (Exception e)
+            {
+                Utilities.Log(LogLevel.Error, "QTCore.Disconnect Client exception: " + e.StackTrace);
+            }
+            finally
+            {
+                if (Client != null)
+                {
+                    Client.OnConnected -= Client_OnConnected;
+                    Client.OnDisconnected -= Client_OnDisconnected;
+                }
+
+                if (pubSubClient != null)
+                {
+                    pubSubClient.OnPubSubServiceClosed -= PubSubClient_OnPubSubServiceClosed;
+                    pubSubClient.OnPubSubServiceError -= PubSubClient_OnPubSubServiceError;
+                    pubSubClient.OnPubSubServiceConnected -= PubSubClient_OnPubSubServiceConnected;
+                }
+            }
+        }
+
+        /// <summary>
+        /// [DEPRECATED] Saves the Twitch options and shows a dialog if successful.
+        /// </summary>
+        public void SetupTwitchOptions(TwitchOptions options)
+        {
+            twitchOptions = options;
+            if (ConfigManager.SaveTwitchOptionsConfigs(twitchOptions))
+            {
+                Utilities.ShowMessage("Twitch options saved!");
+            }
+        }
+
+        private async void InitializeTwitchAPI()
+        {
             // Setup API client
             apiClient = new TwitchAPI();
 
@@ -171,12 +255,18 @@ namespace QTBot
             channelId = authChannel.Id;
             var authUser = await apiClient.V5.Users.GetUserAsync(apiClient.Settings.AccessToken);
             userId = authUser.Id;
+        }
 
+        private void InitializePubSub()
+        {
             // Setup PubSub client
             Utilities.Log(LogLevel.Information, $"QTCore - Setting up PubSub");
             pubSubClient = new TwitchPubSub();
 
             // Setup core listeners separately
+            pubSubClient.OnPubSubServiceClosed -= PubSubClient_OnPubSubServiceClosed;
+            pubSubClient.OnPubSubServiceError -= PubSubClient_OnPubSubServiceError;
+            pubSubClient.OnPubSubServiceConnected -= PubSubClient_OnPubSubServiceConnected;
             pubSubClient.OnPubSubServiceClosed += PubSubClient_OnPubSubServiceClosed;
             pubSubClient.OnPubSubServiceError += PubSubClient_OnPubSubServiceError;
             pubSubClient.OnPubSubServiceConnected += PubSubClient_OnPubSubServiceConnected;
@@ -191,61 +281,6 @@ namespace QTBot
             {
                 Utilities.Log(LogLevel.Information, $"QTCore - Setting up StreamElementsModule");
                 StreamElementsModule.Instance.Initialize(mainConfig);
-            }
-
-            // Start integrations
-            Utilities.Log(LogLevel.Information, $"QTCore - Starting up integrations");
-            IntegrationHelper.StartDLLIntegration();
-
-            this.shouldBeConnected = true;
-        }
-
-        /// <summary>
-        /// Disconnect Twitch services.
-        /// </summary>
-        public void Disconnect()
-        {
-            this.shouldBeConnected = false;
-
-            try
-            {
-                RemovePubSubListeners();
-                pubSubClient.Disconnect();
-            }
-            catch (Exception e)
-            {
-                Utilities.Log(LogLevel.Error, "QTCore.Disconnect PubSub exception: " + e.StackTrace);
-            }
-
-            try
-            {
-                RemoveClientEventListeners();
-                Client.Disconnect();
-            }
-            catch (Exception e)
-            {
-                Utilities.Log(LogLevel.Error, "QTCore.Disconnect Client exception: " + e.StackTrace);
-            }
-            finally
-            {
-                Client.OnConnected -= Client_OnConnected;
-                Client.OnDisconnected -= Client_OnDisconnected;
-
-                pubSubClient.OnPubSubServiceClosed -= PubSubClient_OnPubSubServiceClosed;
-                pubSubClient.OnPubSubServiceError -= PubSubClient_OnPubSubServiceError;
-                pubSubClient.OnPubSubServiceConnected -= PubSubClient_OnPubSubServiceConnected;
-            }
-        }
-
-        /// <summary>
-        /// [DEPRECATED] Saves the Twitch options and shows a dialog if successful.
-        /// </summary>
-        public void SetupTwitchOptions(TwitchOptions options)
-        {
-            twitchOptions = options;
-            if (ConfigManager.SaveTwitchOptionsConfigs(twitchOptions))
-            {
-                Utilities.ShowMessage("Twitch options saved!");
             }
         }
 
@@ -313,6 +348,8 @@ namespace QTBot
 
         private void SetupClientEventListeners()
         {
+            RemoveClientEventListeners();
+
             if (Client != null)
             {
                 Client.OnLog += Client_OnLog;
@@ -377,10 +414,19 @@ namespace QTBot
         private void Client_OnConnected(object sender, OnConnectedArgs e)
         {
             Utilities.Log(LogLevel.Information, $"ClientConnected");
+
+            // Setup all other listeners
+            SetupClientEventListeners();
+
+            // Setup modules
+            InitializeModules();
+            InitializeTwitchAPI();
+            InitializePubSub();
+
             QTChatManager.Instance.ToggleChat(true);
 
             timersManager?.StartTimers();
-            IntegrationHelper.ReEnableAllEnabledDLLsHandlers();
+            IntegrationHelper.ReEnableAllEnabledDLLs();
         }
 
         private void Client_OnDisconnected(object sender, TwitchLib.Communication.Events.OnDisconnectedEventArgs e)
@@ -391,7 +437,12 @@ namespace QTBot
             timersManager?.StopTimers();
 
             OnDisconnected?.Invoke(sender, null);
-            IntegrationHelper.DisableAllEnabledDLLsHandlers();
+            IntegrationHelper.DisableAllEnabledDLLs();
+        }
+
+        private void Client_OnConnectionError(object sender, OnConnectionErrorArgs e)
+        {
+            Utilities.Log(LogLevel.Error, $"QTCore - Client_OnConnectionError: {e.Error.Message}");
         }
 
         private void Client_OnNewSubscriber(object sender, OnNewSubscriberArgs e)
@@ -417,7 +468,6 @@ namespace QTBot
         private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
         {
             currentChannel = new JoinedChannel(e.Channel);
-            OnConnected?.Invoke(sender, null);
 
             eventsManager?.OnJoinedChannelResponseEvent(e);
 
@@ -493,12 +543,6 @@ namespace QTBot
         private void PubSubClient_OnPubSubServiceClosed(object sender, EventArgs e)
         {
             Utilities.Log("PubSubClient_OnPubSubServiceClosed");
-
-            if (this.shouldBeConnected)
-            {
-                Utilities.Log("PubSubClient was closed, but should have stayed connected - attempting to reconnect silently");
-                //this.pubSubClient.Connect();
-            }
         }
 
         private void PubSubClient_OnFollow(object sender, TwitchLib.PubSub.Events.OnFollowArgs e)
@@ -556,12 +600,19 @@ namespace QTBot
         private void PubSubClient_OnListenResponse(object sender, TwitchLib.PubSub.Events.OnListenResponseArgs e)
         {
             Utilities.Log($"PubSubClient_OnListenResponse for {e.Topic} was successful: {e.Successful} | {e.Response.Error ?? ""}");
+            if (!e.Successful)
+            {
+                this.isPubSubListeningTopicFailed = true;
+            }
+
             eventsManager?.OnListenResponseEvent(e);
         }
 
         private void PubSubClient_OnPubSubServiceConnected(object sender, EventArgs e)
         {
             Utilities.Log(LogLevel.Information, "PubSubClient_OnPubSubServiceConnected");
+            this.isPubSubConnected = true;
+
             pubSubClient.SendTopics(apiClient.Settings.AccessToken);
         }
 

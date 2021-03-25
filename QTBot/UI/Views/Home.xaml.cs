@@ -17,7 +17,7 @@ namespace QTBot.UI.Views
             InitializeComponent();
 
             QTCore.Instance.OnConnected += InstanceOnConnected;
-            QTCore.Instance.OnDisconnected += InstanceOnDisonnected;
+            QTCore.Instance.OnDisconnected += InstanceOnDisconnected;
 
             CheckConfig();
         }
@@ -47,16 +47,18 @@ namespace QTBot.UI.Views
             Utilities.ExecuteOnUIThread(() =>
             {
                 isConnected = true;
+                Connect.IsEnabled = true;
                 ConnectionStatus.Text = "Connected";
                 Connect.Content = "Disconnect";
             });
         }
 
-        private void InstanceOnDisonnected(object sender, EventArgs e)
+        private void InstanceOnDisconnected(object sender, EventArgs e)
         {
             Utilities.ExecuteOnUIThread(() =>
             {
                 isConnected = false;
+                Connect.IsEnabled = true;
                 ConnectionStatus.Text = "Disconnected";
                 Connect.Content = "Connect";
             });
@@ -66,11 +68,13 @@ namespace QTBot.UI.Views
         {
             if (isConnected)
             {
+                Connect.IsEnabled = false;
                 QTCore.Instance.Disconnect();
             }
             else
             {
-                _ = QTCore.Instance.Setup();
+                Connect.IsEnabled = false;
+                QTCore.Instance.Setup();
             }
         }
         #endregion

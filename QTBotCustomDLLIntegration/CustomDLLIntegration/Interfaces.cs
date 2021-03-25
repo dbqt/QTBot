@@ -1,9 +1,10 @@
-﻿using TwitchLib.Client.Events;
+﻿using System;
+using TwitchLib.Client.Events;
 using TwitchLib.PubSub.Events;
 
 namespace QTBot.CustomDLLIntegration
 {
-    public interface DLLIntegrationInterface
+    public interface DLLIntegrationInterface : IDisposable
     {
         event LogMessage SendLogMessage;
         event MessageToTwitch SendMessageToTwitchChat;

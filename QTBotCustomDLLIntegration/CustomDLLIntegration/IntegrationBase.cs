@@ -6,7 +6,7 @@ using TwitchLib.PubSub.Events;
 
 namespace QTBot.CustomDLLIntegration
 {
-    public abstract class IntegrationBase : DLLIntegrationInterface, IDisposable
+    public abstract class IntegrationBase : DLLIntegrationInterface
     {
         public abstract string IntegrationName { get; }
         public abstract string IntegrationDefinition { get; }
@@ -32,14 +32,15 @@ namespace QTBot.CustomDLLIntegration
         {
             try
             {
-                if (dllLoopThread?.ThreadState != ThreadState.Suspended)
+                WriteLog(LogLevel.Information, $"DLL: Disabling {IntegrationName} current thread state {dllLoopThread?.ThreadState}");
+                if (dllLoopThread?.ThreadState == ThreadState.Running || dllLoopThread?.ThreadState == ThreadState.Background)
                 {
                     dllLoopThread?.Abort();
                 }
 
                 for (int i = 0; i < 5; i++)
                 {
-                    if (dllLoopThread?.ThreadState == ThreadState.Aborted)
+                    if (dllLoopThread == null || dllLoopThread?.ThreadState == ThreadState.Aborted || dllLoopThread?.ThreadState == ThreadState.Stopped)
                     {
                         dllLoopThread = null;
 
@@ -58,6 +59,7 @@ namespace QTBot.CustomDLLIntegration
                 WriteLog(LogLevel.Error, e);
             }
 
+            WriteLog(LogLevel.Information, $"DLL: Failed to disable {IntegrationName} current thread state {dllLoopThread?.ThreadState}");
             return false;
         }
 

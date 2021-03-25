@@ -55,7 +55,7 @@ namespace QTBot.Core
         /// </summary>
         public void SendInstantMessage(string message)
         {
-            client.SendMessage(QTCore.Instance.CurrentChannel, message);
+            client?.SendMessage(QTCore.Instance.CurrentChannel, message);
         }
 
         /// <summary>

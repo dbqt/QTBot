@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using QTBot.Core;
 using QTBot.Helpers;
 using System;
 using System.Collections.Generic;
@@ -102,27 +103,6 @@ namespace QTBot.CustomDLLIntegration
             }
         }
 
-
-        /// <summary>
-        /// Starts all enabled integrations and add handlers to them
-        /// </summary>
-        public static void StartDLLIntegration()
-        {
-            foreach (DLLIntegrationModel integrationModel in _DLLIntegrations)
-            {
-                Utilities.Log(LogLevel.Information, $"IntegrationHelper : {integrationModel.DllProperties.DllName} is started: {integrationModel.DllProperties.IsEnabled}");
-                if (integrationModel.DllProperties.IsEnabled)
-                {
-                    integrationModel.DllIntegration.SendLogMessage += DLLIntegratrion_LogMessage;
-                    AddHandlersToDLLAssembly(integrationModel.DllIntegration);
-
-                    RetrieveDLLSettings(integrationModel.DllIntegration);
-
-                    integrationModel.DllIntegration.OnDLLStartup();
-                }
-            }
-        }
-
         /// <summary>
         /// Will create the managed list that keeps track of the DLL integrations during runtime
         /// </summary>
@@ -145,9 +125,17 @@ namespace QTBot.CustomDLLIntegration
         /// <param name="integrationName">DLL Name</param>
         /// <param name="level">Log Level</param>
         /// <param name="message">Log Message</param>
-        private static void DLLIntegratrion_LogMessage(string integrationName, LogLevel level, string message)
+        private static void DLLIntegrationLogMessage(string integrationName, LogLevel level, string message)
         {
             Utilities.Log(level, $"*{integrationName}* - {message}");
+        }
+
+        /// <summary>
+        /// Sends provided message to twitch chat
+        /// </summary>
+        private static void DLLIntegrationSendMessageToTwitchChat(string message)
+        {
+            QTChatManager.Instance.SendInstantMessage(message);
         }
 
         /// <summary>
@@ -266,6 +254,11 @@ namespace QTBot.CustomDLLIntegration
                     {
                         Utilities.Log(LogLevel.Warning, $"DLL was unable to disable properly. GuidID: {integrationGuidID}");
                     }
+                    else
+                    {
+                        integration.DllIntegration.Dispose();
+                    }
+
                     RemoveHandlersFromDLLAssembly(integration.DllIntegration);
                     count++;
                 }
@@ -297,13 +290,19 @@ namespace QTBot.CustomDLLIntegration
         /// <summary>
         /// Removes all handlers from the integration DLLs that may exist
         /// </summary>
-        public static void DisableAllEnabledDLLsHandlers()
+        public static void DisableAllEnabledDLLs()
         {
             Utilities.Log(LogLevel.Information, $"IntegrationHelper - DisableAllEnabledDLLsHandlers");
             foreach (DLLIntegrationModel integrationModel in _DLLIntegrations)
             {
                 if (integrationModel.DllProperties.IsEnabled)
                 {
+                    bool disabled = integrationModel.DllIntegration.DisableDLL();
+                    if (disabled)
+                    {
+                        integrationModel.DllIntegration.Dispose();
+                    }
+                    Utilities.Log(LogLevel.Information, $"IntegrationHelper - {integrationModel.DllIntegration.IntegrationName} was successfully disabled: {disabled}");
                     RemoveHandlersFromDLLAssembly(integrationModel.DllIntegration);
                 }
             }
@@ -312,7 +311,7 @@ namespace QTBot.CustomDLLIntegration
         /// <summary>
         /// Add handlers to all enabled integration DLLs
         /// </summary>
-        public static void ReEnableAllEnabledDLLsHandlers()
+        public static void ReEnableAllEnabledDLLs()
         {
             Utilities.Log(LogLevel.Information, $"IntegrationHelper - ReEnableAllEnabledDLLsHandlers");
             foreach (DLLIntegrationModel integrationModel in _DLLIntegrations)
@@ -320,6 +319,10 @@ namespace QTBot.CustomDLLIntegration
                 if (integrationModel.DllProperties.IsEnabled)
                 {
                     AddHandlersToDLLAssembly(integrationModel.DllIntegration);
+
+                    RetrieveDLLSettings(integrationModel.DllIntegration);
+
+                    integrationModel.DllIntegration.OnDLLStartup();
                 }
             }
         }
@@ -332,9 +335,13 @@ namespace QTBot.CustomDLLIntegration
         {
             try
             {
+                RemoveHandlersFromDLLAssembly(dLLIntegration);
+
                 Utilities.Log(LogLevel.Information, $"IntegrationHelper - AddHandlersToDLLAssembly for {dLLIntegration.IntegrationName}");
 
-                RemoveHandlersFromDLLAssembly(dLLIntegration);
+                dLLIntegration.SendLogMessage += DLLIntegrationLogMessage;
+                dLLIntegration.SendMessageToTwitchChat += DLLIntegrationSendMessageToTwitchChat;
+
                 QTCore.Instance.EventsManager.OnBitsReceived += dLLIntegration.OnBitsReceived;
                 QTCore.Instance.EventsManager.OnChannelSubscription += dLLIntegration.OnChannelSubscription;
                 QTCore.Instance.EventsManager.OnEmoteOnly += dLLIntegration.OnEmoteOnlyOn;
@@ -365,6 +372,9 @@ namespace QTBot.CustomDLLIntegration
             try
             {
                 Utilities.Log(LogLevel.Information, $"IntegrationHelper - RemoveHandlersFromDLLAssembly for {dLLIntegration.IntegrationName}");
+
+                dLLIntegration.SendLogMessage -= DLLIntegrationLogMessage;
+                dLLIntegration.SendMessageToTwitchChat -= DLLIntegrationSendMessageToTwitchChat;
 
                 QTCore.Instance.EventsManager.OnBitsReceived -= dLLIntegration.OnBitsReceived;
                 QTCore.Instance.EventsManager.OnChannelSubscription -= dLLIntegration.OnChannelSubscription;
