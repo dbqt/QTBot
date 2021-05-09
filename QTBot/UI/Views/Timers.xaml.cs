@@ -179,7 +179,7 @@ namespace QTBot.UI.Views
                 Name = model.Name;
                 Message = model.Message;
                 DelayMin = model.DelayMin;
-                OffsetMin = model.DelayMin;
+                OffsetMin = model.OffsetMin;
                 Active = model.Active;
             }
 
