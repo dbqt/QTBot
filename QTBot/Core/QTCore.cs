@@ -88,9 +88,9 @@ namespace QTBot
             this.eventsManager = new QTEventsManager();
 
             // Check Dlls folder and DLLs settings for additional DLLIntegration
-            string integrationFolderPath = Path.Combine(Utilities.GetDataDirectory(), "DLLIntegration");
-            IntegrationHelper.SetupIntegrationhelper(integrationFolderPath, Path.Combine(integrationFolderPath, "DLLIntegrationSetup.json"));
-            IntegrationHelper.SetupDLLIntegration();
+            //string integrationFolderPath = Path.Combine(Utilities.GetDataDirectory(), "DLLIntegration");
+            //IntegrationHelper.SetupIntegrationhelper(integrationFolderPath, Path.Combine(integrationFolderPath, "DLLIntegrationSetup.json"));
+            //IntegrationHelper.SetupDLLIntegration();
         }
 
         #region Core Functionality
@@ -475,6 +475,8 @@ namespace QTBot
         private void Client_OnConnectionError(object sender, OnConnectionErrorArgs e)
         {
             Utilities.Log(LogLevel.Error, $"QTCore - Client_OnConnectionError: {e.Error.Message}");
+            Disconnect();
+            Utilities.ShowMessage("Something failed to connect, restart the bot and try again. If this persists, tell Dbqt :(");
         }
 
         private void Client_OnNewSubscriber(object sender, OnNewSubscriberArgs e)

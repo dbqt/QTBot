@@ -56,11 +56,11 @@
                         </MenuItem>
                         <MenuItem x:Name="TimersMenuItem" Header="Timers" Click="MenuItemClick" IsEnabled="{Binding Path=IsDisconnected}">
                         </MenuItem>
-                        <MenuItem x:Name="IntegrationMenuItem" Header="Integrations" Click="MenuItemClick" IsEnabled="True">
+                        <MenuItem x:Name="IntegrationMenuItem" Header="Integrations (soon)" Click="MenuItemClick" IsEnabled="False">
                         </MenuItem>
-                        <MenuItem x:Name="CommandsMenuItem" Header="Commands" Click="MenuItemClick" IsEnabled="False">
+                        <MenuItem x:Name="CommandsMenuItem" Header="Commands (soon)" Click="MenuItemClick" IsEnabled="False">
                         </MenuItem>
-                        <MenuItem x:Name="SettingsMenuItem" Header="Settings" Click="MenuItemClick" IsEnabled="False">
+                        <MenuItem x:Name="SettingsMenuItem" Header="Settings (soon)" Click="MenuItemClick" IsEnabled="False">
                         </MenuItem>
                     </Menu>
                 </DockPanel>
